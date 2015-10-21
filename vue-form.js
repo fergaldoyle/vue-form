@@ -3,30 +3,64 @@
     var vueForm = {};
     vueForm.install = function (Vue) {
 
-        var globalValidators = {
+        var emailRegExp = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/,
+            urlRegExp = /^(http\:\/\/|https\:\/\/)(.{4,})$/,
+            attrs = [
+                'type',
+                'required',
+                'pattern',
+                'multiple',
+                'minlength',
+                'maxlength'
+            ];
+
+        var validators = {
             required: function (value) {
                 return !!value;
-            }
+            },
+            email: function (value, multiple) {
+                return emailRegExp.test(value);
+            },
+            number: function (value) {
+                return !isNaN(value);
+            },
+            minlength: function (value, length) {
+                return value.length >= (length * 1);
+            },
+            maxlength: function (value, length) {
+                return (length * 1) >= value.length;
+            },
+            pattern: function () { }
         };
-
-        function checkAttribute($this, attribute, formModelCtrl) {
+        
+        // check if an attribute exists, static or binding.
+        // if it is a binding, watch it and re-validate on change
+        function checkAttribute($this, attribute) {
+            var formModelCtrl = $this._formModelCtrl;
             var binding = Vue.util.getBindAttr($this.el, attribute);
             if (binding) {
-                $this.vm.$watch(binding, function (value) {
-                    console.log('value', value, attribute)
-                    if (value) {
-                        formModelCtrl.validators[attribute] = globalValidators[attribute];
+                $this.vm.$watch(binding, function (value, oldValue) {
+                    formModelCtrl[attribute] = value;
+                    if (attribute === 'type') {
+                        delete formModelCtrl.validators[oldValue];
+                        formModelCtrl.validators[value] = validators[value];
                     } else {
-                        formModelCtrl.validators[attribute] = false;
+                        formModelCtrl.validators[attribute] = validators[attribute];
+                        if (value === false) {
+                            formModelCtrl.validators[attribute] = false;
+                        }
                     }
                     formModelCtrl.validate($this._value);
-                }, {
-                    immediate: true
-                });
+                }, { immediate: true });
             }
             var staticAttr = $this.el.getAttribute(attribute);
             if (staticAttr !== null) {
-                formModelCtrl.validators[attribute] = globalValidators[attribute];
+                formModelCtrl[attribute] = staticAttr || true;
+                if (attribute === 'type') {
+                    formModelCtrl.validators[staticAttr] = validators[staticAttr];
+                } else {
+                    formModelCtrl.validators[attribute] = validators[attribute];
+                }
             }
         }
 
@@ -90,6 +124,7 @@
                 };
 
                 var formModelCtrl = this._formModelCtrl = {
+                    el: this.el,
                     setVadility: function (key, isValid) {
                         state.$valid = isValid;
                         state.$invalid = !isValid;
@@ -103,36 +138,44 @@
                     validators: {},
                     error: {},
                     validate: function (value) {
-                        var isValid = true;
-                        for (var prop in this.validators) {
-                            if (!this.validators.hasOwnProperty(prop)) {
-                                continue;
+                        var isValid = true,
+                            self = this;
+
+                        Object.keys(this.validators).forEach(function (validator) {
+                            var args = [value];
+                            if (self.validators[validator] === false) {
+                                self.setVadility(validator, true);
+                                return;
                             }
 
-                            if (this.validators[prop] === false) {
-                                this.setVadility(prop, true);
-                                continue;
+                            if (!self.validators[validator]) {
+                                return;
                             }
 
-                            if (!this.validators[prop](value)) {
+                            if (validator === 'email') {
+                                args.push(self.multiple);
+                            } else if (validator === 'minlength' || validator === 'maxlength') {
+                                args.push(self[validator]);
+                            }
+
+                            if (!self.validators[validator].apply(this, args)) {
                                 isValid = false;
-                                this.setVadility(prop, false);
+                                self.setVadility(validator, false);
                             } else {
-                                this.setVadility(prop, true);
+                                self.setVadility(validator, true);
                             }
-                        }
+
+                        });
+
                         return isValid;
                     }
-                };                
-                
+                };
+                                
                 // add to validators depending on element attributes 
-                for (var validator in globalValidators) {
-                    if (!globalValidators.hasOwnProperty(validator)) {
-                        continue;
-                    }
-                    checkAttribute(this, validator, formModelCtrl)
-                }
-                
+                attrs.forEach(function (attr) {
+                    checkAttribute(self, attr);
+                });
+                                                        
                 // set inital state
                 formCtrl.setModelState(inputName, state);
 

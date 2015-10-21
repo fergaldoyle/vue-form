@@ -11,10 +11,13 @@
     <p v-if="myform.bar.$invalid">Bar is invalid</p>
 
     <form novalidate v-form name="myform">
-        <input v-model="model.foo" v-form-model="model.foo" name="foo" :required="isRequired" type="text" />
-        <input v-model="model.bar" v-form-model="model.bar" name="bar" type="text" lazy />
+        <input v-model="model.foo" v-form-model="model.foo" name="foo" :required="isRequired" :type="dynamicType" />
+        <input v-model="model.bar" v-form-model="model.bar" name="bar" required type="text" lazy />
         <input v-model="model.baz" v-form-model="model.baz" name="baz" :required="isRequired" type="text" />
-
+        <input v-model="model.email" v-form-model="model.email" name="email" multiple type="email" />
+        
+                  <input v-model="model.f" v-form-model="model.f" multiple name="f" type="email" />        
+                <input v-model="model.g" v-form-model="model.g" name="g" type="number" />        
         <button type="button" id="test">Submit</button>
     </form>
 
@@ -22,7 +25,8 @@
     <pre>{{ myform | json }}</pre>
 
     <button type="button" @click="toggleRequired">toggleRequired</button>
-
+    <button type="button" @click="toggleType">toggleType</button>
+    
     <script src="../node_modules/vue/dist/vue.js"></script>
     <script src="../vue-form.js"></script>
 
@@ -33,14 +37,24 @@
             data: {
                 // myform: {},
                 isRequired: true,
+                isMultiple: true,
+                dynamicType: 'text',
                 model: {
                     foo: '',
-                    bar: 'joe.doe@hpe.com'
+                    bar: 'joe.doe@hpe.com',
+                    f: '',
+                    g: ''
                 }
             },
             methods: {
                 toggleRequired: function () {
                     this.isRequired = !this.isRequired;
+                },
+                toggleMultiple: function () {
+                    this.isMultiple = !this.isMultiple;
+                },
+                toggleType: function () {
+                    this.dynamicType = 'email';
                 }
             }
         });
