@@ -7,15 +7,25 @@ describe('vue-form', function () {
       replace: false,
       template: `
         <form v-form name="myform">
-          <input v-model="model.a" v-form-model="model.a" name="a" required type="text" />
-          <input v-model="model.b" v-form-model="model.b" name="b" required type="text" />
-          <input v-model="model.c" v-form-model="model.c" name="c" type="text" />
-          <input v-model="model.d" v-form-model="model.d" name="d" :required="isRequired" type="text" />
-          <input v-model="model.e" v-form-model="model.e" name="e" :required="isRequired" type="text" />
-          <input v-model="model.f" v-form-model="model.f" name="f" type="email" />        
-          <input v-model="model.g" v-form-model="model.g" name="g" type="number" />        
-          <input v-model="model.h" v-form-model="model.h" name="h" type="text" minlength="6" />        
-          <input v-model="model.i" v-form-model="model.i" name="i" type="text" maxlength="10" />        
+          <input v-model="model.a" v-form-ctrl name="a" required type="text" />
+          <input v-model="model.b" v-form-ctrl name="b" required type="text" />
+          <input v-model="model.c" v-form-ctrl name="c" type="text" />
+          <input v-model="model.d" v-form-ctrl name="d" :required="isRequired" type="text" />
+          <input v-model="model.e" v-form-ctrl name="e" :required="isRequired" type="text" />
+          <input v-model="model.f" v-form-ctrl name="f" type="email" />
+          <input v-model="model.g" v-form-ctrl name="g" type="number" />
+          <input v-model="model.h" v-form-ctrl name="h" type="text" minlength="6" />
+          <input v-model="model.i" v-form-ctrl name="i" type="text" maxlength="10" />
+          <input v-model="model.j" v-form-ctrl name="j" type="number" min="10" />
+          <input v-model="model.k" v-form-ctrl name="k" type="number" max="10" />
+          <input v-model="model.l" v-form-ctrl name="l" type="url" />
+          <input v-model="model.m" v-form-ctrl name="m" type="text" :pattern="'[A-Za-z]{3}'" />
+          <input v-model="model.o" v-form-ctrl name="o" type="text" custom-validator="customValidator" />
+          
+          <input type="checkbox" value="Jack" v-model="multicheck" v-form-ctrl required name="multicheck"/>
+          <input type="checkbox" value="John" v-model="multicheck" v-form-ctrl required name="multicheck"/>
+          <input type="checkbox" value="Mike" v-model="multicheck" v-form-ctrl required name="multicheck"/>
+
         </form>
       `,
       data: {
@@ -29,7 +39,18 @@ describe('vue-form', function () {
           f: 'foo.bar@com.com',
           g: '3',
           h: '',
-          i: ''
+          i: '',
+          j: 11,
+          k: 5,
+          l: 'non url',
+          m: 'x',
+          o: 'abc',
+          multicheck: []
+        }
+      },
+      methods: {
+        customValidator: function (value) {
+          return value === 'custom';
         }
       }
     });
@@ -67,7 +88,7 @@ describe('vue-form', function () {
       Vue.nextTick(done);
     });
   });
-  
+
   it('should react to attribue binding changes', function (done) {
     expect(vm.myform.d.$valid).toBe(false);
     vm.isRequired = false;
@@ -75,7 +96,7 @@ describe('vue-form', function () {
       expect(vm.myform.d.$valid).toBe(true);
       Vue.nextTick(done);
     });
-  });  
+  });
 
   it('should validate [type=email]', function (done) {
     expect(vm.myform.f.$valid).toBe(true);
@@ -84,8 +105,8 @@ describe('vue-form', function () {
       expect(vm.myform.f.$valid).toBe(false);
       Vue.nextTick(done);
     });
-  }); 
- 
+  });
+
   it('should validate [type=number]', function (done) {
     expect(vm.myform.g.$valid).toBe(true);
     vm.model.g = 'not a real email';
@@ -93,7 +114,25 @@ describe('vue-form', function () {
       expect(vm.myform.g.$valid).toBe(false);
       Vue.nextTick(done);
     });
-  }); 
+  });
+
+  it('should validate [type=url]', function (done) {
+    expect(vm.myform.l.$valid).toBe(false);
+    vm.model.l = 'http://foo.bar/baz';
+    Vue.nextTick(function () {
+      expect(vm.myform.l.$valid).toBe(true);
+      Vue.nextTick(done);
+    });
+  });
+
+  it('should validate [required]', function (done) {
+    expect(vm.myform.a.$valid).toBe(true);
+    vm.model.a = '';
+    Vue.nextTick(function () {
+      expect(vm.myform.a.$valid).toBe(false);
+      Vue.nextTick(done);
+    });
+  });
 
   it('should validate [minlength]', function (done) {
     expect(vm.myform.h.$valid).toBe(false);
@@ -102,7 +141,7 @@ describe('vue-form', function () {
       expect(vm.myform.h.$valid).toBe(true);
       Vue.nextTick(done);
     });
-  }); 
+  });
 
   it('should validate [maxlength]', function (done) {
     expect(vm.myform.i.$valid).toBe(true);
@@ -111,6 +150,74 @@ describe('vue-form', function () {
       expect(vm.myform.i.$valid).toBe(false);
       Vue.nextTick(done);
     });
-  }); 
+  });
+
+  it('should validate [number][min]', function (done) {
+    expect(vm.myform.j.$valid).toBe(true);
+    vm.model.j = 9;
+    Vue.nextTick(function () {
+      expect(vm.myform.j.$valid).toBe(false);
+      Vue.nextTick(done);
+    });
+  });
+
+  it('should validate [number][max]', function (done) {
+    expect(vm.myform.k.$valid).toBe(true);
+    vm.model.k = 15;
+    Vue.nextTick(function () {
+      expect(vm.myform.k.$valid).toBe(false);
+      Vue.nextTick(done);
+    });
+  });
+
+  it('should validate [pattern]', function (done) {
+    expect(vm.myform.m.$valid).toBe(false);
+    vm.model.m = 'abc';
+    Vue.nextTick(function () {
+      expect(vm.myform.m.$valid).toBe(true);
+      Vue.nextTick(done);
+    });
+  });
+
+  it('should validate custom-validator', function (done) {
+    expect(vm.myform.o.$valid).toBe(false);
+    vm.model.o = 'custom';
+    Vue.nextTick(function () {
+      expect(vm.myform.o.$valid).toBe(true);
+      Vue.nextTick(done);
+    });
+  });
+
+
+  it('should validate checkbox array', function (done) {
+    expect(vm.myform.multicheck.$valid).toBe(false);
+    vm.$el.querySelector('[name=multicheck]').click();
+    Vue.nextTick(function () {
+      expect(vm.myform.multicheck.$valid).toBe(true);
+      Vue.nextTick(done);
+    });
+  });
+
+ it('should set input dirty when changed', function (done) {
+    expect(vm.myform.d.$dirty).toBe(false);
+    vm.model.d = 'abc';
+    Vue.nextTick(function () {
+      expect(vm.myform.d.$dirty).toBe(true);
+      Vue.nextTick(done);
+    });
+  });
+
+  it('should set form dirty when child changed', function (done) {
+    expect(vm.myform.$dirty).toBe(false);
+    vm.model.d = 'abc';
+    Vue.nextTick(function () {
+      expect(vm.myform.$dirty).toBe(true);
+      Vue.nextTick(done);
+    });
+  });
+
+  it('should set form invalid when child is invald', function () {
+    expect(vm.myform.$invalid).toBe(true);
+  });
 
 });

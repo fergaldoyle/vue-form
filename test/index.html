@@ -9,16 +9,46 @@
 <body>
 
     <p v-if="myform.bar.$invalid">Bar is invalid</p>
+    <p v-if="myform.$error.bar.$error.required">Bar is required </p>
+
+    <div>
+        <p v-for="error in myform.$error">
+            {{error.$name}}
+        </p>
+    </div>
+
+    <pre>{{myform.$error | json}}</pre>
+
 
     <form novalidate v-form name="myform">
-        <input v-model="model.foo" v-form-model="model.foo" name="foo" :required="isRequired" :type="dynamicType" />
-        <input v-model="model.bar" v-form-model="model.bar" name="bar" required type="text" lazy />
-        <input v-model="model.baz" v-form-model="model.baz" name="baz" :required="isRequired" type="text" />
-        <input v-model="model.email" v-form-model="model.email" name="email" multiple type="email" />
-        
-                  <input v-model="model.f" v-form-model="model.f" multiple name="f" type="email" />        
-                <input v-model="model.g" v-form-model="model.g" name="g" type="number" />        
-        <button type="button" id="test">Submit</button>
+        <input v-model="model.foo" v-form-ctrl :required="isRequired" name="foo" />
+        <input v-model="model.bar" v-form-ctrl custom-validator="customValidator" name="bar" />
+        <!--
+        <input v-model="model.foo" v-form-ctrl :required="isRequired" name="foo" />
+        <input v-model="model.bar" v-form-ctrl :custom-validator.literal="customValidator" name="bar" />
+
+        <span v-form-ctrl="model.custom" name="custom" :required="isRequired">
+            <custom-control :model="model.custom"></custom-control>
+        </span>
+
+        <input type="radio" name='group' v-model="color" v-form-ctrl value="red" required> Red
+        <br/>
+        <input type="radio" name='group' v-model="color" v-form-ctrl value="green" required> Green
+        <br/>
+        <input type="radio" name='group' v-model="color" v-form-ctrl value="blue" required> Blue
+        <br/>
+
+        <input type="checkbox" id="jack" value="Jack" v-model="checkedNames" v-form-ctrl required name="multicheck"/>
+        <label for="jack">Jack</label>
+        <input type="checkbox" id="john" value="John" v-model="checkedNames" v-form-ctrl required name="multicheck"/>
+        <label for="john">John</label>
+        <input type="checkbox" id="mike" value="Mike" v-model="checkedNames" v-form-ctrl required name="multicheck"/>
+        <label for="mike">Mike</label>
+        <br>
+        <span>Checked names: {{ checkedNames | json }}</span>
+
+-->
+        <button type="submit" id="test">Submit</button>
     </form>
 
     <pre>isRequired {{isRequired}}</pre>
@@ -26,27 +56,45 @@
 
     <button type="button" @click="toggleRequired">toggleRequired</button>
     <button type="button" @click="toggleType">toggleType</button>
-    
+
     <script src="../node_modules/vue/dist/vue.js"></script>
     <script src="../vue-form.js"></script>
 
     <script>
-        Vue.config.silent = true;
-        new Vue({
+        //Vue.config.silent = true;
+        var vm = new Vue({
             el: 'body',
             data: {
-                // myform: {},
+                myform: {},
                 isRequired: true,
                 isMultiple: true,
                 dynamicType: 'text',
+                checkedNames: [],
+
                 model: {
                     foo: '',
-                    bar: 'joe.doe@hpe.com',
+                    bar: '',
                     f: '',
-                    g: ''
+                    g: '',
+                    custom: '',
+                    custom2: '',
+                    
                 }
             },
+            components: {                
+                customControl: {
+                    replace: true,
+                    props: ['model'],
+                    template: '<div>Custom control here</div>',
+                    ready: function () {
+                                                
+                    }
+                }                
+            },
             methods: {
+                customValidator: function (value) {
+                    return value === 'custom';
+                }, 
                 toggleRequired: function () {
                     this.isRequired = !this.isRequired;
                 },
@@ -58,6 +106,7 @@
                 }
             }
         });
+        
     </script>
 
 </body>
