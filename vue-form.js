@@ -138,6 +138,7 @@
             bind: function () {
                 var  el = this.el,
                     formName = el.getAttribute('name'),
+                    hook = el.getAttribute('hook'),
                     vm = this.vm,                   
                     self = this,
                     controls = {};
@@ -223,6 +224,10 @@
                         }
                     }
                 };
+                
+                if(hook) {
+                    vm[hook](vueForm);
+                }
 
                 this._submitEvent = function () {
                     vueForm.setSubmitted(true);
@@ -244,6 +249,7 @@
             bind: function () {
                 var inputName = this.el.getAttribute('name'),
                     vModel = this.el.getAttribute('v-model'),
+                    hook = this.el.getAttribute('hook'),
                     vm = this.vm,
                     el = this.el,
                     self = this,
@@ -360,7 +366,7 @@
                         }); 
                     }
                 }
-
+                
                 function init(vueForm) {
                     if(!vueForm) {
                         return;
@@ -388,6 +394,10 @@
                     }
                     
                 };
+                
+                if(hook) {
+                    vm[hook](vueFormCtrl);
+                }                
 
             },
             update: function (value, oldValue) {
