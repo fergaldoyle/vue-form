@@ -6,11 +6,11 @@ HTML5 form validation for Vue.js 1.0+. Works along side `v-model` but can also b
 
 Available through npm as `vue-form`.
 
-  ``` js
-  // es6: import * as vueForm from 'vue-form'; 
-  var vueForm = require('vue-form');
-  Vue.use(vueForm);
-  ```
+``` js
+// es6: import * as vueForm from 'vue-form'; 
+var vueForm = require('vue-form');
+Vue.use(vueForm);
+```
   
 You can also directly include it with a `<script>` tag when you have Vue itself included globally. It will automatically install itself.
 
@@ -111,6 +111,20 @@ You can use static validation attributes or bindings. If it is a binding, the in
 
 #### State classes
 
+As forms and input validation states change, state classes are added and removed:
+
+Possible form classes:
+```
+vf-dirty, vf-pristine, vf-valid, vf-invalid, vf-submitted
+```
+
+Possible input classes:
+```
+vf-dirty, vf-pristine, vf-valid, vf-invalid
+
+// also for every validation error, a class will be added, e.g.
+vf-invalid-required, vf-invalid-minlength, vf-invalid-max, etc
+```
 
 #### Custom validator:
 
@@ -133,6 +147,8 @@ methods: {
 ### Custom form control component
 
 You can also use `vue-form` on your own form components. Simply wrap your component with an element with `v-form-ctrl`, `name` and any validation attributes. You can also get a hook into the internals of `v-form-ctrl` to mange control state. 
+
+[See custom tinymce component validation example ](https://github.com/fergaldoyle/vue-form/tree/master/example)
 
 ```html
 <div>
