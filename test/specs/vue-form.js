@@ -219,5 +219,35 @@ describe('vue-form', function () {
   it('should set form invalid when child is invald', function () {
     expect(vm.myform.$invalid).toBe(true);
   });
+   
+  it('should add and remove state classes from inputs', function (done) {
+    var classes = vm.$el.querySelector('[name=b]').className;
+    expect(classes.indexOf('vf-pristine')).not.toBe(-1);
+    expect(classes.indexOf('vf-invalid')).not.toBe(-1);
+    expect(classes.indexOf('vf-invalid-required')).not.toBe(-1);
+    vm.model.b = 'abc';
+    Vue.nextTick(function () {
+      classes = vm.$el.querySelector('[name=b]').className;
+      expect(classes.indexOf('vf-pristine')).toBe(-1);
+      expect(classes.indexOf('vf-invalid')).toBe(-1);
+      expect(classes.indexOf('vf-invalid-required')).toBe(-1);
+      expect(classes.indexOf('vf-valid')).not.toBe(-1);
+      Vue.nextTick(done);
+    });
+  }); 
+  
+  it('should add and remove state classes from form', function (done) {
+    var classes = vm.$el.querySelector('[name="myform"]').className;
+    expect(classes.indexOf('vf-invalid')).not.toBe(-1);
+    expect(classes.indexOf('vf-pristine')).not.toBe(-1);
+    vm.model.b = 'abc';
+    Vue.nextTick(function () {
+      classes = vm.$el.querySelector('[name="myform"]').className;
+      //expect(classes.indexOf('vf-pristine')).toBe(-1);
+      //expect(classes.indexOf('vf-invalid')).toBe(-1);
+      //expect(classes.indexOf('vf-valid')).not.toBe(-1);
+      Vue.nextTick(done);
+    });
+  });   
 
 });

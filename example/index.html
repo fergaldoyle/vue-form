@@ -7,12 +7,13 @@
     <style>
         label {
             display: block;
-            margin-bottom: 1em;
+            margin-bottom: 1.5em;
         }
         
         label > span {
             display: inline-block;
             width: 8em;
+            vertical-align: top;
         }
     </style>
 </head>
@@ -20,6 +21,11 @@
 <body>
 
     <form v-form name="myform" @submit.prevent="onSubmit">
+        
+        <div class="errors" v-if="myform.$submitted">
+            <p v-if="myform.name.$error.required">Name is required.</p>
+            <p v-if="myform.email.$error.email">Email is not valid.</p>
+        </div>
 
         <label>
             <span>Name *</span>
@@ -32,17 +38,22 @@
         </label>
 
         <label>
-            <span>Add comments</span>
-            <input v-model="model.commentsRequired" v-form-ctrl name="commentsRequired" type="checkbox" />
+            <span>Request call back</span>
+            <input v-model="model.contactRequired" v-form-ctrl name="contactRequired" type="checkbox" />
         </label>
 
         <label>
-            <span>Comments <span v-if="model.commentsRequired">*</span></span>
-            <textarea v-model="model.comments" :required="model.commentsRequired" v-form-ctrl name="comments"></textarea>
+            <span>Contact details <span v-if="model.contactRequired">*</span></span>
+            <textarea v-model="model.contact" :required="model.contactRequired" v-form-ctrl name="comments"></textarea>
         </label>
         
-        <div>
-            <p>Extra
+        <div v-if="model.contactRequired">
+            <p>Extra contact fields</p>
+            
+            <label>
+                <span>3 digit code *</span>
+                <input v-model="model.code" v-form-ctrl name="code" type="text" pattern="[A-Za-z]{3}" required />
+            </label>
             
         </div>
         
@@ -50,23 +61,6 @@
     </form>
 
     <pre>{{ myform | json }}</pre>
-
-    <button @click="toggleRequired" type="button">toggleRequired</button>
-    <button @click="toggleForm" type="button">toggleForm</button>
-
-    <div v-if="form2Enabled">
-        <form v-form name="myform2" @submit.prevent="onSubmit">
-
-            <label>
-                <span>Name *</span>
-                <input v-model="model.name" v-form-ctrl required="" name="name" />
-            </label>
-
-            <button type="submit">Submit</button>
-        </form>
-    </div>
-
-    <pre>{{ myform2 | json }}</pre>
 
     <script src="../node_modules/vue/dist/vue.js"></script>
     <script src="../vue-form.js"></script>
@@ -80,7 +74,7 @@
                 isRequired: true,
                 form2Enabled: false,
                 model: {
-                   commentsRequired: false              
+                    contactRequired: false              
                 }
             },
             components: {                
