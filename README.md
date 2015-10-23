@@ -1,6 +1,6 @@
 # vue-form
 
-HTML5 form validation for Vue.js 1.0+
+HTML5 form validation for Vue.js 1.0+. Works along side `v-model` but can also be used on your custom form control components (tinymce, select2, tag-editor etc).
 
 ### Install
 
@@ -109,6 +109,9 @@ You can use static validation attributes or bindings. If it is a binding, the in
 <input type="text" name="name" v-model="model.name" v-form-ctrl :maxlength="maxLen" :minlength="minLen" />
 ```
 
+#### State classes
+
+
 #### Custom validator:
 
 ```html
@@ -124,4 +127,18 @@ methods: {
 	}
 }
 // ...
+```
+
+
+### Custom form control component
+
+You can also use `vue-form` on your own form components. Simply wrap your component with an element with `v-form-ctrl`, `name` and any validation attributes. You can also get a hook into the internals of `v-form-ctrl` to mange control state. 
+
+```html
+<div>
+    <span>Rich text *</span>
+    <span v-form-ctrl="model.html" name="html" required>
+        <tinymce id="inline-editor" :model.sync="model.html"></tinymce>
+    </span>
+</div>
 ```
