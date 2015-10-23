@@ -66,34 +66,15 @@
     <script src="../vue-form.js"></script>
 
     <script>
-        //Vue.config.silent = true;
         var vm = new Vue({
             el: 'body',
             data: {
                 myform: {},
-                isRequired: true,
-                form2Enabled: false,
                 model: {
                     contactRequired: false              
                 }
             },
-            components: {                
-                customControl: {
-                    replace: true,
-                    props: ['model'],
-                    template: '<div>Custom control here</div>',
-                    ready: function () {
-                                                
-                    }
-                }                
-            },
-            methods: {
-                customValidator: function (value) {
-                    return value === 'custom';
-                }, 
-                toggleRequired: function () {
-                    this.isRequired = !this.isRequired;
-                },        
+            methods: {     
                 onSubmit: function () {
                     console.log(this.myform.$valid);
                 }
