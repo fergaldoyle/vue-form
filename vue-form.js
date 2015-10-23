@@ -216,6 +216,11 @@
                     },
                     setSubmitted: function (isSubmitted) {
                         state.$submitted = isSubmitted;
+                        if(isSubmitted) {
+                            Vue.util.addClass(el, submittedClass);
+                        } else {
+                            Vue.util.removeClass(el, submittedClass);
+                        }
                     }
                 };
 
