@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>vue-form example</title>
+    <meta charset="utf-8" />
+    <style>
+        label {
+            display: block;
+            margin-bottom: 1em;
+        }
+        
+        label > span {
+            display: inline-block;
+            width: 8em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <form v-form name="myform" @submit.prevent="onSubmit">
+
+        <label>
+            <span>Name *</span>
+            <input v-model="model.name" v-form-ctrl required name="name" />
+        </label>
+
+        <label>
+            <span>Email</span>
+            <input v-model="model.email" v-form-ctrl name="email" type="email" />
+        </label>
+
+        <label>
+            <span>Add comments</span>
+            <input v-model="model.commentsRequired" v-form-ctrl name="commentsRequired" type="checkbox" />
+        </label>
+
+        <label>
+            <span>Comments <span v-if="model.commentsRequired">*</span></span>
+            <textarea v-model="model.comments" :required="model.commentsRequired" v-form-ctrl name="comments"></textarea>
+        </label>
+        
+        <div>
+            <p>Extra
+            
+        </div>
+        
+        <button type="submit">Submit</button>
+    </form>
+
+    <pre>{{ myform | json }}</pre>
+
+    <button @click="toggleRequired" type="button">toggleRequired</button>
+    <button @click="toggleForm" type="button">toggleForm</button>
+
+    <div v-if="form2Enabled">
+        <form v-form name="myform2" @submit.prevent="onSubmit">
+
+            <label>
+                <span>Name *</span>
+                <input v-model="model.name" v-form-ctrl required="" name="name" />
+            </label>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <pre>{{ myform2 | json }}</pre>
+
+    <script src="../node_modules/vue/dist/vue.js"></script>
+    <script src="../vue-form.js"></script>
+
+    <script>
+        //Vue.config.silent = true;
+        var vm = new Vue({
+            el: 'body',
+            data: {
+                myform: {},
+                isRequired: true,
+                form2Enabled: false,
+                model: {
+                   commentsRequired: false              
+                }
+            },
+            components: {                
+                customControl: {
+                    replace: true,
+                    props: ['model'],
+                    template: '<div>Custom control here</div>',
+                    ready: function () {
+                                                
+                    }
+                }                
+            },
+            methods: {
+                customValidator: function (value) {
+                    return value === 'custom';
+                }, 
+                toggleRequired: function () {
+                    this.isRequired = !this.isRequired;
+                },        
+                onSubmit: function () {
+                    console.log(this.myform.$valid);
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

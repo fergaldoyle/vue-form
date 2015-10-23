@@ -1,7 +1,18 @@
-﻿// http://plnkr.co/edit/iNWVNyuLM9ihOzlbuZvS?p=preview
-; (function () {
+﻿; (function () {
     var vueForm = {};
     vueForm.install = function (Vue) {
+
+        function closest(elem, selector) {
+            var matchesSelector = elem.matches || elem.webkitMatchesSelector || elem.mozMatchesSelector || elem.msMatchesSelector;
+            while (elem) {
+                if (matchesSelector.call(elem, selector)) {
+                    return elem;
+                } else {
+                    elem = elem.parentElement;
+                }
+            }
+            return null;
+        }
 
         var emailRegExp = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/,
             urlRegExp = /^(http\:\/\/|https\:\/\/)(.{4,})$/,
@@ -67,32 +78,43 @@
         // check if an attribute exists, static or binding.
         // if it is a binding, watch it and re-validate on change
         function checkAttribute($this, attribute) {
-            var formCtrlCtrl = $this._formCtrlCtrl;
-            var binding = Vue.util.getBindAttr($this.el, attribute);
+            var vueFormCtrl = $this._vueFormCtrl;
+            var binding = Vue.util.getBindAttr($this.el, attribute);           
             if (binding) {
                 $this.vm.$watch(binding, function (value, oldValue) {
-                    formCtrlCtrl[attribute] = value;
+                    vueFormCtrl[attribute] = value;
                     if (attribute === 'type') {
-                        delete formCtrlCtrl.validators[oldValue];
-                        formCtrlCtrl.validators[value] = validators[value];
+                        delete vueFormCtrl.validators[oldValue];
+                        vueFormCtrl.validators[value] = validators[value];
                     } else {
-                        formCtrlCtrl.validators[attribute] = validators[attribute];
-                        if (value === false) {
-                            formCtrlCtrl.validators[attribute] = false;
+                        vueFormCtrl.validators[attribute] = validators[attribute];
+                        if (value === false || typeof value === 'undefined') {
+                            vueFormCtrl.validators[attribute] = false;
                         }
                     }
-                    formCtrlCtrl.validate($this._value);
+                    if($this._vueForm) {
+                        vueFormCtrl.validate($this._value);  
+                    } else {
+                        // this is for when an input is inside a v-if
+                        // and will not be inserted into the dom for 
+                        // some time
+                        Vue.nextTick(function () {
+                            Vue.nextTick(function () {
+                                vueFormCtrl.validate($this._value);
+                            });
+                        });
+                    } 
                 }, { immediate: true });
             }
             var staticAttr = $this.el.getAttribute(attribute);
             if (staticAttr !== null) {
-                formCtrlCtrl[attribute] = staticAttr || true;
+                vueFormCtrl[attribute] = staticAttr || true;
                 if (attribute === 'type') {
-                    formCtrlCtrl.validators[staticAttr] = validators[staticAttr];
+                    vueFormCtrl.validators[staticAttr] = validators[staticAttr];
                 } else if (attribute === 'custom-validator') {
-                    formCtrlCtrl.validators[attribute] = $this.vm[staticAttr];
+                    vueFormCtrl.validators[attribute] = $this.vm[staticAttr];
                 } else {
-                    formCtrlCtrl.validators[attribute] = validators[attribute];
+                    vueFormCtrl.validators[attribute] = validators[attribute];
                 }
             }
 
@@ -107,6 +129,8 @@
                     self = this,
                     controls = {};
 
+                this.el.noValidate = true;
+
                 var state = this._state = {
                     $name: formName,
                     $dirty: false,
@@ -119,14 +143,16 @@
 
                 vm.$set(formName, state);
 
-                var formCtrl = {
+                var vueForm = this.el._vueForm = {
                     name: formName,
                     state: state,
                     addControl: function (ctrl) {
                         controls[ctrl.name] = ctrl;
                     },
                     removeControl: function (ctrl) {
+                        //this.removeError(ctrl.name);
                         delete controls[ctrl.name];
+                        //this.checkValidity();
                     },
                     setData: function (key, data) {
                         vm.$set(formName + '.' + key, data);
@@ -158,31 +184,15 @@
                         Object.keys(controls).forEach(function (ctrl) {
                             controls[ctrl].setPristine();
                         });
-                        formCtrl.setSubmitted(false);
+                        vueForm.setSubmitted(false);
                     },
                     setSubmitted: function (isSubmitted) {
                         state.$submitted = isSubmitted;
                     }
                 };
 
-                vm.$on('vue-form.hook', function (el, cb) {
-                    // make sure the element dispatching the event is inside this form
-                    var found = false,
-                        els = self.el.querySelectorAll('[name="' + el.getAttribute('name') + '"]');
-
-                    for (var i = 0; i < els.length; i++) {
-                        if (els[i] === el) {
-                            found = true;
-                        }
-                    }
-
-                    if (found) {
-                        cb(formCtrl);
-                    }
-                });
-
                 this._submitEvent = function () {
-                    formCtrl.setSubmitted(true);
+                    vueForm.setSubmitted(true);
                 };
                 Vue.util.on(this.el, 'submit', this._submitEvent);
             },
@@ -191,6 +201,7 @@
             },
             unbind: function () {
                 Vue.util.off(this.el, 'submit', this._submitEvent);
+                delete this.el._vueForm;
             }
         });
 
@@ -202,23 +213,14 @@
                     vModel = this.el.getAttribute('v-model'),
                     vm = this.vm,
                     self = this,
-                    formCtrl;
+                    vueForm;
 
                 if (!inputName) {
                     console.warn('Name attribute must be populated');
                     return;
                 }
-
-                this.vm.$dispatch('vue-form.hook', this.el, function (ctrl) {
-                    formCtrl = ctrl;
-                });
-
-                if (!formCtrl) {
-                    console.warn('Parent form not found');
-                    return;
-                }
-
-                var state = this._state = {
+                      
+                var state = self._state = {
                     $name: inputName,
                     $dirty: false,
                     $pristine: true,
@@ -227,27 +229,28 @@
                     $error: {}
                 };
 
-                var formCtrlCtrl = this._formCtrlCtrl = {
-                    el: this.el,
+                var vueFormCtrl = self.el._vueFormCtrl = self._vueFormCtrl = {
+                    el: self.el,
                     name: inputName,
                     state: state,
                     setVadility: function (key, isValid) {
+                        var vueForm = self._vueForm;
                         state.$valid = isValid;
                         state.$invalid = !isValid;
                         if (isValid) {
-                            formCtrl.setData(inputName + '.$error.' + key, false);
+                            vueForm.setData(inputName + '.$error.' + key, false);
                             delete state.$error[key];
-                            formCtrl.removeError(inputName);
+                            vueForm.removeError(inputName);
                         } else {
-                            formCtrl.setData(inputName + '.$error.' + key, true);
-                            formCtrl.setData('$error.' + inputName, state);
+                            vueForm.setData(inputName + '.$error.' + key, true);
+                            vueForm.setData('$error.' + inputName, state);
                         }
-                        formCtrl.checkValidity();
+                        vueForm.checkValidity();
                     },
                     setDirty: function () {
                         state.$dirty = true;
                         state.$pristine = false;
-                        formCtrl.setDirty();
+                        self._vueForm.setDirty();
                     },
                     setPristine: function () {
                         state.$dirty = false;
@@ -288,108 +291,79 @@
 
                         return isValid;
                     }
-                };
-                
-                // register the form control
-                formCtrl.addControl(formCtrlCtrl);
-                                
+                };  
+                    
                 // add to validators depending on element attributes 
                 attrs.forEach(function (attr) {
                     checkAttribute(self, attr);
-                });
-                                                                        
-                // set inital state
-                formCtrl.setData(inputName, state);
-
-                if (vModel) {
-                    this.vm.$watch(vModel, function (value, oldValue) {
-                        if (typeof oldValue !== 'undefined') {
-                            formCtrlCtrl.setDirty();
-                        }
-                        formCtrlCtrl.validate(value);
-                        self._value = value;
-                    }, { immediate: true });
+                });              
+                
+                // find parent form
+                var form;
+                if(self.el.form) {
+                    init(self.el.form._vueForm);                                   
+                } else {
+                    // this is either a non form element node 
+                    // or a detached node (inside v-if)
+                    form = closest(self.el, 'form[name]');
+                    if(form && form._vueForm) {
+                        init(form._vueForm); 
+                    } else {
+                        // must be detached
+                        Vue.nextTick(function () {
+                            form = self.el.form || closest(self.el, 'form[name]');
+                            init(form._vueForm);
+                        }); 
+                    }
                 }
 
-                vm.$on('vue-form-ctrl.hook', function (cb) {
-                    cb(formCtrlCtrl);
-                });
+                function init(vueForm) {
+                    if(!vueForm) {
+                        return;
+                    }
+                    self._vueForm = vueForm;
+                                   
+                    // register the form control
+                    vueForm.addControl(vueFormCtrl);                 
+                                                                                                        
+                    // set inital state
+                    vueForm.setData(inputName, state);               
+                                                 
+                    if (vModel) {
+                        self.vm.$watch(vModel, function (value, oldValue) {
+                            if (typeof oldValue !== 'undefined') {
+                                vueFormCtrl.setDirty();
+                            }
+                            vueFormCtrl.validate(value);
+                            self._value = value;
+                        }, { immediate: true });
+                    }
+                    
+                };
 
             },
             update: function (value, oldValue) {
                 if (typeof oldValue !== 'undefined') {
-                    this._formCtrlCtrl.setDirty();
+                    this._vueFormCtrl.setDirty();
                 }
-                this._formCtrlCtrl.validate(value);
+                this._vueFormCtrl.validate(value);
                 this._value = value;
             },
             unbind: function () {
-
+                this._vueForm.removeControl(this._vueFormCtrl);
+                delete this.el._vueFormCtrl;
             }
         });
-        
-        /*
-        Vue.component('form-ctrl', {
-            replace: false,
-            props: ['model'],
-            template: '<slot></slot>',
-            beforeCompile: function () {
-                this.$el.setAttribute('v-form-ctrl', this.model);
-            }
-        });
-        */
 
     }
 
-    if (typeof exports == "object") {
-        module.exports = vueForm;
-    } else if (typeof define == "function" && define.amd) {
-        define([], function () { return vueForm });
-    } else if (window.Vue) {
-        window.vueForm = vueForm;
-        Vue.use(vueForm);
-    }
+if (typeof exports == "object") {
+    module.exports = vueForm;
+} else if (typeof define == "function" && define.amd) {
+    define([], function () { return vueForm });
+} else if (window.Vue) {
+    window.vueForm = vueForm;
+    Vue.use(vueForm);
+}
 
 })();
-
-/*
-this.vm.$set(formName + '.' + inputName, {
-    $dirty: false,
-    $valid: true,
-    $invalid: false,
-    $error: {},
-    $name: inputName,
-});
-*/
-
-/*
-{
-  "$error": {},
-  "$name": "myForm",
-  "$dirty": false,
-  "$pristine": true,
-  "$valid": true,
-  "$invalid": false,
-  "$submitted": false,
-  "input": {
-    "$viewValue": "guest",
-    "$modelValue": "guest",
-    "$validators": {},
-    "$asyncValidators": {},
-    "$parsers": [],
-    "$formatters": [
-      null
-    ],
-    "$viewChangeListeners": [],
-    "$untouched": true,
-    "$touched": false,
-    "$pristine": true,
-    "$dirty": false,
-    "$valid": true,
-    "$invalid": false,
-    "$error": {},
-    "$name": "input",
-    "$options": null
-  }
-}
-*/
