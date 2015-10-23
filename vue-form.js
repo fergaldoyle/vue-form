@@ -401,9 +401,10 @@
 
             },
             update: function (value, oldValue) {
-                //if (typeof oldValue !== 'undefined') {
-                this._vueFormCtrl.setDirty();
-                //}
+                if (this._notfirst) {
+                    this._vueFormCtrl.setDirty();                    
+                }
+                this._notfirst = true;
                 this._vueFormCtrl.validate(value);
                 this._value = value;
             },
