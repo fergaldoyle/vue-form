@@ -111,7 +111,7 @@ You can use static validation attributes or bindings. If it is a binding, the in
 
 #### State classes
 
-As forms and input validation states change, state classes are added and removed:
+As form and input validation states change, state classes are added and removed:
 
 Possible form classes:
 ```
