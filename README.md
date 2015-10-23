@@ -111,7 +111,7 @@ You can use static validation attributes or bindings. If it is a binding, the in
 
 #### State classes
 
-As form and input validation states change, state classes are added and removed:
+As form and input validation states change, state classes are added and removed
 
 Possible form classes:
 ```
@@ -137,7 +137,7 @@ vf-invalid-required, vf-invalid-minlength, vf-invalid-max, etc
 methods: {
 	customValidator: function (value) {
 		// return true to set input as $valid, false to set as $invalid
-	  return value === 'custom';
+		return value === 'custom';
 	}
 }
 // ...
@@ -146,7 +146,7 @@ methods: {
 
 ### Custom form control component
 
-You can also use `vue-form` on your own form components. Simply wrap your component with an element with `v-form-ctrl`, `name` and any validation attributes. You can also get a hook into the internals of `v-form-ctrl` to mange control state. 
+You can also use `vue-form` on your own form components. Simply wrap your component with an element with `v-form-ctrl`, `name` and any validation attributes. Set `v-form-ctrl` to the same property you will be updating via two-way binding in your component. You can also get a hook into the internals of `v-form-ctrl` to mange control state. 
 
 [See custom tinymce component validation example ](https://github.com/fergaldoyle/vue-form/tree/master/example)
 
