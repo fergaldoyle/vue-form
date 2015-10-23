@@ -83,7 +83,7 @@ Apply the `v-form-ctrl` directive to each of the form elements. `v-form-ctrl` wi
 
 ### Validators
 
-Built in validators:
+#### Built in validators:
 
 ```
 type="email"
@@ -98,14 +98,30 @@ max (for type="number")
 
 ```
 
-You can use static validation attributes or bindings. If it is a binding, the input will be re-validated every binding update meaning you can have inputs which are conditionally required.
+You can use static validation attributes or bindings. If it is a binding, the input will be re-validated every binding update meaning you can have inputs which are conditionally required etc.
 ```html
-  <!-- static validators -->
-  <input type="email" v-form-ctrl required />
-  <input type="text" v-form-ctrl maxlength="25" minlength="5" />
+<!-- static validators -->
+<input type="email" name="email" v-model="model.email" v-form-ctrl required />
+<input type="text" name="name" v-model="model.name" v-form-ctrl maxlength="25" minlength="5" />
 
-  <!-- bound validators -->
-  <input type="email" v-form-ctrl :required="isRequired" />
-  <input type="text" v-form-ctrl :maxlength="maxLen" :minlength="minLen" />
+<!-- bound validators -->
+<input type="email" name="email" v-model="model.email" v-form-ctrl :required="isRequired" />
+<input type="text" name="name" v-model="model.name" v-form-ctrl :maxlength="maxLen" :minlength="minLen" />
 ```
 
+#### Custom validator:
+
+```html
+<input v-model="something" v-form-ctrl name="something" custom-validator="customValidator" />
+```
+
+```js
+// ...
+methods: {
+	customValidator: function (value) {
+		// return true to set input as $valid, false to set as $invalid
+	  return value === 'custom';
+	}
+}
+// ...
+```
