@@ -1,6 +1,6 @@
 # vue-form
 
-HTML5 form validation for Vue.js 1.0+. Works along side `v-model` but can also be used on your custom form control components (tinymce, select2, tag-editor etc).
+Form validation for Vue.js 1.0+. Works along side `v-model` but can also be used on your custom form control components (tinymce, select2, tag-editor etc).
 
 ### Install
 
