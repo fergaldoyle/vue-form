@@ -21,7 +21,7 @@
             el.className = (classes.join(" ")).trim();
         }
         
-        var emailRegExp = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/,
+        var emailRegExp = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i, // from angular
             urlRegExp = /^(http\:\/\/|https\:\/\/)(.{4,})$/,
             dirtyClass = 'vf-dirty',
             pristineClass = 'vf-pristine',
