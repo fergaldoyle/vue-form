@@ -20,6 +20,7 @@ describe('vue-form', function () {
           <input v-model="model.k" v-form-ctrl name="k" type="number" max="10" />
           <input v-model="model.l" v-form-ctrl name="l" type="url" />
           <input v-model="model.m" v-form-ctrl name="m" type="text" :pattern="'[A-Za-z]{3}'" />
+          <input v-model="model.n" v-form-ctrl name="n" type="email" required minlength="8" />
           <input v-model="model.o" v-form-ctrl name="o" type="text" custom-validator="customValidator" />
           
           <input type="checkbox" value="Jack" v-model="multicheck" v-form-ctrl required name="multicheck"/>
@@ -44,6 +45,7 @@ describe('vue-form', function () {
           k: 5,
           l: 'non url',
           m: 'x',
+          n: '',
           o: 'abc',
           multicheck: []
         }
@@ -178,6 +180,28 @@ describe('vue-form', function () {
       Vue.nextTick(done);
     });
   });
+  
+  it('should validate multiple validators', function (done) {
+    expect(vm.myform.n.$valid).toBe(false);
+    // pass required
+    vm.model.n = 'abc';
+    Vue.nextTick(function () {
+      // email will be invalid
+      expect(vm.myform.n.$valid).toBe(false);
+      // pass email
+      vm.model.n = 'a@b.c';
+      Vue.nextTick(function () {
+        // minlength will be invalid
+        expect(vm.myform.n.$valid).toBe(false);
+        // pass minlength
+        vm.model.n = 'aa@bb.xxxx';
+        Vue.nextTick(function () {
+          expect(vm.myform.n.$valid).toBe(true);
+          Vue.nextTick(done);
+        });
+      });
+    });
+  });  
 
   it('should validate custom-validator', function (done) {
     expect(vm.myform.o.$valid).toBe(false);
