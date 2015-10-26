@@ -38,7 +38,7 @@ describe('vue-form', function () {
           e: 'eee',
           f: 'foo.bar@com.com',
           g: '3',
-          h: '',
+          h: '12',
           i: '',
           j: 11,
           k: 5,
