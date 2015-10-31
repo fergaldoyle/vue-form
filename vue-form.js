@@ -283,7 +283,8 @@
                             } else {
                                 Vue.util.removeClass(el, validClass);
                                 Vue.util.addClass(el, invalidClass);
-                            }                            
+                            }  
+                            vueForm.checkValidity();                          
                             return;
                         }
 
@@ -296,7 +297,6 @@
                             vueForm.setData('$error.' + inputName, state);   
                             Vue.util.addClass(el, invalidClass + '-' + key);
                         }
-                        vueForm.checkValidity();
                     },
                     setDirty: function () {
                         state.$dirty = true;
