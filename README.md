@@ -18,7 +18,7 @@ You can also directly include it with a `<script>` tag when you have Vue itself 
 
 This plugin registers two global directives, `v-form` and `v-form-ctrl`.  Apply the `v-form` directive to a `form` element, and set the `name` attribute. This `name` will hold the overall form state object and is created on the current vm.
 
-Apply the `v-form-ctrl` directive to each of the form elements. `v-form-ctrl` will watch `v-model` and validate on change. Use static or binding attributes to specify validators (`required`, `maxlength`, `type="email"`, `type="url"`, etc)
+Apply the `v-form-ctrl` directive to each of the form inputs. `v-form-ctrl` will watch `v-model` and validate on change. Use static or binding attributes to specify validators (`required`, `maxlength`, `type="email"`, `type="url"`, etc)
 
 ```html
 <form v-form name="myform" @submit.prevent="onSubmit">
