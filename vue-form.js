@@ -83,11 +83,11 @@
         
         // check if an attribute exists, static or binding.
         // if it is a binding, watch it and re-validate on change
-        function checkAttribute($this, attribute) {
+        function checkAttribute($this, scope, attribute) {
             var vueFormCtrl = $this._vueFormCtrl;
             var binding = Vue.util.getBindAttr($this.el, attribute);
             if (binding) {
-                $this.vm.$watch(binding, function (value, oldValue) {
+                scope.$watch(binding, function (value, oldValue) {
                     vueFormCtrl[attribute] = value;
                     if (attribute === 'type') {
                         delete vueFormCtrl.validators[oldValue];
@@ -136,7 +136,7 @@
                     vm = this.vm,
                     self = this,
                     controls = {};
-
+                    
                 el.noValidate = true;
 
                 var state = this._state = {
@@ -242,13 +242,30 @@
             priority: 10000,
             bind: function () {
                 var inputName = this.el.getAttribute('name'),
+                    boundInputName = this.el.getAttribute(':name') || this.el.getAttribute('v-bind:name'), 
                     vModel = this.el.getAttribute('v-model'),
                     hook = this.el.getAttribute('hook'),
                     vm = this.vm,
                     el = this.el,
                     self = this,
-                    vueForm;
+                    scope;                    
 
+                if(this._scope) {
+                    // is inside loop   
+                    scope = this._scope;             
+                } else {
+                    scope = this.vm;
+                }
+                
+                if(boundInputName) {
+                    scope.$watch(boundInputName, function (value) {
+                        console.log(value);
+                        inputName = value;                    
+                    }, {
+                        immediate: true
+                    });                    
+                }
+                
                 if (!inputName) {
                     console.warn('Name attribute must be populated');
                     return;
@@ -269,6 +286,10 @@
                     state: state,
                     setVadility: function (key, isValid) {
                         var vueForm = self._vueForm;
+                        
+                        if(!vueForm) {
+                            return;
+                        }
 
                         if (typeof key === 'boolean') {
                             // when key is boolean, we are setting 
@@ -359,10 +380,10 @@
                     
                 // add to validators depending on element attributes 
                 attrs.forEach(function (attr) {
-                    checkAttribute(self, attr);
-                });              
+                    checkAttribute(self, scope, attr);
+                });
                 
-                // find parent form
+                // find parent form             
                 var form;
                 if (el.form) {
                     init(el.form._vueForm);
@@ -374,10 +395,10 @@
                         init(form._vueForm);
                     } else {
                         // must be detached
-                        Vue.nextTick(function () {
+                        setTimeout(function () {
                             form = el.form || closest(el, 'form[name]');
-                            init(form._vueForm);
-                        });
+                            init(form._vueForm);                           
+                        }, 0);
                     }
                 }
 
@@ -397,7 +418,7 @@
 
                     var first = true;
                     if (vModel) {
-                        self.vm.$watch(vModel, function (value, oldValue) {
+                        scope.$watch(vModel, function (value, oldValue) {
                             if (!first) {
                                 vueFormCtrl.setDirty();
                             }

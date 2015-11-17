@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>vue-form example</title>
+    <meta charset="utf-8" />
+    <style>
+        label {
+            display: block;
+            margin-bottom: 1.5em;
+        }
+        
+        label > span {
+            display: inline-block;
+            width: 8em;
+            vertical-align: top;
+        }
+    </style>
+</head>
+
+<body>
+
+    <form v-form name="myform" @submit.prevent="onSubmit">
+        
+        <label v-for="input in inputs">        
+            <input v-form-ctrl type="text" :name="input.name" v-model="input.model" :required="input.required" />      
+            <br />
+        </label>  
+        
+        <div v-form-ctrl v-bind="{'name': 'blah', required: true}"></div>
+        
+        <dynamic-input :name="'someName'" :model.sync="model.someName"></dynamic-input>   
+        
+        <button type="submit">Submit</button>
+    </form>
+
+    <pre>{{ myform | json }}</pre>
+    <pre>{{ inputs | json }}</pre>
+    <pre>{{ model | json }}</pre>
+    <script src="../node_modules/vue/dist/vue.js"></script>
+    <script src="../vue-form.js"></script>
+
+    <script>
+        var vm = new Vue({
+            el: 'body',
+            data: {
+                inputs: [{
+                    name: 'foo',
+                    model: '',
+                    required: true                    
+                }, {
+                    name: 'boo',
+                    model: '',
+                    required: false                    
+                }, {
+                    name: 'baz',
+                    model: '',
+                    required: false                    
+                }],
+                myform: {},
+                model: {
+                    contactRequired: false              
+                }
+            },
+            methods: {     
+                onSubmit: function () {
+                    console.log(this.myform.$valid);
+                }
+            },
+            components: {
+                dynamicInput: {
+                    props: [
+                        'name',
+                        'model'                        
+                    ],
+                    template: '<input type="text" v-form-ctrl :name="name" v-model="model">'
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>
