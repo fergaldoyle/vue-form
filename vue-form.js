@@ -316,6 +316,8 @@
                     validate: function (value) {
                         var isValid = true,
                             _this = this;
+                            
+                        //console.log('value', value)
 
                         Object.keys(this.validators).forEach(function (validator) {
                             var args = [value];
@@ -415,6 +417,9 @@
 
             },
             update: function (value, oldValue) {
+                if(typeof value === 'undefined') {
+                    return;
+                }
                 if (this._notfirst) {
                     this._vueFormCtrl.setDirty();
                 }
