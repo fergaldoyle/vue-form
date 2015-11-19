@@ -274,4 +274,90 @@ describe('vue-form', function () {
     });
   });   
 
+  it('should work with v-for scope', function (done) {
+    
+     vm.$destroy();    
+
+     var vmx = new Vue({
+      el: 'body',
+      replace: false,
+      template: `
+        <form v-form name="myform">
+          <label v-for="input in inputs">
+              <label> {{input.label}} <br>   
+              <input v-form-ctrl type="text" :name="input.name" v-model="input.model" :required="input.required" />      
+              </label>
+          </label>
+        </form>
+      `,
+      data: { 
+        inputs: [{
+            label: 'Input A',
+            name: 'a',
+            model: '',
+            required: true                    
+        }, {
+            label: 'Input B',
+            name: 'b',
+            model: '',
+            required: false                    
+        }, {
+            label: 'Input C',
+            name: 'c',
+            model: 'abc',
+            required: true                    
+        }],
+        myform: {}
+      },
+      ready: function () {
+        setTimeout(function () {
+          expect(vmx.myform.a.$valid).toBe(false);
+          expect(vmx.myform.b.$valid).toBe(true);
+          expect(vmx.myform.c.$valid).toBe(true);      
+          done();
+        }, 100);       
+      }
+    });
+
+  }); 
+
+  it('should work with v-bind object syntax', function (done) {
+    
+     vm.$destroy();
+    
+     var vmx = new Vue({
+      el: 'body',
+      replace: false,
+      template: `
+        <form v-form name="myform">
+          <input v-model="model.a" v-form-ctrl v-bind="{'name': 'a', required: true}" />
+          <input v-model="model.b" v-form-ctrl v-bind="{'name': 'b', required: false}" />         
+        </form>
+      `,
+      data: { 
+        model: {
+          b: 'xxx'
+        },
+        myform: {}
+      },
+      ready: function () {
+        this.$nextTick(function () {
+          expect(vmx.myform.a.$valid).toBe(false);
+          expect(vmx.myform.b.$valid).toBe(true);  
+          
+          /*vmx.model.a = 'aaa';
+          vmx.model.b = 'aa';
+          this.$nextTick(function () {
+            console.log(vmx.model);
+            expect(vmx.myform.a.$valid).toBe(true);
+            expect(vmx.myform.b.$valid).toBe(false);             
+            done();          
+          });*/
+          done();
+        });
+      }
+    });
+
+  }); 
+
 });

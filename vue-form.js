@@ -83,9 +83,9 @@
         
         // check if an attribute exists, static or binding.
         // if it is a binding, watch it and re-validate on change
-        function checkAttribute($this, scope, attribute) {
+        function checkAttribute($this, scope, attribute, objectBinding) {
             var vueFormCtrl = $this._vueFormCtrl;
-            var binding = Vue.util.getBindAttr($this.el, attribute);
+            var binding = typeof objectBinding[attribute] !== 'undefined' ? objectBinding[attribute] + '' : Vue.util.getBindAttr($this.el, attribute);
             if (binding) {
                 scope.$watch(binding, function (value, oldValue) {
                     vueFormCtrl[attribute] = value;
@@ -248,7 +248,7 @@
                     vm = this.vm,
                     el = this.el,
                     self = this,
-                    scope;                    
+                    scope, objectBinding;                    
 
                 if(this._scope) {
                     // is inside loop   
@@ -259,14 +259,23 @@
                 
                 if(boundInputName) {
                     scope.$watch(boundInputName, function (value) {
-                        console.log(value);
                         inputName = value;                    
                     }, {
                         immediate: true
                     });                    
                 }
                 
-                if (!inputName) {
+                el._vue_directives.forEach(function (directive) {
+                    // is object syntax
+                    if(directive.name === 'bind' && !directive.arg) {
+                        objectBinding = directive.vm.$eval(directive.expression);
+                        if(objectBinding.name) {
+                            inputName = objectBinding.name;
+                        }
+                    }
+                });
+                               
+                if (!inputName) { 
                     console.warn('Name attribute must be populated');
                     return;
                 }
@@ -380,7 +389,7 @@
                     
                 // add to validators depending on element attributes 
                 attrs.forEach(function (attr) {
-                    checkAttribute(self, scope, attr);
+                    checkAttribute(self, scope, attr, objectBinding || {});
                 });
                 
                 // find parent form             
@@ -436,6 +445,9 @@
 
             },
             update: function (value, oldValue) {
+                if(typeof value === 'undefined') {
+                    return;
+                }                
                 if (this._notfirst) {
                     this._vueFormCtrl.setDirty();
                 }
