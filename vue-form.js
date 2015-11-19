@@ -118,7 +118,7 @@
                 if (attribute === 'type') {
                     vueFormCtrl.validators[staticAttr] = validators[staticAttr];
                 } else if (attribute === 'custom-validator') {
-                    vueFormCtrl.validators[attribute] = $this.vm[staticAttr];
+                    vueFormCtrl.validators[attribute] = scope[staticAttr];
                 } else {
                     vueFormCtrl.validators[attribute] = validators[attribute];
                 }
@@ -136,7 +136,7 @@
                     vm = this.vm,
                     self = this,
                     controls = {};
-                    
+
                 el.noValidate = true;
 
                 var state = this._state = {
@@ -242,40 +242,40 @@
             priority: 10000,
             bind: function () {
                 var inputName = this.el.getAttribute('name'),
-                    boundInputName = this.el.getAttribute(':name') || this.el.getAttribute('v-bind:name'), 
+                    boundInputName = this.el.getAttribute(':name') || this.el.getAttribute('v-bind:name'),
                     vModel = this.el.getAttribute('v-model'),
                     hook = this.el.getAttribute('hook'),
                     vm = this.vm,
                     el = this.el,
                     self = this,
-                    scope, objectBinding;                    
+                    scope, objectBinding;
 
-                if(this._scope) {
+                if (this._scope) {
                     // is inside loop   
-                    scope = this._scope;             
+                    scope = this._scope;
                 } else {
                     scope = this.vm;
                 }
-                
-                if(boundInputName) {
+
+                if (boundInputName) {
                     scope.$watch(boundInputName, function (value) {
-                        inputName = value;                    
+                        inputName = value;
                     }, {
-                        immediate: true
-                    });                    
+                            immediate: true
+                        });
                 }
-                
+
                 el._vue_directives.forEach(function (directive) {
                     // is object syntax
-                    if(directive.name === 'bind' && !directive.arg) {
+                    if (directive.name === 'bind' && !directive.arg) {
                         objectBinding = directive.vm.$eval(directive.expression);
-                        if(objectBinding.name) {
+                        if (objectBinding.name) {
                             inputName = objectBinding.name;
                         }
                     }
                 });
-                               
-                if (!inputName) { 
+
+                if (!inputName) {
                     console.warn('Name attribute must be populated');
                     return;
                 }
@@ -295,8 +295,8 @@
                     state: state,
                     setVadility: function (key, isValid) {
                         var vueForm = self._vueForm;
-                        
-                        if(!vueForm) {
+
+                        if (!vueForm) {
                             return;
                         }
 
@@ -313,18 +313,19 @@
                             } else {
                                 Vue.util.removeClass(el, validClass);
                                 Vue.util.addClass(el, invalidClass);
-                            }  
-                            vueForm.checkValidity();                          
+                            }
+                            vueForm.checkValidity();
                             return;
                         }
 
+                        key = Vue.util.camelize(key);
                         if (isValid) {
                             vueForm.setData(inputName + '.$error.' + key, false);
                             delete state.$error[key];
                             removeClassWithPrefix(el, invalidClass + '-');
                         } else {
                             vueForm.setData(inputName + '.$error.' + key, true);
-                            vueForm.setData('$error.' + inputName, state);   
+                            vueForm.setData('$error.' + inputName, state);
                             Vue.util.addClass(el, invalidClass + '-' + key);
                         }
                     },
@@ -357,7 +358,7 @@
 
                             if (!_this.validators[validator]) {
                                 return;
-                            }
+                            }                           
                             
                             // if not the required validator and value is 
                             // falsy but not a number, do not validate
@@ -406,7 +407,7 @@
                         // must be detached
                         setTimeout(function () {
                             form = el.form || closest(el, 'form[name]');
-                            init(form._vueForm);                           
+                            init(form._vueForm);
                         }, 0);
                     }
                 }
@@ -445,9 +446,9 @@
 
             },
             update: function (value, oldValue) {
-                if(typeof value === 'undefined') {
+                if (typeof value === 'undefined') {
                     return;
-                }                
+                }
                 if (this._notfirst) {
                     this._vueFormCtrl.setDirty();
                 }
