@@ -21,7 +21,7 @@
 <body>
 
     <form v-form name="myform" @submit.prevent="onSubmit">
-        
+
         <div class="errors" v-if="myform.$submitted">
             <p v-if="myform.name.$error.required">Name is required.</p>
             <p v-if="myform.email.$error.email">Email is not valid.</p>
@@ -46,17 +46,17 @@
             <span>Contact details <span v-if="model.contactRequired">*</span></span>
             <textarea v-model="model.contact" :required="model.contactRequired" v-form-ctrl name="comments"></textarea>
         </label>
-        
+
         <div v-if="model.contactRequired">
             <p>Extra contact fields</p>
-            
+
             <label>
                 <span>3 digit code *</span>
                 <input v-model="model.code" v-form-ctrl name="code" type="text" pattern="[A-Za-z]{3}" required />
             </label>
-            
+
         </div>
-        
+
         <button type="submit">Submit</button>
     </form>
 

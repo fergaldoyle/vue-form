@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>vue-form example</title>
+    <meta charset="utf-8" />
+    <style>
+        label {
+            display: block;
+            margin-bottom: 1.5em;
+        }
+        
+        label > span {
+            display: inline-block;
+            width: 8em;
+            vertical-align: top;
+        }
+    </style>
+</head>
+
+<body>
+
+    <form v-form name="myform" @submit.prevent="onSubmit">
+        
+        <label v-for="input in inputs">
+            <label> {{input.label}} <br>   
+            <input v-form-ctrl type="text" :name="input.name" v-model="input.model" :required="input.required" :custom-validator="input.validator" />      
+            </label>
+        </label>
+        
+        <label>
+            custom-validator <br>
+            <input v-model="model.blah2" v-form-ctrl name="blah2" required="true" custom-validator="customValidator" />  
+        </label>       
+        
+        <label>
+            v-bind object syntax <br>
+            <input v-model="model.blah" v-form-ctrl v-bind="{'name': 'blah', required: true, 'custom-validator': 'customValidator'}" />  
+        </label>
+
+        <label>
+            Inside component <br>
+            <dynamic-input :name="'someName'" :model.sync="model.someName"></dynamic-input> 
+        </label>
+
+        <button type="submit">Submit</button>
+        
+    </form>
+
+    <pre>{{ myform | json }}</pre>
+    <script src="../node_modules/vue/dist/vue.js"></script>
+    <script src="../vue-form.js"></script>
+
+    <script>
+        var vm = new Vue({
+            el: 'body',
+            data: {
+                isRequired: true,
+                inputs: [{
+                    label: 'Input A',
+                    name: 'a',
+                    model: '',
+                    required: true,
+                    validator: function (value) {
+                        return value === 'foo';                 
+                    }                 
+                }, {
+                    label: 'Input B',
+                    name: 'b',
+                    model: '',
+                    required: false,
+                    validator: function (value) {
+                        return value === 'bar';                 
+                    }                  
+                }, {
+                    label: 'Input C',
+                    name: 'c',
+                    model: '',
+                    required: true                    
+                }],
+                myform: {},
+                model: {}
+            },
+            methods: {     
+                onSubmit: function () {
+                    console.log(this.myform.$valid);
+                },
+                customValidator: function (value) {
+                    // return true to set input as $valid, false to set as $invalid
+                    return value === 'custom';
+                }                
+            },
+            components: {
+                dynamicInput: {
+                    props: [
+                        'name',
+                        'model'                        
+                    ],
+                    template: '<input type="text" v-form-ctrl :name="name" v-model="model">'
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

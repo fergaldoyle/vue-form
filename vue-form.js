@@ -83,15 +83,17 @@
         
         // check if an attribute exists, static or binding.
         // if it is a binding, watch it and re-validate on change
-        function checkAttribute($this, attribute) {
+        function checkAttribute($this, scope, attribute, objectBinding) {
             var vueFormCtrl = $this._vueFormCtrl;
-            var binding = Vue.util.getBindAttr($this.el, attribute);
+            var binding = typeof objectBinding[attribute] !== 'undefined' ? objectBinding[attribute] + '' : Vue.util.getBindAttr($this.el, attribute);
             if (binding) {
-                $this.vm.$watch(binding, function (value, oldValue) {
+                scope.$watch(binding, function (value, oldValue) {
                     vueFormCtrl[attribute] = value;
                     if (attribute === 'type') {
                         delete vueFormCtrl.validators[oldValue];
                         vueFormCtrl.validators[value] = validators[value];
+                    } else if (attribute === 'custom-validator') {
+                        vueFormCtrl.validators[attribute] = scope.$eval(binding);
                     } else {
                         vueFormCtrl.validators[attribute] = validators[attribute];
                         if (value === false || typeof value === 'undefined') {
@@ -118,7 +120,7 @@
                 if (attribute === 'type') {
                     vueFormCtrl.validators[staticAttr] = validators[staticAttr];
                 } else if (attribute === 'custom-validator') {
-                    vueFormCtrl.validators[attribute] = $this.vm[staticAttr];
+                    vueFormCtrl.validators[attribute] = scope[staticAttr];
                 } else {
                     vueFormCtrl.validators[attribute] = validators[attribute];
                 }
@@ -242,12 +244,38 @@
             priority: 10000,
             bind: function () {
                 var inputName = this.el.getAttribute('name'),
+                    boundInputName = this.el.getAttribute(':name') || this.el.getAttribute('v-bind:name'),
                     vModel = this.el.getAttribute('v-model'),
                     hook = this.el.getAttribute('hook'),
                     vm = this.vm,
                     el = this.el,
                     self = this,
-                    vueForm;
+                    scope, objectBinding;
+
+                if (this._scope) {
+                    // is inside loop   
+                    scope = this._scope;
+                } else {
+                    scope = this.vm;
+                }
+
+                if (boundInputName) {
+                    scope.$watch(boundInputName, function (value) {
+                        inputName = value;
+                    }, {
+                            immediate: true
+                        });
+                }
+
+                el._vue_directives.forEach(function (directive) {
+                    // is object syntax
+                    if (directive.name === 'bind' && !directive.arg) {
+                        objectBinding = directive.vm.$eval(directive.expression);
+                        if (objectBinding.name) {
+                            inputName = objectBinding.name;
+                        }
+                    }
+                });
 
                 if (!inputName) {
                     console.warn('Name attribute must be populated');
@@ -270,6 +298,10 @@
                     setVadility: function (key, isValid) {
                         var vueForm = self._vueForm;
 
+                        if (!vueForm) {
+                            return;
+                        }
+
                         if (typeof key === 'boolean') {
                             // when key is boolean, we are setting 
                             // overall field vadility
@@ -283,18 +315,19 @@
                             } else {
                                 Vue.util.removeClass(el, validClass);
                                 Vue.util.addClass(el, invalidClass);
-                            }  
-                            vueForm.checkValidity();                          
+                            }
+                            vueForm.checkValidity();
                             return;
                         }
 
+                        key = Vue.util.camelize(key);
                         if (isValid) {
                             vueForm.setData(inputName + '.$error.' + key, false);
                             delete state.$error[key];
                             removeClassWithPrefix(el, invalidClass + '-');
                         } else {
                             vueForm.setData(inputName + '.$error.' + key, true);
-                            vueForm.setData('$error.' + inputName, state);   
+                            vueForm.setData('$error.' + inputName, state);
                             Vue.util.addClass(el, invalidClass + '-' + key);
                         }
                     },
@@ -329,7 +362,7 @@
 
                             if (!_this.validators[validator]) {
                                 return;
-                            }
+                            }                           
                             
                             // if not the required validator and value is 
                             // falsy but not a number, do not validate
@@ -361,10 +394,10 @@
                     
                 // add to validators depending on element attributes 
                 attrs.forEach(function (attr) {
-                    checkAttribute(self, attr);
-                });              
+                    checkAttribute(self, scope, attr, objectBinding || {});
+                });
                 
-                // find parent form
+                // find parent form             
                 var form;
                 if (el.form) {
                     init(el.form._vueForm);
@@ -376,10 +409,10 @@
                         init(form._vueForm);
                     } else {
                         // must be detached
-                        Vue.nextTick(function () {
+                        setTimeout(function () {
                             form = el.form || closest(el, 'form[name]');
                             init(form._vueForm);
-                        });
+                        }, 0);
                     }
                 }
 
@@ -399,7 +432,7 @@
 
                     var first = true;
                     if (vModel) {
-                        self.vm.$watch(vModel, function (value, oldValue) {
+                        scope.$watch(vModel, function (value, oldValue) {
                             if (!first) {
                                 vueFormCtrl.setDirty();
                             }
@@ -417,7 +450,7 @@
 
             },
             update: function (value, oldValue) {
-                if(typeof value === 'undefined') {
+                if (typeof value === 'undefined') {
                     return;
                 }
                 if (this._notfirst) {
