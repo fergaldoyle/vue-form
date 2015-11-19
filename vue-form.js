@@ -74,10 +74,10 @@
                 return patternRegExp.test(value);
             },
             min: function (value, min) {
-                return value >= min;
+                return value * 1 >= min * 1;
             },
             max: function (value, max) {
-                return max >= value;
+                return max * 1 >= value * 1;
             }
         };
         
