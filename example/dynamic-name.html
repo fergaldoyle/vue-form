@@ -24,7 +24,7 @@
         
         <label v-for="input in inputs">
             <label> {{input.label}} <br>   
-            <input v-form-ctrl type="text" :name="input.name" v-model="input.model" :required="input.required" />      
+            <input v-form-ctrl type="text" :name="input.name" v-model="input.model" :required="input.required" :custom-validator="input.validator" />      
             </label>
         </label>
         
@@ -35,7 +35,7 @@
         
         <label>
             v-bind object syntax <br>
-            <input v-model="model.blah" v-form-ctrl v-bind="{'name': 'blah', required: true}" custom-validator="customValidator" />  
+            <input v-model="model.blah" v-form-ctrl v-bind="{'name': 'blah', required: true, 'custom-validator': 'customValidator'}" />  
         </label>
 
         <label>
@@ -60,12 +60,18 @@
                     label: 'Input A',
                     name: 'a',
                     model: '',
-                    required: true                    
+                    required: true,
+                    validator: function (value) {
+                        return value === 'foo';                 
+                    }                 
                 }, {
                     label: 'Input B',
                     name: 'b',
                     model: '',
-                    required: false                    
+                    required: false,
+                    validator: function (value) {
+                        return value === 'bar';                 
+                    }                  
                 }, {
                     label: 'Input C',
                     name: 'c',
