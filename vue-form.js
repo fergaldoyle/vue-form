@@ -92,6 +92,8 @@
                     if (attribute === 'type') {
                         delete vueFormCtrl.validators[oldValue];
                         vueFormCtrl.validators[value] = validators[value];
+                    } else if (attribute === 'custom-validator') {
+                        vueFormCtrl.validators[attribute] = scope.$eval(binding);
                     } else {
                         vueFormCtrl.validators[attribute] = validators[attribute];
                         if (value === false || typeof value === 'undefined') {
