@@ -267,15 +267,17 @@
                         });
                 }
 
-                el._vue_directives.forEach(function (directive) {
-                    // is object syntax
-                    if (directive.name === 'bind' && !directive.arg) {
-                        objectBinding = directive.vm.$eval(directive.expression);
-                        if (objectBinding.name) {
-                            inputName = objectBinding.name;
+                if(el._vue_directives) {
+                    el._vue_directives.forEach(function (directive) {
+                        // is object syntax
+                        if (directive.name === 'bind' && !directive.arg) {
+                            objectBinding = directive.vm.$eval(directive.expression);
+                            if (objectBinding.name) {
+                                inputName = objectBinding.name;
+                            }
                         }
-                    }
-                });
+                    });
+                }
 
                 if (!inputName) {
                     console.warn('Name attribute must be populated');
