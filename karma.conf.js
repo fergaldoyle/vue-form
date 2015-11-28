@@ -15,7 +15,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
 		files: [
-		  'node_modules/vue/dist/vue.js',
+		  'node_modules/vue/dist/vue.min.js',
 		  'vue-form.js',
 		  'test/specs/*.js'
 		],
@@ -74,6 +74,6 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false
+    singleRun: true
   })
 }

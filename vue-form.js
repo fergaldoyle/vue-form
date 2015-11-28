@@ -245,6 +245,7 @@
             bind: function () {
                 var inputName = this.el.getAttribute('name'),
                     boundInputName = this.el.getAttribute(':name') || this.el.getAttribute('v-bind:name'),
+                    objectBindingExp = this.el.getAttribute(':') || this.el.getAttribute('v-bind'),
                     vModel = this.el.getAttribute('v-model'),
                     hook = this.el.getAttribute('hook'),
                     vm = this.vm,
@@ -266,17 +267,12 @@
                             immediate: true
                         });
                 }
-
-                if(el._vue_directives) {
-                    el._vue_directives.forEach(function (directive) {
-                        // is object syntax
-                        if (directive.name === 'bind' && !directive.arg) {
-                            objectBinding = directive.vm.$eval(directive.expression);
-                            if (objectBinding.name) {
-                                inputName = objectBinding.name;
-                            }
-                        }
-                    });
+                
+                if(objectBindingExp !== null) {                   
+                    objectBinding = scope.$eval(objectBindingExp);               
+                    if (objectBinding.name) {
+                        inputName = objectBinding.name;
+                    }
                 }
 
                 if (!inputName) {

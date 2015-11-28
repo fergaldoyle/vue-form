@@ -331,7 +331,7 @@ describe('vue-form', function () {
       template: `
         <form v-form name="myform">
           <input v-model="model.a" v-form-ctrl v-bind="{'name': 'a', required: true}" />
-          <input v-model="model.b" v-form-ctrl v-bind="{'name': 'b', required: false}" />         
+          <input v-model="model.b" v-form-ctrl :="{'name': 'b', required: false}" />         
         </form>
       `,
       data: { 
