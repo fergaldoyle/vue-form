@@ -1,4 +1,6 @@
-# vue-form
+# vue-form  
+
+[![Build Status](https://travis-ci.org/fergaldoyle/vue-form.svg?branch=0.2.2)](https://travis-ci.org/fergaldoyle/vue-form)
 
 Form validation for Vue.js 1.0+. Works along side `v-model` but can also be used on your custom form control components (tinymce, select2, tag-editor etc).
 
