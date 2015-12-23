@@ -242,6 +242,7 @@
         Vue.directive('formCtrl', {
             id: 'formCtrl',
             priority: 10000,
+            deep: true,
             bind: function () {
                 var inputName = this.el.getAttribute('name'),
                     boundInputName = this.el.getAttribute(':name') || this.el.getAttribute('v-bind:name'),
@@ -264,8 +265,8 @@
                     scope.$watch(boundInputName, function (value) {
                         inputName = value;
                     }, {
-                            immediate: true
-                        });
+                        immediate: true                    
+                    });
                 }
                 
                 if(objectBindingExp !== null) {                   
