@@ -159,6 +159,9 @@
                 var vueForm = this.el._vueForm = {
                     name: formName,
                     state: state,
+                    getControls: function () {
+                        return controls;
+                    },                    
                     addControl: function (ctrl) {
                         controls[ctrl.name] = ctrl;
                     },
