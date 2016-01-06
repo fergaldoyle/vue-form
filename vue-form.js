@@ -101,14 +101,14 @@
                         }
                     }
                     if ($this._vueForm) {
-                        vueFormCtrl.validate($this._value);
+                        vueFormCtrl.validate();
                     } else {
                         // this is for when an input is inside a v-if
                         // and will not be inserted into the dom for 
                         // some time
                         Vue.nextTick(function () {
                             Vue.nextTick(function () {
-                                vueFormCtrl.validate($this._value);
+                                vueFormCtrl.validate();
                             });
                         });
                     }
@@ -346,12 +346,11 @@
                     },
                     validators: {},
                     error: {},
-                    validate: function (value) {
+                    validate: function () {
                         var isValid = true,
-                            _this = this;
+                            _this = this,
+                            value = self._value;
                             
-                        //console.log('value', value)
-
                         Object.keys(this.validators).forEach(function (validator) {
                             var args = [value];
 
@@ -437,8 +436,8 @@
                                 vueFormCtrl.setDirty();
                             }
                             first = false;
-                            vueFormCtrl.validate(value);
                             self._value = value;
+                            vueFormCtrl.validate(value);                            
                         }, { immediate: true });
                     }
 
@@ -457,8 +456,8 @@
                     this._vueFormCtrl.setDirty();
                 }
                 this._notfirst = true;
-                this._vueFormCtrl.validate(value);
                 this._value = value;
+                this._vueFormCtrl.validate(value);                
             },
             unbind: function () {
                 this._vueForm.removeControl(this._vueFormCtrl);
