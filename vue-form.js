@@ -35,11 +35,15 @@
                 'multiple',
                 'minlength',
                 'maxlength',
+                'maxdate',
+                'mindate',
                 'min',
                 'max',
                 'custom-validator'
             ],
             attrsWithValue = [
+                'maxdate',
+                'mindate',
                 'minlength',
                 'maxlength',
                 'min',
@@ -54,6 +58,10 @@
                 }
                 return !!value;
             },
+            date:function(value) {
+                var dt = Date.parse(value);
+                return !isNaN(dt) && new Date(dt).getFullYear();
+            },            
             email: function (value, multiple) {
                 return emailRegExp.test(value);
             },
@@ -62,6 +70,14 @@
             },
             url: function (value) {
                 return urlRegExp.test(value);
+            },
+            mindate:function (value, stopdate) {
+                if(stopdate=='today') stopdate = new Date().toString();
+                return Date.parse(value)>= Date.parse(stopdate);
+            },
+            maxdate:function (value, stopdate) {
+                if(stopdate=='today') stopdate = new Date().toString();
+                return Date.parse(value)<= Date.parse(stopdate);
             },
             minlength: function (value, length) {
                 return value.length >= length;
