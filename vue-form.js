@@ -196,11 +196,16 @@
                             Vue.util.addClass(el, invalidClass);
                         }
                     },
-                    setDirty: function () {
+                    setDirty: function (fromCtrl) {
                         state.$dirty = true;
                         state.$pristine = false;
                         Vue.util.addClass(el, dirtyClass);
                         Vue.util.removeClass(el, pristineClass);
+
+                        //if execute not from form-ctrl unit, set all form-ctrl unit to dirty
+                        if(!fromCtrl) Object.keys(controls).forEach(function (ctrl) {
+                            controls[ctrl].setDirty();
+                        });
                     },
                     setPristine: function () {
                         state.$dirty = false;
@@ -334,7 +339,7 @@
                     setDirty: function () {
                         state.$dirty = true;
                         state.$pristine = false;
-                        self._vueForm.setDirty();
+                        self._vueForm.setDirty(true);
                         Vue.util.addClass(el, dirtyClass);
                         Vue.util.removeClass(el, pristineClass);
                     },
