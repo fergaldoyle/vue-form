@@ -465,8 +465,8 @@
                 this._vueFormCtrl.validate(value);                
             },
             unbind: function () {
-                this._vueForm.removeControl(this._vueFormCtrl);
-                delete this.el._vueFormCtrl;
+                if(this._vueForm) this._vueForm.removeControl(this._vueFormCtrl);
+                if(this.el) delete this.el._vueFormCtrl;
             }
         });
 
