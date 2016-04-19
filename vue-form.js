@@ -28,6 +28,8 @@
             validClass = 'vf-valid',
             invalidClass = 'vf-invalid',
             submittedClass = 'vf-submitted',
+            touchedClass = 'vf-touched',
+            untouchedClass = 'vf-untouched',
             attrs = [
                 'type',
                 'required',
@@ -148,6 +150,8 @@
                     $valid: true,
                     $invalid: false,
                     $submitted: false,
+                    $touched: false,
+                    $untouched: true,
                     $error: {}
                 };
 
@@ -155,6 +159,7 @@
                 vm.$set(formName, state);
                 Vue.util.addClass(el, pristineClass);
                 Vue.util.addClass(el, validClass);
+                Vue.util.addClass(el, untouchedClass);
 
                 var vueForm = this.el._vueForm = {
                     name: formName,
@@ -219,6 +224,21 @@
                         } else {
                             Vue.util.removeClass(el, submittedClass);
                         }
+                    }, 
+                    setTouched: function () {                        
+                        state.$touched = true;
+                        state.$untouched = false;
+                        Vue.util.addClass(el, touchedClass);
+                        Vue.util.removeClass(el, untouchedClass);              
+                    },
+                    setUntouched: function () {                        
+                        state.$touched = false;
+                        state.$untouched = true;                        
+                        Vue.util.removeClass(el, touchedClass);
+                        Vue.util.addClass(el, untouchedClass);
+                        Object.keys(controls).forEach(function (ctrl) {
+                            controls[ctrl].setUntouched();
+                        });                                           
                     }
                 };
 
@@ -288,6 +308,8 @@
                     $pristine: true,
                     $valid: true,
                     $invalid: false,
+                    $touched: false,
+                    $untouched: true,
                     $error: {}
                 };
 
@@ -344,6 +366,19 @@
                         Vue.util.removeClass(el, dirtyClass);
                         Vue.util.addClass(el, pristineClass);
                     },
+                    setTouched: function (isTouched) {                        
+                        state.$touched = true;
+                        state.$untouched = false;
+                        self._vueForm.setTouched();
+                        Vue.util.addClass(el, touchedClass);
+                        Vue.util.removeClass(el, untouchedClass); 
+                    },       
+                    setUntouched: function (isTouched) {                        
+                        state.$touched = false;
+                        state.$untouched = true;
+                        Vue.util.removeClass(el, touchedClass);
+                        Vue.util.addClass(el, untouchedClass);
+                    },                                 
                     validators: {},
                     error: {},
                     validate: function () {
@@ -428,6 +463,9 @@
                     vueForm.setData(inputName, state);
                     Vue.util.addClass(el, pristineClass);
                     Vue.util.addClass(el, validClass);
+                    Vue.util.addClass(el, untouchedClass);
+                    
+                    Vue.util.on(el, 'blur', vueFormCtrl.setTouched);
 
                     var first = true;
                     if (vModel) {
@@ -461,7 +499,8 @@
             },
             unbind: function () {
                 this._vueForm.removeControl(this._vueFormCtrl);
-                delete this.el._vueFormCtrl;
+                Vue.util.off(this.el, 'blur', this._vueFormCtrl.setTouched);
+                delete this.el._vueFormCtrl;                
             }
         });
 
