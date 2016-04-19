@@ -18,6 +18,6 @@
     "karma-phantomjs-launcher": "^0.2.1",
     "phantomjs": "^1.9.18",
     "uglify-js": "^2.5.0",
-    "vue": "^1.0.8"
+    "vue": "^1.0.21"
   }
 }
