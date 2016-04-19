@@ -90,7 +90,7 @@
                             if(this._currentState === value) {
                                 return;
                             }
-                            vm.TinyMCE_editor.setContent(value || '');
+                            this.TinyMCE_editor.setContent(value || '');
                         }
                     },                     
                     ready: function () {
@@ -100,7 +100,7 @@
                         
                         var vm = this;
                         var options = {
-                            setup (editor) {
+                            setup: function (editor) {
                                 
                                 vm.TinyMCE_editor = editor;
                                 vm.TinyMCE_isFirstChange = true;
@@ -129,7 +129,7 @@
                             fixed_toolbar_container: '#' + this.id + '-toolbar'
                         };
             
-                        this.$nextTick(() => {
+                        this.$nextTick(function () {
                             tinymce.init(options);
                         });
                         

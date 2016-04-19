@@ -20,7 +20,7 @@
 
 <body>
 
-    <form v-form name="myform" @submit.prevent="onSubmit">
+    <form v-form name="myform" @submit.prevent="onSubmit" hook="formHook">
         
         <div class="errors" v-if="myform.$submitted">
             <p v-if="myform.name.$error.required">Name is required.</p>
@@ -73,7 +73,21 @@
             methods: {     
                 onSubmit: function () {
                     console.log(this.myform.$valid);
+                },
+                formHook: function (form) {
+                    this.form = form;
                 }
+            },
+            ready: function () {
+                setTimeout(function (){
+                    vm.model = {
+                        a: 'foo'
+                    };
+                    vm.$nextTick(function () {
+                        vm.form.setPristine();
+                    });
+                    //console.log(vm.form);
+                }, 200);
             }
         });
     </script>
