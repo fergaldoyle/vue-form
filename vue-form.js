@@ -446,6 +446,7 @@
                         setTimeout(function () {
                             form = el.form || closest(el, 'form[name]');
                             init(form._vueForm);
+                            self._vueFormCtrl.validate(self._value);
                         }, 0);
                     }
                 }
