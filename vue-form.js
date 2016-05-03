@@ -157,6 +157,14 @@
 
                 // set inital state
                 vm.$set(formName, state);
+
+                // prevent external overwrite (vue hot loader resets state after update)
+                vm.$watch(formName, function (newState) {
+                    if (state !== newState) {
+                        vm.$set(formName, state);
+                    }
+                });
+
                 Vue.util.addClass(el, pristineClass);
                 Vue.util.addClass(el, validClass);
                 Vue.util.addClass(el, untouchedClass);
