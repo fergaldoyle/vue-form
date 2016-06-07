@@ -1,6 +1,7 @@
 ﻿; (function () {
     var vueForm = {};
-    vueForm.install = function (Vue) {
+    vueForm.install = function (Vue, options) {
+        options = options || {}
 
         function closest(elem, selector) {
             var matchesSelector = elem.matches || elem.webkitMatchesSelector || elem.mozMatchesSelector || elem.msMatchesSelector;
@@ -21,15 +22,22 @@
             el.className = (classes.join(" ")).trim();
         }
 
+        var opts = {
+            dirtyClass: 'vf-dirty',
+            pristineClass: 'vf-pristine',
+            validClass: 'vf-valid',
+            invalidClass: 'vf-invalid',
+            submittedClass: 'vf-submitted',
+            touchedClass: 'vf-touched',
+            untouchedClass: 'vf-untouched'
+        }
+
+        Object.keys(options).forEach(function (o) {
+            opts[o] = options[o]
+        })
+
         var emailRegExp = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i, // from angular
             urlRegExp = /^(http\:\/\/|https\:\/\/)(.{4,})$/,
-            dirtyClass = 'vf-dirty',
-            pristineClass = 'vf-pristine',
-            validClass = 'vf-valid',
-            invalidClass = 'vf-invalid',
-            submittedClass = 'vf-submitted',
-            touchedClass = 'vf-touched',
-            untouchedClass = 'vf-untouched',
             attrs = [
                 'type',
                 'required',
@@ -157,14 +165,16 @@
 
                 // set inital state
                 vm.$set(formName, state);
-                Vue.util.addClass(el, pristineClass);
-                Vue.util.addClass(el, validClass);
-                Vue.util.addClass(el, untouchedClass);
+                Vue.util.addClass(el, opts.pristineClass);
+                Vue.util.addClass(el, opts.validClass);
+                Vue.util.addClass(el, opts.untouchedClass);
 
                 var vueForm = this.el._vueForm = {
+                    el: el,                
                     name: formName,
                     state: state,
-                    controls: controls,                    
+                    controls: controls,    
+                    directive: self,
                     addControl: function (ctrl) {
                         controls[ctrl.name] = ctrl;
                     },
@@ -193,19 +203,19 @@
                         state.$valid = isValid;
                         state.$invalid = !isValid;
                         if (isValid) {
-                            Vue.util.addClass(el, validClass);
-                            Vue.util.removeClass(el, invalidClass);
-                            removeClassWithPrefix(el, invalidClass + '-');
+                            Vue.util.addClass(el, opts.validClass);
+                            Vue.util.removeClass(el, opts.invalidClass);
+                            removeClassWithPrefix(el, opts.invalidClass + '-');
                         } else {
-                            Vue.util.removeClass(el, validClass);
-                            Vue.util.addClass(el, invalidClass);
+                            Vue.util.removeClass(el, opts.validClass);
+                            Vue.util.addClass(el, opts.invalidClass);
                         }
                     },
                     setDirty: function () {
                         state.$dirty = true;
                         state.$pristine = false;
-                        Vue.util.addClass(el, dirtyClass);
-                        Vue.util.removeClass(el, pristineClass);
+                        Vue.util.addClass(el, opts.dirtyClass);
+                        Vue.util.removeClass(el, opts.pristineClass);
                     },
                     setPristine: function () {
                         state.$dirty = false;
@@ -214,28 +224,28 @@
                             controls[ctrl].setPristine();
                         });
                         vueForm.setSubmitted(false);
-                        Vue.util.removeClass(el, dirtyClass);
-                        Vue.util.addClass(el, pristineClass);
+                        Vue.util.removeClass(el, opts.dirtyClass);
+                        Vue.util.addClass(el, opts.pristineClass);
                     },
                     setSubmitted: function (isSubmitted) {
                         state.$submitted = isSubmitted;
                         if (isSubmitted) {
-                            Vue.util.addClass(el, submittedClass);
+                            Vue.util.addClass(el, opts.submittedClass);
                         } else {
-                            Vue.util.removeClass(el, submittedClass);
+                            Vue.util.removeClass(el, opts.submittedClass);
                         }
                     }, 
                     setTouched: function () {                        
                         state.$touched = true;
                         state.$untouched = false;
-                        Vue.util.addClass(el, touchedClass);
-                        Vue.util.removeClass(el, untouchedClass);              
+                        Vue.util.addClass(el, opts.touchedClass);
+                        Vue.util.removeClass(el, opts.untouchedClass);              
                     },
                     setUntouched: function () {                        
                         state.$touched = false;
                         state.$untouched = true;                        
-                        Vue.util.removeClass(el, touchedClass);
-                        Vue.util.addClass(el, untouchedClass);
+                        Vue.util.removeClass(el, opts.touchedClass);
+                        Vue.util.addClass(el, opts.untouchedClass);
                         Object.keys(controls).forEach(function (ctrl) {
                             controls[ctrl].setUntouched();
                         });                                           
@@ -317,6 +327,7 @@
                     el: el,
                     name: inputName,
                     state: state,
+                    directive: self,
                     setVadility: function (key, isValid) {
                         var vueForm = self._vueForm;
 
@@ -332,11 +343,11 @@
 
                             if (isValid) {
                                 vueForm.removeError(inputName);
-                                Vue.util.addClass(el, validClass);
-                                Vue.util.removeClass(el, invalidClass);
+                                Vue.util.addClass(el, opts.validClass);
+                                Vue.util.removeClass(el, opts.invalidClass);
                             } else {
-                                Vue.util.removeClass(el, validClass);
-                                Vue.util.addClass(el, invalidClass);
+                                Vue.util.removeClass(el, opts.validClass);
+                                Vue.util.addClass(el, opts.invalidClass);
                             }
                             vueForm.checkValidity();
                             return;
@@ -346,38 +357,38 @@
                         if (isValid) {
                             vueForm.setData(inputName + '.$error.' + key, false);
                             delete state.$error[key];
-                            removeClassWithPrefix(el, invalidClass + '-');
+                            removeClassWithPrefix(el, opts.invalidClass + '-');
                         } else {
                             vueForm.setData(inputName + '.$error.' + key, true);
                             vueForm.setData('$error.' + inputName, state);
-                            Vue.util.addClass(el, invalidClass + '-' + key);
+                            Vue.util.addClass(el, opts.invalidClass + '-' + key);
                         }
                     },
                     setDirty: function () {
                         state.$dirty = true;
                         state.$pristine = false;
                         self._vueForm.setDirty();
-                        Vue.util.addClass(el, dirtyClass);
-                        Vue.util.removeClass(el, pristineClass);
+                        Vue.util.addClass(el, opts.dirtyClass);
+                        Vue.util.removeClass(el, opts.pristineClass);
                     },
                     setPristine: function () {
                         state.$dirty = false;
                         state.$pristine = true;
-                        Vue.util.removeClass(el, dirtyClass);
-                        Vue.util.addClass(el, pristineClass);
+                        Vue.util.removeClass(el, opts.dirtyClass);
+                        Vue.util.addClass(el, opts.pristineClass);
                     },
                     setTouched: function (isTouched) {                        
                         state.$touched = true;
                         state.$untouched = false;
                         self._vueForm.setTouched();
-                        Vue.util.addClass(el, touchedClass);
-                        Vue.util.removeClass(el, untouchedClass); 
+                        Vue.util.addClass(el, opts.touchedClass);
+                        Vue.util.removeClass(el, opts.untouchedClass); 
                     },       
                     setUntouched: function (isTouched) {                        
                         state.$touched = false;
                         state.$untouched = true;
-                        Vue.util.removeClass(el, touchedClass);
-                        Vue.util.addClass(el, untouchedClass);
+                        Vue.util.removeClass(el, opts.touchedClass);
+                        Vue.util.addClass(el, opts.untouchedClass);
                     },                                 
                     validators: {},
                     error: {},
@@ -461,9 +472,9 @@
                                                                                                         
                     // set inital state
                     vueForm.setData(inputName, state);
-                    Vue.util.addClass(el, pristineClass);
-                    Vue.util.addClass(el, validClass);
-                    Vue.util.addClass(el, untouchedClass);
+                    Vue.util.addClass(el, opts.pristineClass);
+                    Vue.util.addClass(el, opts.validClass);
+                    Vue.util.addClass(el, opts.untouchedClass);
                     
                     Vue.util.on(el, 'blur', vueFormCtrl.setTouched);
 
