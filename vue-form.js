@@ -54,7 +54,7 @@
                 if (Vue.util.isArray(value)) {
                     return !!value.length;
                 } else if (value === false) {
-                  return value;
+                  return true;
                 }
                 return !!value;
             },
