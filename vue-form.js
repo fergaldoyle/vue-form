@@ -53,6 +53,8 @@
             required: function (value) {
                 if (Vue.util.isArray(value)) {
                     return !!value.length;
+                } else if (value === false) {
+                  return true;
                 }
                 return !!value;
             },
@@ -82,7 +84,7 @@
                 return max * 1 >= value * 1;
             }
         };
-        
+
         // check if an attribute exists, static or binding.
         // if it is a binding, watch it and re-validate on change
         function checkAttribute($this, scope, attribute, objectBinding) {
@@ -106,7 +108,7 @@
                         vueFormCtrl.validate();
                     } else {
                         // this is for when an input is inside a v-if
-                        // and will not be inserted into the dom for 
+                        // and will not be inserted into the dom for
                         // some time
                         Vue.nextTick(function () {
                             Vue.nextTick(function () {
@@ -164,7 +166,7 @@
                 var vueForm = this.el._vueForm = {
                     name: formName,
                     state: state,
-                    controls: controls,                    
+                    controls: controls,
                     addControl: function (ctrl) {
                         controls[ctrl.name] = ctrl;
                     },
@@ -224,21 +226,21 @@
                         } else {
                             Vue.util.removeClass(el, submittedClass);
                         }
-                    }, 
-                    setTouched: function () {                        
+                    },
+                    setTouched: function () {
                         state.$touched = true;
                         state.$untouched = false;
                         Vue.util.addClass(el, touchedClass);
-                        Vue.util.removeClass(el, untouchedClass);              
+                        Vue.util.removeClass(el, untouchedClass);
                     },
-                    setUntouched: function () {                        
+                    setUntouched: function () {
                         state.$touched = false;
-                        state.$untouched = true;                        
+                        state.$untouched = true;
                         Vue.util.removeClass(el, touchedClass);
                         Vue.util.addClass(el, untouchedClass);
                         Object.keys(controls).forEach(function (ctrl) {
                             controls[ctrl].setUntouched();
-                        });                                           
+                        });
                     }
                 };
 
@@ -276,7 +278,7 @@
                     scope, objectBinding;
 
                 if (this._scope) {
-                    // is inside loop   
+                    // is inside loop
                     scope = this._scope;
                 } else {
                     scope = this.vm;
@@ -286,12 +288,12 @@
                     scope.$watch(boundInputName, function (value) {
                         inputName = value;
                     }, {
-                        immediate: true                    
+                        immediate: true
                     });
                 }
-                
-                if(objectBindingExp !== null) {                   
-                    objectBinding = scope.$eval(objectBindingExp);               
+
+                if(objectBindingExp !== null) {
+                    objectBinding = scope.$eval(objectBindingExp);
                     if (objectBinding.name) {
                         inputName = objectBinding.name;
                     }
@@ -325,7 +327,7 @@
                         }
 
                         if (typeof key === 'boolean') {
-                            // when key is boolean, we are setting 
+                            // when key is boolean, we are setting
                             // overall field vadility
                             state.$valid = isValid;
                             state.$invalid = !isValid;
@@ -366,26 +368,26 @@
                         Vue.util.removeClass(el, dirtyClass);
                         Vue.util.addClass(el, pristineClass);
                     },
-                    setTouched: function (isTouched) {                        
+                    setTouched: function (isTouched) {
                         state.$touched = true;
                         state.$untouched = false;
                         self._vueForm.setTouched();
                         Vue.util.addClass(el, touchedClass);
-                        Vue.util.removeClass(el, untouchedClass); 
-                    },       
-                    setUntouched: function (isTouched) {                        
+                        Vue.util.removeClass(el, untouchedClass);
+                    },
+                    setUntouched: function (isTouched) {
                         state.$touched = false;
                         state.$untouched = true;
                         Vue.util.removeClass(el, touchedClass);
                         Vue.util.addClass(el, untouchedClass);
-                    },                                 
+                    },
                     validators: {},
                     error: {},
                     validate: function () {
                         var isValid = true,
                             _this = this,
                             value = self._value;
-                            
+
                         Object.keys(this.validators).forEach(function (validator) {
                             var args = [value];
 
@@ -396,9 +398,9 @@
 
                             if (!_this.validators[validator]) {
                                 return;
-                            }                           
-                            
-                            // if not the required validator and value is 
+                            }
+
+                            // if not the required validator and value is
                             // falsy but not a number, do not validate
                             if (validator !== 'required' && !value && typeof value !== 'number') {
                                 _this.setVadility(validator, true);
@@ -424,19 +426,19 @@
 
                         return isValid;
                     }
-                };  
-                    
-                // add to validators depending on element attributes 
+                };
+
+                // add to validators depending on element attributes
                 attrs.forEach(function (attr) {
                     checkAttribute(self, scope, attr, objectBinding || {});
                 });
-                
-                // find parent form             
+
+                // find parent form
                 var form;
                 if (el.form) {
                     init(el.form._vueForm);
                 } else {
-                    // this is either a non form element node 
+                    // this is either a non form element node
                     // or a detached node (inside v-if)
                     form = closest(el, 'form[name]');
                     if (form && form._vueForm) {
@@ -455,16 +457,16 @@
                         return;
                     }
                     self._vueForm = vueForm;
-                                   
+
                     // register the form control
-                    vueForm.addControl(vueFormCtrl);                 
-                                                                                                        
+                    vueForm.addControl(vueFormCtrl);
+
                     // set inital state
                     vueForm.setData(inputName, state);
                     Vue.util.addClass(el, pristineClass);
                     Vue.util.addClass(el, validClass);
                     Vue.util.addClass(el, untouchedClass);
-                    
+
                     Vue.util.on(el, 'blur', vueFormCtrl.setTouched);
 
                     var first = true;
@@ -475,7 +477,7 @@
                             }
                             first = false;
                             self._value = value;
-                            vueFormCtrl.validate(value);                            
+                            vueFormCtrl.validate(value);
                         }, { immediate: true });
                     }
 
@@ -495,12 +497,12 @@
                 }
                 this._notfirst = true;
                 this._value = value;
-                this._vueFormCtrl.validate(value);                
+                this._vueFormCtrl.validate(value);
             },
             unbind: function () {
                 this._vueForm.removeControl(this._vueFormCtrl);
                 Vue.util.off(this.el, 'blur', this._vueFormCtrl.setTouched);
-                delete this.el._vueFormCtrl;                
+                delete this.el._vueFormCtrl;
             }
         });
 
