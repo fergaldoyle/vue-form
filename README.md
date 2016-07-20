@@ -9,18 +9,18 @@ Form validation for Vue.js 1.0+. Works along side `v-model` but can also be used
 Available through npm as `vue-form`.
 
 ``` js
-// es6: import * as vueForm from 'vue-form'; 
+// es6: import * as vueForm from 'vue-form';
 var vueForm = require('vue-form');
 Vue.use(vueForm);
 ```
-  
+
 You can also directly include it with a `<script>` tag when you have Vue itself included globally. It will automatically install itself.
 
 ### Usage
 
 This plugin registers two global directives, `v-form` and `v-form-ctrl`.  Apply the `v-form` directive to a `form` element, and set the `name` attribute. This `name` will hold the overall form state object and is created on the current vm.
 
-Apply the `v-form-ctrl` directive to each of the form inputs. `v-form-ctrl` will watch `v-model` and validate on change. Use static or binding attributes to specify validators (`required`, `maxlength`, `type="email"`, `type="url"`, etc)
+Apply the `v-form-ctrl` directive to each of the form inputs, and set the `name` or `id` attribute. `v-form-ctrl` will watch `v-model` and validate on change. Use static or binding attributes to specify validators (`required`, `maxlength`, `type="email"`, `type="url"`, etc).
 
 ```html
 <form v-form name="myform" @submit.prevent="onSubmit">
@@ -34,7 +34,7 @@ Apply the `v-form-ctrl` directive to each of the form inputs. `v-form-ctrl` will
 	</label>
 	<label>
 		<span>Email</span>
-		<input v-model="model.email" v-form-ctrl name="email" type="email" />
+		<input v-model="model.email" v-form-ctrl id="email" type="email" />
 	</label>
 	<button type="submit">Submit</button>
 </form>
@@ -59,6 +59,10 @@ Apply the `v-form-ctrl` directive to each of the form inputs. `v-form-ctrl` will
       "$invalid": true,
       "$error": {
         "required": true
+      },
+      "$validator": {},
+      "$validatorAttr": {
+        "required": true
       }
     }
   },
@@ -70,6 +74,10 @@ Apply the `v-form-ctrl` directive to each of the form inputs. `v-form-ctrl` will
     "$invalid": true,
     "$error": {
       "required": true
+    },
+    "$validator": {},
+    "$validatorAttr": {
+      "required": true
     }
   },
   "email": {
@@ -78,10 +86,24 @@ Apply the `v-form-ctrl` directive to each of the form inputs. `v-form-ctrl` will
     "$pristine": true,
     "$valid": true,
     "$invalid": false,
-    "$error": {}
+    "$error": {},
+    "$validator": {},
+    "$validatorAttr": {
+      "type": "email"
+    }
   }
 }
 ```
+
+`$validator` field's value is an object that maps names of assigned validators to the corresponding validator functions.
+For the `name` input field above `$validator` field is like:
+```js
+{
+  "required": function() {...}
+}
+```
+
+`$validatorAttr` field's value is an object that contains attributes which are used to define validators for the input field.
 
 ### Validators
 
@@ -113,7 +135,7 @@ You can use static validation attributes or bindings. If it is a binding, the in
 
 #### State classes
 
-As form and input validation states change, state classes are added and removed
+As form and input validation states change, state classes are added and removed.
 
 Possible form classes:
 ```
@@ -127,6 +149,21 @@ vf-dirty, vf-pristine, vf-valid, vf-invalid
 // also for every validation error, a class will be added, e.g.
 vf-invalid-required, vf-invalid-minlength, vf-invalid-max, etc
 ```
+
+#### Changing or adding validator
+
+It is possible to redefine a built-in validator or add a new one by using `vueForm.setValidator(name, validator)`. For example:
+```js
+vueForm.setValidator('url', function(value) {
+    return /^(https?\:\/\/)?.{4,}$/i.test(value);
+}).setValidator('integer', function(value) {
+    return /^\-?\d+$/.test(value);
+});
+```
+
+Added validator can be used as custom validator.
+
+`vueForm.getValidator(name)` returns validator function for the given name.
 
 #### Custom validator:
 
@@ -145,10 +182,12 @@ methods: {
 // ...
 ```
 
+Custom validator can be defined as method of the current vm or as global validator that is set via `vueForm.setValidator`.
+
 
 ### Custom form control component
 
-You can also use `vue-form` on your own form components. Simply wrap your component with an element with `v-form-ctrl`, `name` and any validation attributes. Set `v-form-ctrl` to the same property you will be updating via two-way binding in your component. You can also get a hook into the internals of `v-form-ctrl` to mange control state. 
+You can also use `vue-form` on your own form components. Simply wrap your component with an element with `v-form-ctrl`, `name` and any validation attributes. Set `v-form-ctrl` to the same property you will be updating via two-way binding in your component. You can also get a hook into the internals of `v-form-ctrl` to mange control state.
 
 [See custom tinymce component validation example ](https://github.com/fergaldoyle/vue-form/tree/master/example)
 
