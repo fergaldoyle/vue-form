@@ -504,6 +504,16 @@
             }
         });
 
+        Vue.registerFormValidator = function registerFormValidator(name, handler) {
+            validators[name] = handler;
+            if ( attrs.indexOf(name) === -1 ) {
+                attrs.push(name);
+            }
+            if ( attrsWithValue.indexOf(name) === -1 ) {
+                attrsWithValue.push(name);
+            }
+        };
+
     }
 
     if (typeof exports == "object") {

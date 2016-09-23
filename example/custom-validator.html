@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>vue-form example</title>
+    <meta charset="utf-8" />
+    <style>
+        label {
+            display: block;
+            margin-bottom: 1.5em;
+        }
+        
+        label > span {
+            display: inline-block;
+            width: 8em;
+            vertical-align: top;
+        }
+    </style>
+</head>
+
+<body>
+
+    <form v-form name="myform" @submit.prevent="onSubmit">
+
+        <div class="errors" v-if="myform.$submitted">
+            <p v-if="myform.slug.$error.slug">Should be a slug: lowercase with only letters, digits and dashes.</p>
+            <p v-if="myform.between.$error.between">Should be a value between 3 and 15.</p>
+        </div>
+
+        <label>
+            <span>Slug</span>
+            <input type="text" v-model="model.slug" v-form-ctrl name="slug" slug/>
+        </label>
+
+        <label>
+            <span>Between</span>
+            <input type="number" v-model="model.between" v-form-ctrl name="between" between="3,15"/>
+        </label>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <pre>{{ myform | json }}</pre>
+
+    <script src="../node_modules/vue/dist/vue.js"></script>
+    <script src="../vue-form.js"></script>
+
+    <script>
+
+        Vue.registerFormValidator('slug', function(val) {
+            return /^[a-z0-9-]*$/.test(val);
+        });
+
+        Vue.registerFormValidator('between', function(val, range) {
+            range = range.split(',');
+            return val >= +range[0] && val <= +range[1];
+        });
+
+        var vm = new Vue({
+            el: 'body',
+            data: {
+                myform: {},
+                model: {}
+            },
+            methods: {     
+                onSubmit: function () {
+                    console.log(this.myform.$valid);
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

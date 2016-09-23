@@ -2,6 +2,10 @@ describe('vue-form', function () {
   var vm;
 
   beforeEach(function (done) {
+    Vue.registerFormValidator('between', function(val, range) {
+        range = range.split(',');
+        return val >= +range[0] && val <= +range[1];
+    });
     vm = new Vue({
       el: 'body',
       replace: false,
@@ -22,6 +26,7 @@ describe('vue-form', function () {
           <input v-model="model.m" v-form-ctrl name="m" type="text" :pattern="'[A-Za-z]{3}'" />
           <input v-model="model.n" v-form-ctrl name="n" type="email" required minlength="8" />
           <input v-model="model.o" v-form-ctrl name="o" type="text" custom-validator="customValidator" />
+          <input v-model="model.p" v-form-ctrl name="p" type="number" between="3,15" />
           
           <input type="checkbox" value="Jack" v-model="multicheck" v-form-ctrl required name="multicheck"/>
           <input type="checkbox" value="John" v-model="multicheck" v-form-ctrl required name="multicheck"/>
@@ -47,6 +52,7 @@ describe('vue-form', function () {
           m: 'x',
           n: '',
           o: 'abc',
+          p: 2,
           multicheck: []
         }
       },
@@ -208,6 +214,15 @@ describe('vue-form', function () {
     vm.model.o = 'custom';
     Vue.nextTick(function () {
       expect(vm.myform.o.$valid).toBe(true);
+      Vue.nextTick(done);
+    });
+  });
+
+  it('should validate globally registered validator', function (done) {
+    expect(vm.myform.p.$valid).toBe(false);
+    vm.model.p = 5;
+    Vue.nextTick(function () {
+      expect(vm.myform.p.$valid).toBe(true);
       Vue.nextTick(done);
     });
   });
