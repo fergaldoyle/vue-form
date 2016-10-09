@@ -145,6 +145,26 @@ methods: {
 // ...
 ```
 
+#### Globally register a validator:
+
+Globally register some validators:
+```js
+Vue.registerFormValidator('slug', function(val) {
+    return /^[a-z0-9-]*$/.test(val);
+});
+Vue.registerFormValidator('between', function(val, range) {
+    range = range.split(',');
+    return val >= +range[0] && val <= +range[1];
+});
+```
+
+Then use them in templates
+```html
+<input type="text" v-model="slug" name="slug" v-form-ctrl slug />
+<input type="number" v-model="slug" name="slug" v-form-ctrl between="3,15" />
+```
+
+
 
 ### Custom form control component
 
