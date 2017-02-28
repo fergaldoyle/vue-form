@@ -16,7 +16,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
 		files: [
 		  'node_modules/vue/dist/vue.min.js',
-		  'vue-form.js',
+		  'dist/vue-form.js',
 		  'test/specs/*.js'
 		],
 

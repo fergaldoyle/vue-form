@@ -9,7 +9,7 @@
             display: block;
             margin-bottom: 1.5em;
         }
-        
+
         label > span {
             display: inline-block;
             width: 8em;
@@ -19,64 +19,165 @@
 </head>
 
 <body>
+    <div id="app">
 
-    <form v-form name="myform" @submit.prevent="onSubmit">
+        <vue-form :state="formstate" v-model="formstate" @submit.prevent="onSubmit">
 
-        <div class="errors" v-if="myform.$submitted">
-            <p v-if="myform.name.$error.required">Name is required.</p>
-            <p v-if="myform.email.$error.email">Email is not valid.</p>
-        </div>
+            <button type="button" @click="isReq = !isReq">Toggle</button>
+            <button type="button" @click="changeStuff">Change stuff</button>
 
-        <label>
-            <span>Name *</span>
-            <input v-model="model.name" v-form-ctrl required name="name" />
-        </label>
+            isReq {{isReq}}
 
-        <label>
-            <span>Email *</span>
-            <input v-model="model.email" v-form-ctrl name="email" type="email" required />
-        </label>
-
-        <label>
-            <span>Request call back</span>
-            <input v-model="model.contactRequired" v-form-ctrl name="contactRequired" type="checkbox" />
-        </label>
-
-        <label>
-            <span>Contact details <span v-if="model.contactRequired">*</span></span>
-            <textarea v-model="model.contact" :required="model.contactRequired" v-form-ctrl name="comments"></textarea>
-        </label>
-
-        <div v-if="model.contactRequired">
-            <p>Extra contact fields</p>
-
+            {{formstate.$dirty}}
+            {{formstate.$error}}
+<!--
             <label>
-                <span>3 digit code *</span>
-                <input v-model="model.code" v-form-ctrl name="code" type="text" pattern="[A-Za-z]{3}" required />
+                <span>Name *</span>
+                <validate :required="isReq" min-length="10" max-length="40" pattern="/sdfsdffd/">
+                    <input v-model="model.name" name="name" />
+                </validate>
             </label>
 
-        </div>
+            <label>
+                <span>Email *</span>
+                <validate required>
+                    <input v-model="model.email" name="email" type="email" />
+                </validate>
+            </label>
 
-        <button type="submit">Submit</button>
-    </form>
+            <label>
+                <span>component</span>
+                <validate required>
+                    <test v-model="model.name" name="foobar"></test>
+                </validate>
+            </label>
 
-    <pre>{{ myform | json }}</pre>
+            ====================
+
+
+            <label>
+                <span>Name</span>
+                <input v-form :minlength="3" v-model="model.name" name="name" :required="isReq" pattern="foo" />
+
+                <form-error :field="formstate.name" error="required">Name is a required field 2</form-error>
+                <form-error :field="formstate.name" error="minlength">Min length is not satisfied</form-error>
+
+                <form-errors :field="formstate.name">
+                    <div slot="pattern">Pattern don't match</div>
+                    <div slot="required">Field is required</div>
+                    <div slot="minlength">minlength not satisfied</div>
+                </form-errors>
+
+            </label>
+  -->
+            <validate tag="label">
+                <span>foo</span>
+                <input name="foo" type="text" v-model="model.foo" required />
+            </validate>
+
+            <!--
+            <form-errors field="foo">
+                <div slot="required">Field is required</div>
+            </form-errors>
+            <form-error field="foo" error="required">Name is a required field 2</form-error>
+            -->
+  <!--
+            <label>
+                <span>foo</span>
+                <input name="foo" type="text" v-model="model.foo" required="false" />
+            </label>
+
+            <label>
+                <span>Email</span>
+                <input v-form v-model="model.email" name="email" type="email" :required="isReq" />
+            </label>
+
+            <label>
+                <span>component</span>
+                <test v-validate v-model="model.testcomp" :required="isReq" name="foobar"></test>
+            </label>
+
+
+            <label>
+                <span>Request call back</span>
+                <validate :model="model.contactRequired"><input v-model="model.contactRequired" type="checkbox" name="contactRequired" /></validate>
+            </label>
+
+
+            <label>
+                <span>Contact details <span v-if="model.contactRequired">*</span></span>
+                <textarea v-model="model.contact" :required="model.contactRequired" name="comments"></textarea>
+            </label>
+
+            <div v-if="model.contactRequired">
+                <p>Extra contact fields</p>
+
+                <label>
+                    <span>3 digit code *</span>
+                    <input v-model="model.code" name="code" type="text" pattern="[A-Za-z]{3}" required />
+                </label>
+
+            </div>
+                    -->
+            <button type="submit">Submit</button>
+        </vue-form>
+
+        <pre>{{formstate}}</pre>
+
+    </div>
 
     <script src="../node_modules/vue/dist/vue.js"></script>
-    <script src="../vue-form.js"></script>
-
+    <script src="../dist/vue-form.js"></script>
     <script>
+        Vue.use(vueForm);
+
         var vm = new Vue({
-            el: 'body',
-            data: {
-                myform: {},
-                model: {
-                    contactRequired: false              
+            el: '#app',
+            components: {
+                test: {
+                    props: [
+                       // 'name',
+                        'value'
+                    ],
+                    data () {
+                        return {
+                            internalValue: ''
+                        }
+                    },
+                    template: '<span>TEST<input @input="update" v-model="internalValue"  /></span>',
+                    created () {
+                        this.$watch('value', () => {
+                            this.internalValue = this.value;
+                        }, {
+                            immediate: true
+                        });
+                    },
+                    methods: {
+                        update () {
+                            this.$emit('input', this.internalValue);
+                        }
+                    }
                 }
             },
-            methods: {     
+            data: {
+                isReq: true,
+                formstate: {},
+                model: {
+                    foo: '',
+                    email: '',
+                    name: 'name',
+                    contact: '',
+                    testcomp: 'comp',
+                    contactRequired: false
+                }
+            },
+            methods: {
+                changeStuff: function () {
+                    this.isReq = !this.isReq;
+                    this.model.name = this.model.name + 'foo';
+                },
                 onSubmit: function () {
-                    console.log(this.myform.$valid);
+                    console.log(this.formstate.$valid);
                 }
             }
         });
