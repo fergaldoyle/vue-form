@@ -5,6 +5,7 @@ export default {
     dest: 'dist/vue-form.js',
     format: 'umd',
     moduleName: 'vueForm',
+    sourceMap: true,
     plugins: [
         babel({
             exclude: 'node_modules/**'

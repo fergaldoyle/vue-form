@@ -20,3 +20,20 @@ export function removeClassWithPrefix(el, prefix) {
     });
     el.className = (classes.join(" ")).trim();
 }
+
+export function vModelValue(data) {
+  return data.directives.filter(v => v.name === 'model')[0].value;
+}
+
+export function getVModelNode(nodes) {
+  let foundVnode;
+  const vModelNode = nodes.filter((node) => {
+    if (node.data && node.data.directives) {
+      const match = node.data.directives.filter(v => v.name === 'model');
+      if (match.length) {
+        foundVnode = node;
+      }
+    }
+  });
+  return foundVnode;
+}

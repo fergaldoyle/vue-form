@@ -26,10 +26,6 @@
             <button type="button" @click="isReq = !isReq">Toggle</button>
             <button type="button" @click="changeStuff">Change stuff</button>
 
-            isReq {{isReq}}
-
-            {{formstate.$dirty}}
-            {{formstate.$error}}
 <!--
             <label>
                 <span>Name *</span>
@@ -54,11 +50,6 @@
 
             ====================
 
-
-            <label>
-                <span>Name</span>
-                <input v-form :minlength="3" v-model="model.name" name="name" :required="isReq" pattern="foo" />
-
                 <form-error :field="formstate.name" error="required">Name is a required field 2</form-error>
                 <form-error :field="formstate.name" error="minlength">Min length is not satisfied</form-error>
 
@@ -67,12 +58,24 @@
                     <div slot="required">Field is required</div>
                     <div slot="minlength">minlength not satisfied</div>
                 </form-errors>
-
-            </label>
   -->
+
+            <label>
+                <span>Name</span>
+                <validate>
+                  <input :minlength="3" v-model="model.name" name="name" :required="isReq" pattern="foo" />
+                </validate>
+            </label>
+
             <validate tag="label">
                 <span>foo</span>
                 <input name="foo" type="text" v-model="model.foo" required />
+            </validate>
+
+
+            <validate tag="label" v-if="isReq">
+                <span>foo2</span>
+                <input name="foo2" type="text" v-model="model.foo2" :required="isReq" />
             </validate>
 
             <!--
@@ -164,6 +167,7 @@
                 formstate: {},
                 model: {
                     foo: '',
+                    foo2: '',
                     email: '',
                     name: 'name',
                     contact: '',

@@ -2,7 +2,7 @@ export const config = {
     formComponent: 'vueForm',
     errorComponent: 'formError',
     errorsComponent: 'formErrors',
-    validateDirective: 'form',
+    validateComponent: 'validate',
     errorTag: 'span',
     errorsTag: 'div',
     dirtyClass: 'vf-dirty',
