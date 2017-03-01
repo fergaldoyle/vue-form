@@ -7,6 +7,7 @@ export default {
       'form', {
         on: {
           submit: (event) => {
+            this.state.$submitted = true;
             this.$emit('submit', event);
           }
         },
@@ -107,6 +108,9 @@ export default {
         out.push(config.touchedClass);
       } else {
         out.push(config.untouchedClass)
+      }
+      if(this.state.$submitted) {
+        out.push(config.submittedClass);
       }
       return out.join(' ');
     }
