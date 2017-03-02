@@ -97,17 +97,17 @@ export default {
       if (this.state.$dirty) {
         out.push(config.dirtyClass);
       } else {
-        out.push(config.pristineClass)
+        out.push(config.pristineClass);
       }
       if (this.state.$valid) {
         out.push(config.validClass);
       } else {
-        out.push(config.invalidClass)
+        out.push(config.invalidClass);
       }
       if (this.state.$touched) {
         out.push(config.touchedClass);
       } else {
-        out.push(config.untouchedClass)
+        out.push(config.untouchedClass);
       }
       if(this.state.$submitted) {
         out.push(config.submittedClass);

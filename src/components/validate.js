@@ -16,6 +16,7 @@ export default {
   },
   props: {
     state: Object,
+    custom: null,
     tag: {
       type: String,
       default: 'span'
@@ -119,12 +120,14 @@ export default {
       _validate(vnode) {
         let isValid = true;
         let value = vModelValue(vnode.data);
+        let skipped = false;
         const attrs = (vnode.data.attrs || {});
 
         Object.keys(this._validators).forEach((validator) => {
-
           if (validator !== 'required' && !value && typeof value !== 'number') {
+            // should this exit the loop?
             this._setValidatorVadility(validator, true);
+            skipped = true;
             return;
           }
 
@@ -135,6 +138,14 @@ export default {
             this._setValidatorVadility(validator, true);
           }
         });
+
+        // custom validators
+        if(!skipped && vm.custom) {
+          if(!vm.custom(value)) {
+            isValid = false;
+            this._setValidatorVadility('custom', false);
+          }
+        }
 
         this._setVadility(isValid);
         return isValid;
