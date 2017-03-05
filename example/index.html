@@ -58,8 +58,24 @@
                     <div slot="required">Field is required</div>
                     <div slot="minlength">minlength not satisfied</div>
                 </form-errors>
+            <validate tag="label">
+        <span>testcomp</span>
+        <test v-model="model.testcomp" :minlength="minLength" :required="isReq" name="testcomp"></test>
+      </validate>
+            <validate tag="label" :custom="customA">
+        <span>foo</span>
+        <input name="name" type="text" v-model="model.name" :required="isReq" />
+      </validate>
   -->
 
+
+
+      <validate tag="label" :custom="{customA: customA, customB: customB}">
+        <span>foo</span>
+        <input name="foo" people-picker-required type="text" v-model="model.foo" :required="isReq" pattern="foo" />
+      </validate>
+
+   <!--
       <label>
           <span>Name</span>
           <validate>
@@ -67,18 +83,11 @@
           </validate>
       </label>
 
-      <validate tag="label" :custom="validator">
-        <span>foo</span>
-        <input name="foo" type="text" v-model="model.foo" required />
-      </validate>
-
-
       <validate tag="label" v-if="isReq">
         <span>foo2</span>
         <input name="foo2" type="text" v-model="model.foo2" :required="isReq" />
       </validate>
 
-      <!--
             <form-errors field="foo">
                 <div slot="required">Field is required</div>
             </form-errors>
@@ -132,16 +141,26 @@
   <script src="../node_modules/vue/dist/vue.js"></script>
   <script src="../dist/vue-form.js"></script>
   <script>
-    Vue.use(vueForm);
+
+//Vue.use(vueForm);
+
+    vueForm.addValidator('people-picker-required', function (model, attrValue, vnode){
+      if (model !== 'scot') {
+        return false;
+      }
+      return true;
+    });
 
     var vm = new Vue({
       el: '#app',
+      mixins: [vueForm.mixin],
       components: {
         test: {
-          props: [
-            // 'name',
-            'value'
-          ],
+          props: {
+            value: String,
+            minlength: Number,
+            required: Boolean
+          },
           data() {
             return {
               internalValue: ''
@@ -164,24 +183,37 @@
       },
       data: {
         isReq: true,
+        minLength: 5,
         formstate: {},
         model: {
-          foo: '',
+          foo: 'n',
           foo2: '',
           email: '',
           name: 'name',
           contact: '',
-          testcomp: 'comp',
+          testcomp: '',
           contactRequired: false
         }
       },
       methods: {
-        validator (value) {
-          console.log('in validator', value);
+        customA () {
           return true;
+        },
+        customB (value) {
+          return new Promise(function (resolve, reject) {
+            setTimeout(function () {
+              resolve(value === 'async');
+            }, 1000);
+          });
+        },
+        customC (value, done) {
+          setTimeout(function () {
+            done(value === 'async');
+          }, 1000);
         },
         changeStuff: function() {
           this.isReq = !this.isReq;
+          this.minLength = 10;
           this.model.name = this.model.name + 'foo';
         },
         onSubmit: function() {

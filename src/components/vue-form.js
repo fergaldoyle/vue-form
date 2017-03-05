@@ -36,6 +36,7 @@ export default {
       $submitted: false,
       $touched: false,
       $untouched: true,
+      $pending: false,
       $error: {},
       _addControl: (ctrl) => {
         controls[ctrl.$name] = ctrl;
@@ -56,6 +57,7 @@ export default {
       let isDirty = false;
       let isValid = true;
       let isTouched = false;
+      let isPending = false;
       Object.keys(controls).forEach((key) => {
         const control = controls[key];
         if (control.$dirty) {
@@ -63,6 +65,9 @@ export default {
         }
         if (control.$touched) {
           isTouched = true;
+        }
+        if(control.$pending) {
+          isPending = true;
         }
         if (!control.$valid) {
           isValid = false;
@@ -79,6 +84,7 @@ export default {
       state.$untouched = !isTouched;
       state.$valid = isValid;
       state.$invalid = !isValid;
+      state.$pending = isPending;
 
     }, {
       deep: true,

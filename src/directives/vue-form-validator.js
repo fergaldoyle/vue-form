@@ -49,6 +49,7 @@ export default {
       return;
     }
 
+    // add validators
     Object.keys(attrs).forEach((attr) => {
       let prop;
       if (attr === 'type') {

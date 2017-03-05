@@ -84,6 +84,7 @@ export default {
       $invalid: false,
       $touched: false,
       $untouched: true,
+      $pending: false,
       $error: {},
       _setValidatorVadility(validator, isValid) {
         if (isValid) {
@@ -118,40 +119,70 @@ export default {
       _hasFocused: false,
       _validators: {},
       _validate(vnode) {
+        this.$pending = true;
         let isValid = true;
-        let value = vModelValue(vnode.data);
-        let skipped = false;
+        let emptyAndRequired = false;
+        const value = vModelValue(vnode.data);
+        const asyncValidators = [];
+        const asyncValidatorNames = [];
         const attrs = (vnode.data.attrs || {});
         const propsData = (vnode.componentOptions && vnode.componentOptions.propsData ? vnode.componentOptions.propsData : {});
 
         Object.keys(this._validators).forEach((validator) => {
-          if (validator !== 'required' && !value && typeof value !== 'number') {
-            // should this exit the loop?
+          // when value is empty and not the required validator, the field is valid
+          if((value === '' || value === undefined || value === null) && validator !== 'required') {
             this._setValidatorVadility(validator, true);
-            skipped = true;
+            emptyAndRequired = true;
+            // return early, required validator will
+            // fall through if it is present
             return;
           }
 
-          if (!validators[validator](value, attrs[validator] || propsData[validator], vnode)) {
-            isValid = false;
-            this._setValidatorVadility(validator, false);
+          const result = this._validators[validator](value, attrs[validator] || propsData[validator], vnode);
+          if(typeof result === 'boolean') {
+            if (result) {
+              this._setValidatorVadility(validator, true);
+            } else {
+              isValid = false;
+              this._setValidatorVadility(validator, false);
+            }
           } else {
-            this._setValidatorVadility(validator, true);
+              asyncValidators.push(result);
+              asyncValidatorNames.push(validator);
           }
+
         });
 
-        // custom validators
-        if(!skipped && vm.custom) {
-          if(!vm.custom(value)) {
-            isValid = false;
-            this._setValidatorVadility('custom', false);
-          }
+        if(asyncValidators.length) {
+          Promise.all(asyncValidators).then((results)=>{
+            console.log(results);
+            results.forEach((result, i) => {
+              const name = asyncValidatorNames[i];
+              if(result) {
+                this._setValidatorVadility(name, true);
+              } else {
+                isValid = false;
+                this._setValidatorVadility(name, false);
+              }
+            });
+            this._setVadility(isValid);
+            this.$pending = false;
+          });
+        } else {
+          this._setVadility(isValid);
+          this.$pending = false;
         }
-
-        this._setVadility(isValid);
-        return isValid;
       }
     }
+
+    // add custom validators
+    if(this.custom) {
+      Object.keys(this.custom).forEach((prop) => {
+        console.log(this.custom.hasOwnProperty(prop))
+        this.fieldstate._validators[prop] = this.custom[prop];
+      });
+    }
+
   },
   destroyed () {
     this.formstate._removeControl(this.fieldstate);
