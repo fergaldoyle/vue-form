@@ -2,16 +2,6 @@ const emailRegExp = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9]
 const urlRegExp = /^(http\:\/\/|https\:\/\/)(.{4,})$/;
 
 export const validators = {
- /*   'type[email]' (model, value, vnode) {
-        return emailRegExp.test(model);
-    },
-    'type[number]' (model) {
-        return !isNaN(model);
-    },
-    'type[url]' (model) {
-        return urlRegExp.test(model);
-    },*/
-
     email (model, value, vnode) {
         return emailRegExp.test(model);
     },
