@@ -1,23 +1,36 @@
 import { validators } from '../validators';
 import { getVModelNode, vModelValue } from '../util';
 
-export function compareChanges(data, oldData) {
+export function compareChanges(vnode, oldvnode) {
+
   let hasChanged = false;
-  const attrs = data.attrs || {};
-  const oldAttrs = oldData.attrs || {};
+  const attrs = vnode.data.attrs || {};
+  const oldAttrs = oldvnode.data.attrs || {};
   const out = {};
 
-  if (vModelValue(data) !== vModelValue(oldData)) {
-    out.vModel = true; //vModelValue(data);
+  if (vModelValue(vnode.data) !== vModelValue(oldvnode.data)) {
+    out.vModel = true;
     hasChanged = true;
   }
 
   Object.keys(validators).forEach((validator) => {
     if (attrs[validator] !== oldAttrs[validator]) {
-      out[validator] = true; //attrs[validator];
+      out[validator] = true;
       hasChanged = true;
     }
   });
+
+  // if is a component
+  if(vnode.componentOptions && vnode.componentOptions.propsData) {
+    const attrs = vnode.componentOptions.propsData;
+    const oldAttrs = oldvnode.componentOptions.propsData;
+    Object.keys(validators).forEach((validator) => {
+      if (attrs[validator] !== oldAttrs[validator]) {
+        out[validator] = true;
+        hasChanged = true;
+      }
+    });
+  }
 
   if (hasChanged) {
     return out;
@@ -48,6 +61,16 @@ export default {
       }
     });
 
+    // if is a component, a validator attribute by be
+    // a prop this component uses
+    if(vnode.componentOptions && vnode.componentOptions.propsData) {
+      Object.keys(vnode.componentOptions.propsData).forEach((prop) => {
+        if (validators[prop]) {
+          fieldstate._validators[prop] = validators[prop];
+        }
+      });
+    }
+
     fieldstate._validate(vnode);
 
     el.addEventListener('blur', () => {
@@ -59,7 +82,7 @@ export default {
   },
 
   update(el, binding, vnode, oldVNode) {
-    const changes = compareChanges(vnode.data, oldVNode.data);
+    const changes = compareChanges(vnode, oldVNode);
     const name = (vnode.data.attrs || {}).name;
     const fieldstate = binding.value;
 
@@ -75,7 +98,6 @@ export default {
     } else {
       // attributes have changed
       // loop through them and re-validate changed ones
-      //console.log(name, 'some attribute rules has changed');
       fieldstate._validate(vnode);
     }
 

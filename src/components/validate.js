@@ -122,6 +122,7 @@ export default {
         let value = vModelValue(vnode.data);
         let skipped = false;
         const attrs = (vnode.data.attrs || {});
+        const propsData = (vnode.componentOptions && vnode.componentOptions.propsData ? vnode.componentOptions.propsData : {});
 
         Object.keys(this._validators).forEach((validator) => {
           if (validator !== 'required' && !value && typeof value !== 'number') {
@@ -131,7 +132,7 @@ export default {
             return;
           }
 
-          if (!validators[validator](value, attrs[validator], vnode)) {
+          if (!validators[validator](value, attrs[validator] || propsData[validator], vnode)) {
             isValid = false;
             this._setValidatorVadility(validator, false);
           } else {
@@ -154,6 +155,5 @@ export default {
   },
   destroyed () {
     this.formstate._removeControl(this.fieldstate);
-    console.log('destroyed')
   }
 };
