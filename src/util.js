@@ -26,14 +26,14 @@ export function vModelValue(data) {
 }
 
 export function getVModelNode(nodes) {
-  let foundVnode;
+  let foundVnodes = [];
   const vModelNode = nodes.filter((node) => {
     if (node.data && node.data.directives) {
       const match = node.data.directives.filter(v => v.name === 'model');
       if (match.length) {
-        foundVnode = node;
+        foundVnodes.push(node);
       }
     }
   });
-  return foundVnode;
+  return foundVnodes;
 }

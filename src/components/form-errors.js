@@ -6,15 +6,22 @@ export default {
     const children = [];
     const field = this.formstate[this.field];
     if (field && field.$error) {
-      Object.keys(field.$error).forEach((key) => {
-        children.push(this.$slots[key]);
-      });
+      const isShow = this.showWhen ? field[this.showWhen] : true;
+      if(isShow) {
+        Object.keys(field.$error).forEach((key) => {
+          children.push(this.$slots[key]);
+        });
+      }
     }
     return h(this.tag, children);
   },
   props: {
     state: Object,
     field: String,
+    showWhen: {
+      type: String,
+      default: ''
+    },
     tag: {
       type: String,
       default: config.errorsTag

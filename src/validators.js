@@ -2,39 +2,43 @@ const emailRegExp = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9]
 const urlRegExp = /^(http\:\/\/|https\:\/\/)(.{4,})$/;
 
 export const validators = {
-    email (model, value, vnode) {
-        return emailRegExp.test(model);
-    },
-    number (model) {
-        return !isNaN(model);
-    },
-    url (model) {
-        return urlRegExp.test(model);
-    },
-    required (model, value, vnode) {
-        if(value === false) {
-            return true;
-        }
-
-        if (Array.isArray(model)) {
-            return !!model.length;
-        }
-        return !!model;
-    },
-    minlength (model, length) {
-        return model.length >= length;
-    },
-    maxlength (model, length) {
-        return length >= model.length;
-    },
-    pattern (model, pattern) {
-        const patternRegExp = new RegExp('^' + pattern + '$');
-        return patternRegExp.test(model);
-    },
-    min (model, min) {
-        return model * 1 >= min * 1;
-    },
-    max (model, max) {
-        return max * 1 >= model * 1;
+  email(value, attrValue, vnode) {
+    return emailRegExp.test(value);
+  },
+  number(value) {
+    return !isNaN(value);
+  },
+  url(value) {
+    return urlRegExp.test(value);
+  },
+  required(value, attrValue, vnode) {
+    if (attrValue === false) {
+      return true;
     }
+
+    if (vnode.data.attrs.type === 'number' && value === 0) {
+      return true;
+    }
+
+    if (Array.isArray(value)) {
+      return !!value.length;
+    }
+    return !!value;
+  },
+  minlength(value, length) {
+    return value.length >= length;
+  },
+  maxlength(value, length) {
+    return length >= value.length;
+  },
+  pattern(value, pattern) {
+    const patternRegExp = new RegExp('^' + pattern + '$');
+    return patternRegExp.test(value);
+  },
+  min(value, min) {
+    return value * 1 >= min * 1;
+  },
+  max(value, max) {
+    return max * 1 >= value * 1;
+  }
 };

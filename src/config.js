@@ -5,11 +5,14 @@ export const config = {
     validateComponent: 'validate',
     errorTag: 'span',
     errorsTag: 'div',
-    dirtyClass: 'vf-dirty',
-    pristineClass: 'vf-pristine',
-    validClass: 'vf-valid',
-    invalidClass: 'vf-invalid',
-    submittedClass: 'vf-submitted',
-    touchedClass: 'vf-touched',
-    untouchedClass: 'vf-untouched'
+    classPrefix: 'vf-',
+    dirtyClass: 'dirty',
+    pristineClass: 'pristine',
+    validClass: 'valid',
+    invalidClass: 'invalid',
+    submittedClass: 'submitted',
+    touchedClass: 'touched',
+    untouchedClass: 'untouched',
+    pendingClass: 'pending',
+    Promise: window.Promise
 };

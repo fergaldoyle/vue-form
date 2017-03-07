@@ -1,5 +1,5 @@
 import { validators } from '../validators';
-import { getVModelNode, vModelValue } from '../util';
+import { vModelValue } from '../util';
 
 export function compareChanges(vnode, oldvnode) {
 
@@ -92,13 +92,18 @@ export default {
     }
 
     if (changes.vModel) {
+      // re-validate all
       if (fieldstate._hasFocused) {
         fieldstate._setDirty();
       }
       fieldstate._validate(vnode);
     } else {
       // attributes have changed
-      // loop through them and re-validate changed ones
+      // to do: loop through them and re-validate changed ones
+      //for(let prop in changes) {
+      //  fieldstate._validate(vnode, validator);
+      //}
+      // for now
       fieldstate._validate(vnode);
     }
 

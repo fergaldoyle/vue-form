@@ -118,7 +118,10 @@ export default {
       if(this.state.$submitted) {
         out.push(config.submittedClass);
       }
-      return out.join(' ');
+      if(this.state.$pending) {
+        out.push(config.pendingClass);
+      }
+      return out.map(v => config.classPrefix + 'form-' + v).join(' ');
     }
   }
 }

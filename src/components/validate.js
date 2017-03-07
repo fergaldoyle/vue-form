@@ -2,17 +2,21 @@ import { config } from '../config';
 import { getVModelNode, vModelValue, addClass, removeClass } from '../util';
 import { validators } from '../validators';
 
+// todo: Make getVModelNode recursive
+
 export default {
   render(h) {
-    let foundVnode = getVModelNode(this.$slots.default);
-    if (foundVnode) {
-      this.name = foundVnode.data.attrs.name;
-      foundVnode.data.directives.push({ name: 'vue-form-validator', value: this.fieldstate });
-      foundVnode.data.attrs['vue-form-validator'] = '';
+    let foundVnodes = getVModelNode(this.$slots.default);
+    if (foundVnodes.length) {
+      this.name = foundVnodes[0].data.attrs.name;
+      foundVnodes.forEach((foundVnode) => {
+        foundVnode.data.directives.push({ name: 'vue-form-validator', value: this.fieldstate });
+        foundVnode.data.attrs['vue-form-validator'] = '';
+      });
     } else {
       console.warn('Element with v-model not found');
     }
-    return h(this.tag, { 'class': this.className.map(v => 'container-' + v) }, this.$slots.default);
+    return h(this.tag, { 'class': this.className.map(v => config.classPrefix + 'container-' + v) }, this.$slots.default);
   },
   props: {
     state: Object,
@@ -47,7 +51,9 @@ export default {
       } else {
         out.push(config.untouchedClass)
       }
-
+      if(this.fieldstate.$pending) {
+        out.push(config.pendingClass);
+      }
       Object.keys(this.fieldstate.$error).forEach((error) => {
         out.push(config.invalidClass + '-' + error);
       });
@@ -60,14 +66,18 @@ export default {
     this.formstate = this.state || this.$parent.state;
     this.formstate._addControl(this.fieldstate);
 
-    const vModelEl = this.$el.querySelector('[vue-form-validator]');
+    const vModelEls = this.$el.querySelectorAll('[vue-form-validator]');
 
     // add classes to the input element
     this.$watch('className', (value, oldValue) => {
       if (oldValue) {
-        oldValue.forEach(v => removeClass(vModelEl, v));
+        for (let i = 0; i < vModelEls.length; i++) {
+          oldValue.forEach(v => removeClass(vModelEls[i], config.classPrefix + v));
+        }
       }
-      value.forEach(v => addClass(vModelEl, v));
+      for (let i = 0; i < vModelEls.length; i++) {
+        value.forEach(v => addClass(vModelEls[i], config.classPrefix + v));
+      };
     }, {
       deep: true,
       immediate: true
@@ -76,6 +86,8 @@ export default {
   },
   created() {
     const vm = this;
+    let pendingValidators = [];
+    let _val;
     this.fieldstate = {
       $name: '',
       $dirty: false,
@@ -123,23 +135,30 @@ export default {
         let isValid = true;
         let emptyAndRequired = false;
         const value = vModelValue(vnode.data);
-        const asyncValidators = [];
-        const asyncValidatorNames = [];
+        _val = value;
+
+        const pending = {
+          promises: [],
+          names: []
+        };
+
+        pendingValidators.push(pending);
+
         const attrs = (vnode.data.attrs || {});
         const propsData = (vnode.componentOptions && vnode.componentOptions.propsData ? vnode.componentOptions.propsData : {});
 
         Object.keys(this._validators).forEach((validator) => {
           // when value is empty and not the required validator, the field is valid
-          if((value === '' || value === undefined || value === null) && validator !== 'required') {
+          if ((value === '' || value === undefined || value === null) && validator !== 'required') {
             this._setValidatorVadility(validator, true);
             emptyAndRequired = true;
             // return early, required validator will
             // fall through if it is present
             return;
           }
-
-          const result = this._validators[validator](value, attrs[validator] || propsData[validator], vnode);
-          if(typeof result === 'boolean') {
+          const attrValue = typeof attrs[validator] !== 'undefined' ? attrs[validator] : propsData[validator];
+          const result = this._validators[validator](value, attrValue, vnode);
+          if (typeof result === 'boolean') {
             if (result) {
               this._setValidatorVadility(validator, true);
             } else {
@@ -147,18 +166,26 @@ export default {
               this._setValidatorVadility(validator, false);
             }
           } else {
-              asyncValidators.push(result);
-              asyncValidatorNames.push(validator);
+            pending.promises.push(result);
+            pending.names.push(validator);
           }
-
         });
 
-        if(asyncValidators.length) {
-          Promise.all(asyncValidators).then((results)=>{
-            console.log(results);
+        if (pending.promises.length) {
+          config.Promise.all(pending.promises).then((results) => {
+
+            // only concerned with the last promise results, in case
+            // async responses return out of order
+            if (pending !== pendingValidators[pendingValidators.length - 1]) {
+              //console.log('ignoring old promise', pending.promises);
+              return;
+            }
+
+            pendingValidators = [];
+
             results.forEach((result, i) => {
-              const name = asyncValidatorNames[i];
-              if(result) {
+              const name = pending.names[i];
+              if (result) {
                 this._setValidatorVadility(name, true);
               } else {
                 isValid = false;
@@ -176,15 +203,14 @@ export default {
     }
 
     // add custom validators
-    if(this.custom) {
+    if (this.custom) {
       Object.keys(this.custom).forEach((prop) => {
-        console.log(this.custom.hasOwnProperty(prop))
         this.fieldstate._validators[prop] = this.custom[prop];
       });
     }
 
   },
-  destroyed () {
+  destroyed() {
     this.formstate._removeControl(this.fieldstate);
   }
 };
