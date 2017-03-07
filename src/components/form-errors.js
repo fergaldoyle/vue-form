@@ -5,20 +5,17 @@ export default {
   render(h) {
     const children = [];
     const field = this.formstate[this.field];
-    if (field && field.$error) {
-      const isShow = this.showWhen ? field[this.showWhen] : true;
-      if(isShow) {
-        Object.keys(field.$error).forEach((key) => {
-          children.push(this.$slots[key]);
-        });
-      }
+    if (field && field.$error && this.isShown) {
+      Object.keys(field.$error).forEach((key) => {
+        children.push(this.$slots[key]);
+      });
     }
     return h(this.tag, children);
   },
   props: {
     state: Object,
     field: String,
-    showWhen: {
+    if: {
       type: String,
       default: ''
     },
@@ -27,12 +24,36 @@ export default {
       default: config.errorsTag
     }
   },
+  computed: {
+    isShown () {
+      const field = this.formstate[this.field];
+
+      if(!this.if || !field) {
+        return true;
+      }
+
+      if(this.if.indexOf('&&') > -1) {
+        // and logic - every
+        const split = this.if.split('&&');
+        return split.every(v => field[v.trim()]);
+      } else if(this.if.indexOf('||') > -1) {
+        // or logic - some
+        const split = this.if.split('||');
+        return split.some(v => field[v.trim()]);
+      } else {
+        // single
+        return field[this.if];
+      }
+    }
+  },
   data () {
     return {
       formstate: {}
     };
   },
-  created () {
-    this.formstate = this.state || this.$parent.state;
+  mounted () {
+    this.$nextTick(()=>{
+      this.formstate = this.state || this.$parent.formstate || this.$parent.state;
+    });
   }
 };

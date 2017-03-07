@@ -14,7 +14,7 @@ export default {
     state: Object,
     field: String,
     error: String,
-    showWhen: {
+    if: {
       type: String,
       default: ''
     },
@@ -28,7 +28,9 @@ export default {
       formstate: {}
     };
   },
-  created () {
-    this.formstate = this.state || this.$parent.state;
+  mounted () {
+    this.$nextTick(()=>{
+      this.formstate = this.state || this.$parent.formstate || this.$parent.state;
+    });
   }
 }
