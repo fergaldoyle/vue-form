@@ -1,12 +1,12 @@
 {
   "name": "vue-form",
-  "version": "0.3.1",
+  "version": "2.0.0",
   "description": "Form validation for Vue.js",
-  "main": "vue-form.js",
+  "main": "dist/vue-form.js",
   "scripts": {
     "dev": "rollup -w -c",
     "test": "karma start",
-    "dist": "uglifyjs --compress -- vue-form.js > vue-form.min.js"
+    "dist": "rollup -c && uglifyjs --compress -- dist/vue-form.js > dist/vue-form.min.js"
   },
   "author": "Fergal Doyle",
   "license": "MIT",

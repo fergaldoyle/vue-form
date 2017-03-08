@@ -753,8 +753,6 @@ var main = {
   }
 };
 
-//https://plnkr.co/edit/yfUBrLH3v29RmMCnsnlo?p=preview
-
 return main;
 
 })));

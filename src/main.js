@@ -30,5 +30,3 @@ export default {
     }
   }
 };
-
-//https://plnkr.co/edit/yfUBrLH3v29RmMCnsnlo?p=preview
