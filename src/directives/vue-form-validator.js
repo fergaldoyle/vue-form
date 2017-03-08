@@ -1,5 +1,5 @@
 import { validators } from '../validators';
-import { vModelValue } from '../util';
+import { vModelValue, getName } from '../util';
 
 export function compareChanges(vnode, oldvnode) {
 
@@ -21,7 +21,7 @@ export function compareChanges(vnode, oldvnode) {
   });
 
   // if is a component
-  if(vnode.componentOptions && vnode.componentOptions.propsData) {
+  if (vnode.componentOptions && vnode.componentOptions.propsData) {
     const attrs = vnode.componentOptions.propsData;
     const oldAttrs = oldvnode.componentOptions.propsData;
     Object.keys(validators).forEach((validator) => {
@@ -42,7 +42,7 @@ export default {
   bind(el, binding, vnode) {
     const fieldstate = binding.value;
     const attrs = (vnode.data.attrs || {});
-    const inputName = attrs.name;
+    const inputName = getName(vnode);
 
     if (!inputName) {
       console.warn('vue-form: name attribute missing');
@@ -57,16 +57,16 @@ export default {
       } else {
         prop = attr;
       }
-      if (validators[prop]) {
+      if (validators[prop] && !fieldstate._validators[prop]) {
         fieldstate._validators[prop] = validators[prop];
       }
     });
 
     // if is a component, a validator attribute by be
     // a prop this component uses
-    if(vnode.componentOptions && vnode.componentOptions.propsData) {
+    if (vnode.componentOptions && vnode.componentOptions.propsData) {
       Object.keys(vnode.componentOptions.propsData).forEach((prop) => {
-        if (validators[prop]) {
+        if (validators[prop] && !fieldstate._validators[prop]) {
           fieldstate._validators[prop] = validators[prop];
         }
       });
@@ -74,12 +74,23 @@ export default {
 
     fieldstate._validate(vnode);
 
+    // native listeners
     el.addEventListener('blur', () => {
       fieldstate._setTouched();
     }, false);
     el.addEventListener('focus', () => {
       fieldstate._setFocused();
     }, false);
+
+    // component listeners
+    if (vnode.componentInstance) {
+      vnode.componentInstance.$on('blur', () => {
+        fieldstate._setTouched();
+      });
+      vnode.componentInstance.$on('focus', () => {
+        fieldstate._setFocused();
+      });
+    }
   },
 
   update(el, binding, vnode, oldVNode) {

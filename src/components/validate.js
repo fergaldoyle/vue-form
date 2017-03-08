@@ -1,5 +1,5 @@
 import { config } from '../config';
-import { getVModelNode, vModelValue, addClass, removeClass } from '../util';
+import { getVModelNode, vModelValue, addClass, removeClass, getName } from '../util';
 import { validators } from '../validators';
 
 // todo: Make getVModelNode recursive
@@ -8,8 +8,11 @@ export default {
   render(h) {
     let foundVnodes = getVModelNode(this.$slots.default);
     if (foundVnodes.length) {
-      this.name = foundVnodes[0].data.attrs.name;
+      this.name = getName(foundVnodes[0]);
       foundVnodes.forEach((foundVnode) => {
+        if (!foundVnode.data.directives) {
+          foundVnode.data.directives = [];
+        }
         foundVnode.data.directives.push({ name: 'vue-form-validator', value: this.fieldstate });
         foundVnode.data.attrs['vue-form-validator'] = '';
       });
@@ -51,7 +54,7 @@ export default {
       } else {
         out.push(config.untouchedClass)
       }
-      if(this.fieldstate.$pending) {
+      if (this.fieldstate.$pending) {
         out.push(config.pendingClass);
       }
       Object.keys(this.fieldstate.$error).forEach((error) => {

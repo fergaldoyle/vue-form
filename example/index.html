@@ -21,6 +21,13 @@
 <body>
   <div id="app">
 
+
+      <label>
+        <span>Non validated</span>
+        <input name="foo2" type="text" />
+      </label>
+
+
     <vue-form :state="formstate" v-model="formstate" @submit.prevent="onSubmit">
 
       <button type="button" @click="isReq = !isReq">Toggle</button>
@@ -67,7 +74,7 @@
         <span>foo</span>
         <input name="name" type="text" v-model="model.name" :required="isReq" />
       </validate>
-  -->
+
       <validate tag="div">
         Checkbox array <br>
         <input type="checkbox" value="Jack" v-model="multicheck" required name="multicheck"/>
@@ -82,26 +89,30 @@
         <input type="radio" value="Mike" v-model="radio" required name="radio"/>
       </validate>
 
-      <label>
+      <validate tag="label">
           <span>Name</span>
-          <validate>
+          <span>
             <input :minlength="3" v-model="model.name" name="name" :required="isReq" pattern="foo" />
-          </validate>
-      </label>
-
+          </span>
+      </validate>
+  -->
       <validate tag="label" :custom="{customA: customA, customB: customB}">
         <span>foo</span>
         <input name="foo" type="text" v-model="model.foo" :required="isReq" pattern="foo" />
       </validate>
 
-      <!--<form-errors field="foo" v-if="formstate.foo && (formstate.foo.$dirty || formstate.foo.$touched)">-->
-      <form-errors field="foo" if="$dirty">
+      <form-errors field="foo" show="$dirty">
           <div slot="required">Field is required</div>
       </form-errors>
 
       <form-error field="foo" error="pattern">pattern doesn't match</form-error>
       <form-error field="foo" error="required">required message 2</form-error>
 
+
+      <validate>
+        <test name="testcomp" v-model="model.testcomp" required></test>
+      </validate>
+      <!--
       <label>
           <span>Name</span>
           <validate>
@@ -114,7 +125,7 @@
         <input name="foo2" type="text" v-model="model.foo2" :required="isReq" />
       </validate>
 
-      <!--
+
             <label>
                 <span>foo</span>
                 <input name="foo" type="text" v-model="model.foo" required="false" />
@@ -181,7 +192,8 @@
           props: {
             value: String,
             minlength: Number,
-            required: Boolean
+            required: Boolean,
+            name: String
           },
           data() {
             return {
@@ -194,6 +206,14 @@
               this.internalValue = this.value;
             }, {
               immediate: true
+            });
+          },
+          mounted () {
+            this.$el.querySelector('input').addEventListener('focus', ()=>{
+              this.$emit('focus');
+            });
+            this.$el.querySelector('input').addEventListener('blur', ()=>{
+              this.$emit('blur');
             });
           },
           methods: {

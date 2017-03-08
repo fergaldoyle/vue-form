@@ -25,6 +25,10 @@ describe('vue-form', function() {
 
           <validate :state="formstate">
             <input v-model="model.b" name="b" required type="text" minlength="6" />
+            <form-errors field="b" show="$dirty && $touched">
+              <span id="error-message-b" slot="required">required error</span>
+            </form-errors>
+            <form-error field="b" error="required" show="$touched"><span id="error-message-b-2"></span></form-error>
           </validate>
 
           <div v-if="isCEnabled">
@@ -429,26 +433,53 @@ describe('vue-form', function() {
     });
   });
 
-  xit('should show the correct form errors', (done) => {
+  it('should show the correct form errors', (done) => {
+    vm.$nextTick(() => {
+
+      // field b
+      expect(vm.$el.querySelector('#error-message-b')).toBe(null);
+      expect(vm.$el.querySelector('#error-message-b-2')).toBe(null);
+      vm.model.b = '123';
+
+      // field c
       expect(vm.$el.querySelector('#error-message')).not.toBeNull(null);
       expect(vm.$el.querySelector('#minlength-message')).toBe(null);
       expect(vm.$el.querySelector('#error-message2')).not.toBeNull(null);
       expect(vm.$el.querySelector('#minlength-message2')).toBe(null);
       vm.model.c = '123';
+
       vm.$nextTick(() => {
+        // field b could still be null
+        expect(vm.$el.querySelector('#error-message-b')).toBe(null);
+        expect(vm.$el.querySelector('#error-message-b-2')).toBe(null);
+        vm.$el.querySelector('[name=b]').focus();
+        vm.$el.querySelector('[name=b]').blur();
+        vm.model.b = '';
+
+        // field c
         expect(vm.$el.querySelector('#error-message')).toBe(null);
         expect(vm.$el.querySelector('#minlength-message')).not.toBeNull(null);
         expect(vm.$el.querySelector('#error-message2')).toBe(null);
         expect(vm.$el.querySelector('#minlength-message2')).not.toBeNull(null);
         vm.model.c = '123456';
+
         vm.$nextTick(() => {
+
+          // field b
+          expect(vm.$el.querySelector('#error-message-b')).not.toBeNull(null);
+          expect(vm.$el.querySelector('#error-message-b-2')).not.toBeNull(null);
+
+          // field c
           expect(vm.$el.querySelector('#error-message')).toBe(null);
           expect(vm.$el.querySelector('#minlength-message')).toBe(null);
           expect(vm.$el.querySelector('#error-message2')).toBe(null);
           expect(vm.$el.querySelector('#minlength-message2')).toBe(null);
+
+
           done();
         });
       });
+    });
   });
 
   it('should work with v-for', function(done) {
@@ -492,6 +523,70 @@ describe('vue-form', function() {
           expect(this.formstate.a.$valid).toBe(false);
           expect(this.formstate.b.$valid).toBe(true);
           expect(this.formstate.c.$valid).toBe(true);
+          done();
+        });
+      }
+    });
+
+  });
+
+  it('should work with components, even if some validation attributes are also component props', function(done) {
+
+    vm.$destroy();
+
+    const div = document.createElement('div');
+    document.body.appendChild(div);
+
+    new Vue({
+      el: div,
+      components: {
+        test: {
+          props: ['value'],
+          template: '<span></span>'
+        },
+        test2: {
+          props: ['value', 'required', 'name'],
+          template: '<span><input type="text" id="input" /></span>',
+          mounted () {
+            this.$el.querySelector('input').addEventListener('focus', this.$emit('focus'));
+            this.$el.querySelector('input').addEventListener('blur', this.$emit('blur'));
+          }
+        }
+      },
+      template: `
+        <vue-form :state="formstate">
+          <validate>
+              <test name="test" v-model="model.test" required ></test>
+          </validate>
+            <validate>
+              <test2 name="test2" v-model="model.test2" required ></test2>
+          </validate>
+        </vue-form>
+      `,
+      data: {
+        model: {
+          test: '',
+          test2: ''
+        },
+        formstate: {}
+      },
+      mounted: function() {
+        expect(this.formstate.test).toBeDefined();
+        expect(this.formstate.test.$error.required).toBe(true);
+        expect(this.formstate.test2).toBeDefined();
+        expect(this.formstate.test2.$error.required).toBe(true);
+        expect(this.formstate.test2.$dirty).toBe(false);
+        this.$el.querySelector('#input').focus();
+        this.$el.querySelector('#input').blur();
+
+        this.model.test = 'xxx';
+        this.model.test2 = 'xxx';
+
+        this.$nextTick(() => {
+          expect(this.formstate.test.$error.required).toBeUndefined();
+          expect(this.formstate.test.$dirty).toBe(false);
+          expect(this.formstate.test2.$dirty).toBe(true);
+          expect(this.formstate.test2.$touched).toBe(true);
           done();
         });
       }

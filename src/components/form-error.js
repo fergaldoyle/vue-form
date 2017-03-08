@@ -1,20 +1,19 @@
 import { config } from '../config';
+import errorMixin from './error-mixin';
 
 export default {
+  mixins: [errorMixin],
   render(h) {
     const field = this.formstate[this.field];
-    if (field && field.$error[this.error]) {
-      const isShow = this.showWhen ? field[this.showWhen] : true;
-      if(isShow) {
-        return h(this.tag, [this.$slots.default]);
-      }
+    if (field && field.$error[this.error] && this.isShown) {
+      return h(this.tag, [this.$slots.default]);
     }
   },
   props: {
     state: Object,
     field: String,
     error: String,
-    if: {
+    show: {
       type: String,
       default: ''
     },
@@ -23,13 +22,13 @@ export default {
       default: config.errorTag
     }
   },
-  data () {
+  data() {
     return {
       formstate: {}
     };
   },
-  mounted () {
-    this.$nextTick(()=>{
+  mounted() {
+    this.$nextTick(() => {
       this.formstate = this.state || this.$parent.formstate || this.$parent.state;
     });
   }

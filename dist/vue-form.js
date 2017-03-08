@@ -11,23 +11,56 @@ var config = {
     validateComponent: 'validate',
     errorTag: 'span',
     errorsTag: 'div',
-    dirtyClass: 'vf-dirty',
-    pristineClass: 'vf-pristine',
-    validClass: 'vf-valid',
-    invalidClass: 'vf-invalid',
-    submittedClass: 'vf-submitted',
-    touchedClass: 'vf-touched',
-    untouchedClass: 'vf-untouched'
+    classPrefix: 'vf-',
+    dirtyClass: 'dirty',
+    pristineClass: 'pristine',
+    validClass: 'valid',
+    invalidClass: 'invalid',
+    submittedClass: 'submitted',
+    touchedClass: 'touched',
+    untouchedClass: 'untouched',
+    pendingClass: 'pending',
+    Promise: window.Promise
+};
+
+var errorMixin = {
+  computed: {
+    isShown: function isShown() {
+      var field = this.formstate[this.field];
+
+      if (!this.show || !field) {
+        return true;
+      }
+
+      if (this.show.indexOf('&&') > -1) {
+        // and logic - every
+        var split = this.show.split('&&');
+        return split.every(function (v) {
+          return field[v.trim()];
+        });
+      } else if (this.show.indexOf('||') > -1) {
+        // or logic - some
+        var _split = this.show.split('||');
+        return _split.some(function (v) {
+          return field[v.trim()];
+        });
+      } else {
+        // single
+        return field[this.show];
+      }
+    }
+  }
 };
 
 var formErrors = {
-  name: '',
+  mixins: [errorMixin],
   render: function render(h) {
     var _this = this;
 
+    //console.log('errors render');
     var children = [];
     var field = this.formstate[this.field];
-    if (field && field.$error) {
+    if (field && field.$error && this.isShown) {
       Object.keys(field.$error).forEach(function (key) {
         children.push(_this.$slots[key]);
       });
@@ -38,6 +71,10 @@ var formErrors = {
   props: {
     state: Object,
     field: String,
+    show: {
+      type: String,
+      default: ''
+    },
     tag: {
       type: String,
       default: config.errorsTag
@@ -48,15 +85,20 @@ var formErrors = {
       formstate: {}
     };
   },
-  created: function created() {
-    this.formstate = this.state || this.$parent.state;
+  mounted: function mounted() {
+    var _this2 = this;
+
+    this.$nextTick(function () {
+      _this2.formstate = _this2.state || _this2.$parent.formstate || _this2.$parent.state;
+    });
   }
 };
 
 var formError = {
+  mixins: [errorMixin],
   render: function render(h) {
     var field = this.formstate[this.field];
-    if (field && field.$error[this.error]) {
+    if (field && field.$error[this.error] && this.isShown) {
       return h(this.tag, [this.$slots.default]);
     }
   },
@@ -65,6 +107,10 @@ var formError = {
     state: Object,
     field: String,
     error: String,
+    show: {
+      type: String,
+      default: ''
+    },
     tag: {
       type: String,
       default: config.errorTag
@@ -75,8 +121,12 @@ var formError = {
       formstate: {}
     };
   },
-  created: function created() {
-    this.formstate = this.state || this.$parent.state;
+  mounted: function mounted() {
+    var _this = this;
+
+    this.$nextTick(function () {
+      _this.formstate = _this.state || _this.$parent.formstate || _this.$parent.state;
+    });
   }
 };
 
@@ -84,51 +134,45 @@ var emailRegExp = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?
 var urlRegExp = /^(http\:\/\/|https\:\/\/)(.{4,})$/;
 
 var validators = {
-    /*   'type[email]' (model, value, vnode) {
-           return emailRegExp.test(model);
-       },
-       'type[number]' (model) {
-           return !isNaN(model);
-       },
-       'type[url]' (model) {
-           return urlRegExp.test(model);
-       },*/
-
-    email: function email(model, value, vnode) {
-        return emailRegExp.test(model);
-    },
-    number: function number(model) {
-        return !isNaN(model);
-    },
-    url: function url(model) {
-        return urlRegExp.test(model);
-    },
-    required: function required(model, value, vnode) {
-        if (value === false) {
-            return true;
-        }
-
-        if (Array.isArray(model)) {
-            return !!model.length;
-        }
-        return !!model;
-    },
-    minlength: function minlength(model, length) {
-        return model.length >= length;
-    },
-    maxlength: function maxlength(model, length) {
-        return length >= model.length;
-    },
-    pattern: function pattern(model, _pattern) {
-        var patternRegExp = new RegExp('^' + _pattern + '$');
-        return patternRegExp.test(model);
-    },
-    min: function min(model, _min) {
-        return model * 1 >= _min * 1;
-    },
-    max: function max(model, _max) {
-        return _max * 1 >= model * 1;
+  email: function email(value, attrValue, vnode) {
+    return emailRegExp.test(value);
+  },
+  number: function number(value) {
+    return !isNaN(value);
+  },
+  url: function url(value) {
+    return urlRegExp.test(value);
+  },
+  required: function required(value, attrValue, vnode) {
+    if (attrValue === false) {
+      return true;
     }
+
+    if (vnode.data.attrs.type === 'number' && value === 0) {
+      return true;
+    }
+
+    if (Array.isArray(value)) {
+      return !!value.length;
+    }
+    return !!value;
+  },
+  minlength: function minlength(value, length) {
+    return value.length >= length;
+  },
+  maxlength: function maxlength(value, length) {
+    return length >= value.length;
+  },
+  pattern: function pattern(value, _pattern) {
+    var patternRegExp = new RegExp('^' + _pattern + '$');
+    return patternRegExp.test(value);
+  },
+  min: function min(value, _min) {
+    return value * 1 >= _min * 1;
+  },
+  max: function max(value, _max) {
+    return _max * 1 >= value * 1;
+  }
 };
 
 var vueForm = {
@@ -138,6 +182,7 @@ var vueForm = {
     return h('form', {
       on: {
         submit: function submit(event) {
+          _this.state.$submitted = true;
           _this.$emit('submit', event);
         }
       },
@@ -168,6 +213,7 @@ var vueForm = {
       $submitted: false,
       $touched: false,
       $untouched: true,
+      $pending: false,
       $error: {},
       _addControl: function _addControl(ctrl) {
         controls[ctrl.$name] = ctrl;
@@ -188,6 +234,7 @@ var vueForm = {
       var isDirty = false;
       var isValid = true;
       var isTouched = false;
+      var isPending = false;
       Object.keys(controls).forEach(function (key) {
         var control = controls[key];
         if (control.$dirty) {
@@ -195,6 +242,9 @@ var vueForm = {
         }
         if (control.$touched) {
           isTouched = true;
+        }
+        if (control.$pending) {
+          isPending = true;
         }
         if (!control.$valid) {
           isValid = false;
@@ -211,6 +261,7 @@ var vueForm = {
       state.$untouched = !isTouched;
       state.$valid = isValid;
       state.$invalid = !isValid;
+      state.$pending = isPending;
     }, {
       deep: true,
       immediate: true
@@ -240,67 +291,115 @@ var vueForm = {
       } else {
         out.push(config.untouchedClass);
       }
-      return out.join(' ');
+      if (this.state.$submitted) {
+        out.push(config.submittedClass);
+      }
+      if (this.state.$pending) {
+        out.push(config.pendingClass);
+      }
+      return out.map(function (v) {
+        return config.classPrefix + 'form-' + v;
+      }).join(' ');
     }
   }
 };
 
 function addClass(el, className) {
-    if (el.classList) {
-        el.classList.add(className);
-    } else {
-        el.className += ' ' + className;
-    }
+  if (el.classList) {
+    el.classList.add(className);
+  } else {
+    el.className += ' ' + className;
+  }
 }
 
 function removeClass(el, className) {
-    if (el.classList) {
-        el.classList.remove(className);
-    } else {
-        el.className = el.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
-    }
+  if (el.classList) {
+    el.classList.remove(className);
+  } else {
+    el.className = el.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
+  }
 }
 
 
 
 function vModelValue(data) {
-    return data.directives.filter(function (v) {
-        return v.name === 'model';
-    })[0].value;
+  if (data.model) {
+    return data.model.value;
+  }
+  return data.directives.filter(function (v) {
+    return v.name === 'model';
+  })[0].value;
 }
 
 function getVModelNode(nodes) {
-    var foundVnode = void 0;
-    var vModelNode = nodes.filter(function (node) {
-        if (node.data && node.data.directives) {
-            var match = node.data.directives.filter(function (v) {
-                return v.name === 'model';
-            });
-            if (match.length) {
-                foundVnode = node;
-            }
+  var foundVnodes = [];
+
+  function traverse(nodes) {
+    for (var i = 0; i < nodes.length; i++) {
+      var node = nodes[i];
+      if (node.data) {
+        if (node.data.directives) {
+          var match = node.data.directives.filter(function (v) {
+            return v.name === 'model';
+          });
+          if (match.length) {
+            foundVnodes.push(node);
+          }
+        } else if (node.data.model) {
+          foundVnodes.push(node);
         }
-    });
-    return foundVnode;
+      }
+      if (node.children) {
+        traverse(node.children);
+      }
+    }
+  }
+
+  traverse(nodes);
+
+  return foundVnodes;
 }
 
-function compareChanges(data, oldData) {
+function getName(vnode) {
+  if (vnode.data && vnode.data.attrs && vnode.data.attrs.name) {
+    return vnode.data.attrs.name;
+  } else if (vnode.componentOptions && vnode.componentOptions.propsData && vnode.componentOptions.propsData.name) {
+    return vnode.componentOptions.propsData.name;
+  }
+}
+
+function compareChanges(vnode, oldvnode) {
+
   var hasChanged = false;
-  var attrs = data.attrs || {};
-  var oldAttrs = oldData.attrs || {};
+  var attrs = vnode.data.attrs || {};
+  var oldAttrs = oldvnode.data.attrs || {};
   var out = {};
 
-  if (vModelValue(data) !== vModelValue(oldData)) {
-    out.vModel = true; //vModelValue(data);
+  if (vModelValue(vnode.data) !== vModelValue(oldvnode.data)) {
+    out.vModel = true;
     hasChanged = true;
   }
 
   Object.keys(validators).forEach(function (validator) {
     if (attrs[validator] !== oldAttrs[validator]) {
-      out[validator] = true; //attrs[validator];
+      out[validator] = true;
       hasChanged = true;
     }
   });
+
+  // if is a component
+  if (vnode.componentOptions && vnode.componentOptions.propsData) {
+    (function () {
+      var attrs = vnode.componentOptions.propsData;
+      var oldAttrs = oldvnode.componentOptions.propsData;
+      Object.keys(validators).forEach(function (validator) {
+        if (attrs[validator] !== oldAttrs[validator]) {
+          out[validator] = true;
+          hasChanged = true;
+        }
+      });
+    })();
+  }
 
   if (hasChanged) {
     return out;
@@ -312,13 +411,14 @@ var vueFormValidator = {
   bind: function bind(el, binding, vnode) {
     var fieldstate = binding.value;
     var attrs = vnode.data.attrs || {};
-    var inputName = attrs.name;
+    var inputName = getName(vnode);
 
     if (!inputName) {
       console.warn('vue-form: name attribute missing');
       return;
     }
 
+    // add validators
     Object.keys(attrs).forEach(function (attr) {
       var prop = void 0;
       if (attr === 'type') {
@@ -326,22 +426,43 @@ var vueFormValidator = {
       } else {
         prop = attr;
       }
-      if (validators[prop]) {
+      if (validators[prop] && !fieldstate._validators[prop]) {
         fieldstate._validators[prop] = validators[prop];
       }
     });
 
+    // if is a component, a validator attribute by be
+    // a prop this component uses
+    if (vnode.componentOptions && vnode.componentOptions.propsData) {
+      Object.keys(vnode.componentOptions.propsData).forEach(function (prop) {
+        if (validators[prop] && !fieldstate._validators[prop]) {
+          fieldstate._validators[prop] = validators[prop];
+        }
+      });
+    }
+
     fieldstate._validate(vnode);
 
+    // native listeners
     el.addEventListener('blur', function () {
       fieldstate._setTouched();
     }, false);
     el.addEventListener('focus', function () {
       fieldstate._setFocused();
     }, false);
+
+    // component listeners
+    if (vnode.componentInstance) {
+      vnode.componentInstance.$on('blur', function () {
+        fieldstate._setTouched();
+      });
+      vnode.componentInstance.$on('focus', function () {
+        fieldstate._setFocused();
+      });
+    }
   },
   update: function update(el, binding, vnode, oldVNode) {
-    var changes = compareChanges(vnode.data, oldVNode.data);
+    var changes = compareChanges(vnode, oldVNode);
     var name = (vnode.data.attrs || {}).name;
     var fieldstate = binding.value;
 
@@ -350,36 +471,50 @@ var vueFormValidator = {
     }
 
     if (changes.vModel) {
+      // re-validate all
       if (fieldstate._hasFocused) {
         fieldstate._setDirty();
       }
       fieldstate._validate(vnode);
     } else {
       // attributes have changed
-      // loop through them and re-validate changed ones
-      //console.log(name, 'some attribute rules has changed');
+      // to do: loop through them and re-validate changed ones
+      //for(let prop in changes) {
+      //  fieldstate._validate(vnode, validator);
+      //}
+      // for now
       fieldstate._validate(vnode);
     }
   }
 };
 
+// todo: Make getVModelNode recursive
+
 var validate = {
   render: function render(h) {
-    var foundVnode = getVModelNode(this.$slots.default);
-    if (foundVnode) {
-      this.name = foundVnode.data.attrs.name;
-      foundVnode.data.directives.push({ name: 'vue-form-validator', value: this.fieldstate });
-      foundVnode.data.attrs['vue-form-validator'] = '';
+    var _this = this;
+
+    var foundVnodes = getVModelNode(this.$slots.default);
+    if (foundVnodes.length) {
+      this.name = getName(foundVnodes[0]);
+      foundVnodes.forEach(function (foundVnode) {
+        if (!foundVnode.data.directives) {
+          foundVnode.data.directives = [];
+        }
+        foundVnode.data.directives.push({ name: 'vue-form-validator', value: _this.fieldstate });
+        foundVnode.data.attrs['vue-form-validator'] = '';
+      });
     } else {
       console.warn('Element with v-model not found');
     }
     return h(this.tag, { 'class': this.className.map(function (v) {
-        return 'container-' + v;
+        return config.classPrefix + 'container-' + v;
       }) }, this.$slots.default);
   },
 
   props: {
     state: Object,
+    custom: null,
     tag: {
       type: String,
       default: 'span'
@@ -411,7 +546,9 @@ var validate = {
       } else {
         out.push(config.untouchedClass);
       }
-
+      if (this.fieldstate.$pending) {
+        out.push(config.pendingClass);
+      }
       Object.keys(this.fieldstate.$error).forEach(function (error) {
         out.push(config.invalidClass + '-' + error);
       });
@@ -424,25 +561,42 @@ var validate = {
     this.formstate = this.state || this.$parent.state;
     this.formstate._addControl(this.fieldstate);
 
-    var vModelEl = this.$el.querySelector('[vue-form-validator]');
+    var vModelEls = this.$el.querySelectorAll('[vue-form-validator]');
 
     // add classes to the input element
     this.$watch('className', function (value, oldValue) {
       if (oldValue) {
-        oldValue.forEach(function (v) {
-          return removeClass(vModelEl, v);
-        });
+        var _loop = function _loop(i) {
+          oldValue.forEach(function (v) {
+            return removeClass(vModelEls[i], config.classPrefix + v);
+          });
+        };
+
+        for (var i = 0; i < vModelEls.length; i++) {
+          _loop(i);
+        }
       }
-      value.forEach(function (v) {
-        return addClass(vModelEl, v);
-      });
+
+      var _loop2 = function _loop2(_i) {
+        value.forEach(function (v) {
+          return addClass(vModelEls[_i], config.classPrefix + v);
+        });
+      };
+
+      for (var _i = 0; _i < vModelEls.length; _i++) {
+        _loop2(_i);
+      }
     }, {
       deep: true,
       immediate: true
     });
   },
   created: function created() {
+    var _this3 = this;
+
     var vm = this;
+    var pendingValidators = [];
+    var _val = void 0;
     this.fieldstate = {
       $name: '',
       $dirty: false,
@@ -451,6 +605,7 @@ var validate = {
       $invalid: false,
       $touched: false,
       $untouched: true,
+      $pending: false,
       $error: {},
       _setValidatorVadility: function _setValidatorVadility(validator, isValid) {
         if (isValid) {
@@ -486,35 +641,88 @@ var validate = {
       _hasFocused: false,
       _validators: {},
       _validate: function _validate(vnode) {
-        var _this = this;
+        var _this2 = this;
 
+        this.$pending = true;
         var isValid = true;
+        var emptyAndRequired = false;
         var value = vModelValue(vnode.data);
+        _val = value;
+
+        var pending = {
+          promises: [],
+          names: []
+        };
+
+        pendingValidators.push(pending);
+
         var attrs = vnode.data.attrs || {};
+        var propsData = vnode.componentOptions && vnode.componentOptions.propsData ? vnode.componentOptions.propsData : {};
 
         Object.keys(this._validators).forEach(function (validator) {
-
-          if (validator !== 'required' && !value && typeof value !== 'number') {
-            _this._setValidatorVadility(validator, true);
+          // when value is empty and not the required validator, the field is valid
+          if ((value === '' || value === undefined || value === null) && validator !== 'required') {
+            _this2._setValidatorVadility(validator, true);
+            emptyAndRequired = true;
+            // return early, required validator will
+            // fall through if it is present
             return;
           }
-
-          if (!validators[validator](value, attrs[validator], vnode)) {
-            isValid = false;
-            _this._setValidatorVadility(validator, false);
+          var attrValue = typeof attrs[validator] !== 'undefined' ? attrs[validator] : propsData[validator];
+          var result = _this2._validators[validator](value, attrValue, vnode);
+          if (typeof result === 'boolean') {
+            if (result) {
+              _this2._setValidatorVadility(validator, true);
+            } else {
+              isValid = false;
+              _this2._setValidatorVadility(validator, false);
+            }
           } else {
-            _this._setValidatorVadility(validator, true);
+            pending.promises.push(result);
+            pending.names.push(validator);
           }
         });
 
-        this._setVadility(isValid);
-        return isValid;
+        if (pending.promises.length) {
+          config.Promise.all(pending.promises).then(function (results) {
+
+            // only concerned with the last promise results, in case
+            // async responses return out of order
+            if (pending !== pendingValidators[pendingValidators.length - 1]) {
+              //console.log('ignoring old promise', pending.promises);
+              return;
+            }
+
+            pendingValidators = [];
+
+            results.forEach(function (result, i) {
+              var name = pending.names[i];
+              if (result) {
+                _this2._setValidatorVadility(name, true);
+              } else {
+                isValid = false;
+                _this2._setValidatorVadility(name, false);
+              }
+            });
+            _this2._setVadility(isValid);
+            _this2.$pending = false;
+          });
+        } else {
+          this._setVadility(isValid);
+          this.$pending = false;
+        }
       }
     };
+
+    // add custom validators
+    if (this.custom) {
+      Object.keys(this.custom).forEach(function (prop) {
+        _this3.fieldstate._validators[prop] = _this3.custom[prop];
+      });
+    }
   },
   destroyed: function destroyed() {
     this.formstate._removeControl(this.fieldstate);
-    console.log('destroyed');
   }
 };
 
@@ -525,6 +733,23 @@ var main = {
     Vue.component(config.errorsComponent, formErrors);
     Vue.component(config.errorComponent, formError);
     Vue.directive('vue-form-validator', vueFormValidator);
+  },
+
+  config: config,
+  addValidator: function addValidator(key, fn) {
+    validators[key] = fn;
+  },
+
+  mixin: {
+    components: {
+      formErrors: formErrors,
+      formError: formError,
+      vueForm: vueForm,
+      validate: validate
+    },
+    directives: {
+      vueFormValidator: vueFormValidator
+    }
   }
 };
 

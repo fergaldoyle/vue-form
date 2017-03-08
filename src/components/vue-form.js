@@ -66,7 +66,7 @@ export default {
         if (control.$touched) {
           isTouched = true;
         }
-        if(control.$pending) {
+        if (control.$pending) {
           isPending = true;
         }
         if (!control.$valid) {
@@ -115,10 +115,10 @@ export default {
       } else {
         out.push(config.untouchedClass);
       }
-      if(this.state.$submitted) {
+      if (this.state.$submitted) {
         out.push(config.submittedClass);
       }
-      if(this.state.$pending) {
+      if (this.state.$pending) {
         out.push(config.pendingClass);
       }
       return out.map(v => config.classPrefix + 'form-' + v).join(' ');
