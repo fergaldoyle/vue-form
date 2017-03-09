@@ -10,6 +10,7 @@ Available through npm as `vue-form`.
 
 ``` js
 import vueForm from 'vue-form';
+
 // install globally
 Vue.use(vueForm);
 
@@ -43,12 +44,70 @@ Example
 ```
 
 ```js
+Vue.use(vueForm);
+
 new Vue({
   el: '#app',
   data: {
-    formstate: {}
+    formstate: {},
+    model: {
+      name: '',
+      email: 'invalid-email'
+    }
+  },
+  methods: {
+    onSubmit: function () {
+      if(this.formstate.$invalid) {
+        // alert user and exit early
+        return;
+      }
+      // otherwise submit form
+    }
   }
 });
+```
+
+The output of `fieldstate` will be:
+```js
+{
+  "$dirty": false,
+  "$pristine": true,
+  "$valid": false,
+  "$invalid": true,
+  "$submitted": false,
+  "$touched": false,
+  "$untouched": true,
+  "$pending": false,
+  "$error": {
+    // fields with errors are copied into this object
+  },
+  "name": {
+    "$name": "name",
+    "$dirty": false,
+    "$pristine": true,
+    "$valid": false,
+    "$invalid": true,
+    "$touched": false,
+    "$untouched": true,
+    "$pending": false,
+    "$error": {
+      "required": true
+    }
+  },
+  "email": {
+    "$name": "email",
+    "$dirty": false,
+    "$pristine": true,
+    "$valid": false,
+    "$invalid": true,
+    "$touched": false,
+    "$untouched": true,
+    "$pending": false,
+    "$error": {
+      "email": true
+    }
+  }
+}
 ```
 
 ### Validators
@@ -71,12 +130,20 @@ max (for type="number")
 You can use static validation attributes or bindings. If it is a binding, the input will be re-validated every binding update meaning you can have inputs which are conditionally required etc.
 ```html
 <!-- static validators -->
-<input type="email" name="email" v-model="model.email" v-form-ctrl required />
-<input type="text" name="name" v-model="model.name" v-form-ctrl maxlength="25" minlength="5" />
+<validate>
+  <input type="email" name="email" v-model="model.email" required />
+</validate>
+<validate>
+  <input type="text" name="name" v-model="model.name" maxlength="25" minlength="5" />
+</validate>
 
 <!-- bound validators -->
-<input type="email" name="email" v-model="model.email" v-form-ctrl :required="isRequired" />
-<input type="text" name="name" v-model="model.name" v-form-ctrl :maxlength="maxLen" :minlength="minLen" />
+<validate>
+  <input type="email" name="email" v-model="model.email" :required="isRequired" />
+</validate>
+<validate>
+  <input type="text" name="name" v-model="model.name" :maxlength="maxLen" :minlength="minLen" />
+</validate>
 ```
 
 #### State classes
@@ -85,7 +152,7 @@ As form and input validation states change, state classes are added and removed
 
 Possible form classes:
 ```
-vf-dirty, vf-pristine, vf-valid, vf-invalid, vf-submitted
+vf-form-dirty, vf-form-pristine, vf-form-valid, vf-form-invalid, vf-form-submitted
 ```
 
 Possible input classes:
@@ -96,10 +163,33 @@ vf-dirty, vf-pristine, vf-valid, vf-invalid
 vf-invalid-required, vf-invalid-minlength, vf-invalid-max, etc
 ```
 
-#### Custom validator:
+Input wrappers (e.g. the tag the `validate` component renders) will also get state classes, but with the `container` prefix, e.g.
+```
+vf-container-dirty, vf-container-pristine, vf-container-valid, vf-container-invalid
+```
+
+#### Custom validators:
+You can register global and local custom validators. 
+
+Global custom validator
+```js
+vueForm.addValidator('my-custom-validator', function (value, attrValue, vnode) {
+  // return true to set input as $valid, false to set as $invalid
+  return value === 'custom';
+});
+```
 
 ```html
-<input v-model="something" v-form-ctrl name="something" custom-validator="customValidator" />
+<validate>
+  <input v-model="something" name="something" my-custom-validator />
+</validate>
+```
+
+Local custom validator
+```html
+<validate :custom="{customValidator: customValidator}">
+  <input v-model="something" name="something" />
+</validate>
 ```
 
 ```js
@@ -115,16 +205,3 @@ methods: {
 
 
 ### Custom form control component
-
-You can also use `vue-form` on your own form components. Simply wrap your component with an element with `v-form-ctrl`, `name` and any validation attributes. Set `v-form-ctrl` to the same property you will be updating via two-way binding in your component. You can also get a hook into the internals of `v-form-ctrl` to mange control state. 
-
-[See custom tinymce component validation example ](https://github.com/fergaldoyle/vue-form/tree/master/example)
-
-```html
-<div>
-    <span>Rich text *</span>
-    <span v-form-ctrl="model.html" name="html" required>
-        <tinymce id="inline-editor" :model.sync="model.html"></tinymce>
-    </span>
-</div>
-```
