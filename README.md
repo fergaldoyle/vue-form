@@ -29,14 +29,24 @@ Example
 ```html
 <div id="app">
   <vue-form :state="formstate" @submit.prevent="onSubmit">
+
     <validate tag="label">
       <span>Name *</span>
       <input v-model="model.name" required name="name" />
+
+      <form-error field="name" error="required">Name is a required field</form-error>
     </validate>
+
     <validate tag="label">
       <span>Email</span>
-      <input v-model="model.email" name="email" type="email" />
+      <input v-model="model.email" name="email" type="email" required />
+
+      <form-errors field="email">
+        <div slot="required">Email is a required field</div>
+        <div slot="email">Email is not valid</div>
+      </form-errors>
     </validate>
+
     <button type="submit">Submit</button>
   </vue-form>
   <pre>{{ formstate }}</pre>
@@ -110,9 +120,22 @@ The output of `fieldstate` will be:
 }
 ```
 
-### Validators
+### Displaying errors
+Display single errors with `form-error` or multiple errors with `form-errors`.
 
-#### Built in validators:
+The `show` prop supports simple expressions which specifiy when erros should be displayed based on the current state of the field, e.g: `$dirty`, `$dirty && $touched`, `$dirty || $touched`
+
+```html
+<form-error field="fieldName" error="errorKey" show="$dirty">Error message</form-error>
+
+<form-errors field="fieldName" show="$dirty && $touched">
+  <div slot="errorKeyA">Error message A</div>
+  <div slot="errorKeyB">Error message B</div>
+</form-errors>
+```
+
+
+### Validators
 
 ```
 type="email"
@@ -146,29 +169,7 @@ You can use static validation attributes or bindings. If it is a binding, the in
 </validate>
 ```
 
-#### State classes
-
-As form and input validation states change, state classes are added and removed
-
-Possible form classes:
-```
-vf-form-dirty, vf-form-pristine, vf-form-valid, vf-form-invalid, vf-form-submitted
-```
-
-Possible input classes:
-```
-vf-dirty, vf-pristine, vf-valid, vf-invalid
-
-// also for every validation error, a class will be added, e.g.
-vf-invalid-required, vf-invalid-minlength, vf-invalid-max, etc
-```
-
-Input wrappers (e.g. the tag the `validate` component renders) will also get state classes, but with the `container` prefix, e.g.
-```
-vf-container-dirty, vf-container-pristine, vf-container-valid, vf-container-invalid
-```
-
-#### Custom validators:
+#### Custom validators
 You can register global and local custom validators. 
 
 Global custom validator
@@ -203,5 +204,60 @@ methods: {
 // ...
 ```
 
+#### Async validators:
 
-### Custom form control component
+Async validators are custom validators which return a Promise. `resolve()` `true` or `false` to set field vadility. 
+```js
+// ...
+methods: {
+  customValidator (value) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(value === 'ajax');
+      }, 100);
+    });
+  }
+}
+// ...
+```
+
+Async validator with debounce (example uses lodash debounce)
+```js
+methods: {
+  debounced: _.debounce(function (value, resolve, reject) {
+    fetch('https://httpbin.org/get').then(function(response){
+      resolve(response.isValid);
+    });
+  }, 500),
+  customValidator (value) {
+    return new Promise((resolve, reject) => {
+      this.debounced(value, resolve, reject);
+    });
+  }
+}
+```
+
+### State classes
+As form and input validation states change, state classes are added and removed
+
+Possible form classes:
+```
+vf-form-dirty, vf-form-pristine, vf-form-valid, vf-form-invalid, vf-form-submitted
+```
+
+Possible input classes:
+```
+vf-dirty, vf-pristine, vf-valid, vf-invalid
+
+// also for every validation error, a class will be added, e.g.
+vf-invalid-required, vf-invalid-minlength, vf-invalid-max, etc
+```
+
+Input wrappers (e.g. the tag the `validate` component renders) will also get state classes, but with the `container` prefix, e.g.
+```
+vf-container-dirty, vf-container-pristine, vf-container-valid, vf-container-invalid
+```
+
+### Custom components
+
+When writing custom form field components, e.g. `<my-checkbox v-model="foo"></my-checkbox>` you should trigger the `focus` and `blur` events after user interaction either by triggering native dom events on the root node of your component, or emitting Vue events (`this.$emit('focus)`) so the `validate` and detect and set the `$dirty` and `$touched` states on the field.
