@@ -16,7 +16,7 @@ export const validators = {
       return true;
     }
 
-    if (vnode.data.attrs.type === 'number' && value === 0) {
+    if (value === 0) {
       return true;
     }
 
