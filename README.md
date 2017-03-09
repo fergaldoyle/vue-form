@@ -2,85 +2,53 @@
 
 [![Build Status](https://travis-ci.org/fergaldoyle/vue-form.svg?branch=0.2.2)](https://travis-ci.org/fergaldoyle/vue-form)
 
-Form validation for Vue.js 1.0+. Works along side `v-model` but can also be used on your custom form control components (tinymce, select2, tag-editor etc).
+Form validation for Vue.js 2.0+
 
 ### Install
 
 Available through npm as `vue-form`.
 
 ``` js
-// es6: import * as vueForm from 'vue-form'; 
-var vueForm = require('vue-form');
+import vueForm from 'vue-form';
+// install globally
 Vue.use(vueForm);
+
+// or use the mixin
+...
+mixins: [vueForm.mixin]
+...
 ```
-  
-You can also directly include it with a `<script>` tag when you have Vue itself included globally. It will automatically install itself.
 
 ### Usage
 
-This plugin registers two global directives, `v-form` and `v-form-ctrl`.  Apply the `v-form` directive to a `form` element, and set the `name` attribute. This `name` will hold the overall form state object and is created on the current vm.
+Once installed you have access to four components (`vue-form`, `validate`, `form-errors`, `form-error`) for managing form state, validating form fields and displaying validation error messages.
 
-Apply the `v-form-ctrl` directive to each of the form inputs. `v-form-ctrl` will watch `v-model` and validate on change. Use static or binding attributes to specify validators (`required`, `maxlength`, `type="email"`, `type="url"`, etc)
+Example
 
 ```html
-<form v-form name="myform" @submit.prevent="onSubmit">
-	<div class="errors" v-if="myform.$submitted">
-		<p v-if="myform.name.$error.required">Name is required.</p>
-		<p v-if="myform.email.$error.email">Email is not valid.</p>
-	</div>
-	<label>
-		<span>Name *</span>
-		<input v-model="model.name" v-form-ctrl required name="name" />
-	</label>
-	<label>
-		<span>Email</span>
-		<input v-model="model.email" v-form-ctrl name="email" type="email" />
-	</label>
-	<button type="submit">Submit</button>
-</form>
-<pre>{{ myform | json }}</pre>
+<div id="app">
+  <vue-form :state="formstate" @submit.prevent="onSubmit">
+    <validate tag="label">
+      <span>Name *</span>
+      <input v-model="model.name" required name="name" />
+    </validate>
+    <validate tag="label">
+      <span>Email</span>
+      <input v-model="model.email" name="email" type="email" />
+    </validate>
+    <button type="submit">Submit</button>
+  </vue-form>
+  <pre>{{ formstate }}</pre>
+</div>
 ```
 
-`myform` will be an object with the following properties:
 ```js
-{
-  "$name": "myform",
-  "$dirty": false,
-  "$pristine": true,
-  "$valid": false,
-  "$invalid": true,
-  "$submitted": false,
-  "$error": {
-    "name": {
-      "$name": "name",
-      "$dirty": false,
-      "$pristine": true,
-      "$valid": false,
-      "$invalid": true,
-      "$error": {
-        "required": true
-      }
-    }
-  },
-  "name": {
-    "$name": "name",
-    "$dirty": false,
-    "$pristine": true,
-    "$valid": false,
-    "$invalid": true,
-    "$error": {
-      "required": true
-    }
-  },
-  "email": {
-    "$name": "email",
-    "$dirty": false,
-    "$pristine": true,
-    "$valid": true,
-    "$invalid": false,
-    "$error": {}
+new Vue({
+  el: '#app',
+  data: {
+    formstate: {}
   }
-}
+});
 ```
 
 ### Validators
