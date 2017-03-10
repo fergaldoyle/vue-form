@@ -15,15 +15,16 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
 		files: [
-		  'node_modules/vue/dist/vue.min.js',
-		  'vue-form.js',
+      'https://www.promisejs.org/polyfills/promise-6.1.0.js',
+      //'https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.js',
+	    'node_modules/vue/dist/vue.js',
+		  'dist/vue-form.js',
 		  'test/specs/*.js'
 		],
 
 
     // list of files to exclude
-    exclude: [
-    ],
+    exclude: [],
 
 
     // preprocess matching files before serving them to the browser
@@ -43,7 +44,7 @@ module.exports = function(config) {
         return file.originalPath;
       }
     },
-        
+
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
@@ -60,7 +61,11 @@ module.exports = function(config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_DEBUG,
+
+    client: {
+      captureConsole: true
+    },
 
 
     // enable / disable watching file and executing tests whenever any file changes
