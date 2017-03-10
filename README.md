@@ -260,4 +260,51 @@ vf-container-dirty, vf-container-pristine, vf-container-valid, vf-container-inva
 
 ### Custom components
 
-When writing custom form field components, e.g. `<my-checkbox v-model="foo"></my-checkbox>` you should trigger the `focus` and `blur` events after user interaction either by triggering native dom events on the root node of your component, or emitting Vue events (`this.$emit('focus)`) so the `validate` and detect and set the `$dirty` and `$touched` states on the field.
+When writing custom form field components, e.g. `<my-checkbox v-model="foo"></my-checkbox>` you should trigger the `focus` and `blur` events after user interaction either by triggering native dom events on the root node of your component, or emitting Vue events (`this.$emit('focus)`) so the `validate` component can detect and set the `$dirty` and `$touched` states on the field.
+
+### Component props
+
+#### vue-form
+* `state` Object on which form state is set
+
+#### validate
+* `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
+* `custom` Object containing one or many custom validators. `{validatorName: validatorFunction}`
+* `tag` String which specifies what elemant tag should be rendered by the `validate` component, defaults to `span`
+
+#### form-error
+* `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
+* `field` String which specifies the related field name
+* `error` String which specifies the error key which the error should be shown for
+* `tag` String, defaults to `span`
+* `show`: String, show error dependant on form field state e.g. `$dirty`, `$dirty && $touched`
+
+#### form-errors
+* `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
+* `field` String which specifies the related field name
+* `tag` String, defaults to `span`
+* `show`: String, show error dependant on form field state e.g. `$touched`, `$dirty || $touched`
+
+### Config
+Set config options using `vueForm.config`, defaults:
+
+```js
+{
+    formComponent: 'vueForm',
+    errorComponent: 'formError',
+    errorsComponent: 'formErrors',
+    validateComponent: 'validate',
+    errorTag: 'span',
+    errorsTag: 'div',
+    classPrefix: 'vf-',
+    dirtyClass: 'dirty',
+    pristineClass: 'pristine',
+    validClass: 'valid',
+    invalidClass: 'invalid',
+    submittedClass: 'submitted',
+    touchedClass: 'touched',
+    untouchedClass: 'untouched',
+    pendingClass: 'pending',
+    Promise: window.Promise
+}
+```
