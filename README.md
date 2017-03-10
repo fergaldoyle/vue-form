@@ -270,7 +270,7 @@ When writing custom form field components, e.g. `<my-checkbox v-model="foo"></my
 #### validate
 * `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
 * `custom` Object containing one or many custom validators. `{validatorName: validatorFunction}`
-* `tag` String which specifies what elemant tag should be rendered by the `validate` component, defaults to `span`
+* `tag` String which specifies what element tag should be rendered by the `validate` component, defaults to `span`
 
 #### form-error
 * `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
