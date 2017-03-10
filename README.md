@@ -282,7 +282,7 @@ When writing custom form field components, e.g. `<my-checkbox v-model="foo"></my
 #### form-errors
 * `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
 * `field` String which specifies the related field name
-* `tag` String, defaults to `span`
+* `tag` String, defaults to `div`
 * `show`: String, show error dependant on form field state e.g. `$touched`, `$dirty || $touched`
 
 ### Config
