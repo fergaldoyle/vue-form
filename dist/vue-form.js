@@ -148,7 +148,7 @@ var validators = {
       return true;
     }
 
-    if (vnode.data.attrs.type === 'number' && value === 0) {
+    if (value === 0) {
       return true;
     }
 
@@ -194,7 +194,6 @@ var vueForm = {
   },
 
   props: {
-    value: Object,
     state: Object
   },
   data: function data() {

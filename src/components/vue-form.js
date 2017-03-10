@@ -19,7 +19,6 @@ export default {
     );
   },
   props: {
-    value: Object,
     state: Object
   },
   data() {
