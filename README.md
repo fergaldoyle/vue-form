@@ -77,7 +77,7 @@ new Vue({
 });
 ```
 
-The output of `fieldstate` will be:
+The output of `formstate` will be:
 ```js
 {
   "$dirty": false,
