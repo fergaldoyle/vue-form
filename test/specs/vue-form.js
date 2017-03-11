@@ -67,7 +67,7 @@ describe('vue-form', function() {
             <input v-model="model.pattern" name="pattern" type="text" pattern="\\d\\d\\d\\d" />
           </validate>
 
-          <validate :custom="{ 'custom-key': customValidator }">
+          <validate :custom="{ customKey: customValidator }">
             <input v-model="model.custom" name="custom" type="text"  />
           </validate>
 
@@ -285,11 +285,11 @@ describe('vue-form', function() {
 
   it('should validate custom validators', function(done) {
     expect(vm.formstate.custom.$valid).toBe(true);
-    expect(vm.formstate.custom.$error['custom-key']).toBeUndefined();
+    expect(vm.formstate.custom.$error.customKey).toBeUndefined();
     vm.model.custom = 'custom invalid value';
     vm.$nextTick(function() {
       expect(vm.formstate.custom.$valid).toBe(false);
-      expect(vm.formstate.custom.$error['custom-key']).toBe(true);
+      expect(vm.formstate.custom.$error.customKey).toBe(true);
       done();
     });
   });
@@ -309,6 +309,14 @@ describe('vue-form', function() {
           done();
         }, 150);
       }, 150);
+    });
+  });
+
+  it('should hyphenate camelcase validator names', function(done) {
+    vm.model.custom = 'custom invalid value';
+    vm.$nextTick(function() {
+      expect(vm.$el.querySelector('[name="custom"]').classList.contains('vf-invalid-custom-key')).toBe(true);
+      done();
     });
   });
 

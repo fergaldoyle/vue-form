@@ -62,3 +62,11 @@ export function getName(vnode) {
     return vnode.componentOptions.propsData.name;
   }
 }
+
+const hyphenateRE = /([^-])([A-Z])/g;
+export function hyphenate (str) {
+  return str
+    .replace(hyphenateRE, '$1-$2')
+    .replace(hyphenateRE, '$1-$2')
+    .toLowerCase()
+}

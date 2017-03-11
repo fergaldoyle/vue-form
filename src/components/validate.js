@@ -1,5 +1,5 @@
 import { config } from '../config';
-import { getVModelNode, vModelValue, addClass, removeClass, getName } from '../util';
+import { getVModelNode, vModelValue, addClass, removeClass, getName, hyphenate } from '../util';
 import { validators } from '../validators';
 
 // todo: Make getVModelNode recursive
@@ -58,7 +58,7 @@ export default {
         out.push(config.pendingClass);
       }
       Object.keys(this.fieldstate.$error).forEach((error) => {
-        out.push(config.invalidClass + '-' + error);
+        out.push(config.invalidClass + '-' + hyphenate(error));
       });
 
       return out;
