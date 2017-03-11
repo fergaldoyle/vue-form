@@ -367,6 +367,11 @@ function getName(vnode) {
   }
 }
 
+var hyphenateRE = /([^-])([A-Z])/g;
+function hyphenate(str) {
+  return str.replace(hyphenateRE, '$1-$2').replace(hyphenateRE, '$1-$2').toLowerCase();
+}
+
 function compareChanges(vnode, oldvnode) {
 
   var hasChanged = false;
@@ -462,7 +467,6 @@ var vueFormValidator = {
   },
   update: function update(el, binding, vnode, oldVNode) {
     var changes = compareChanges(vnode, oldVNode);
-    var name = (vnode.data.attrs || {}).name;
     var fieldstate = binding.value;
 
     if (!changes) {
@@ -549,7 +553,7 @@ var validate = {
         out.push(config.pendingClass);
       }
       Object.keys(this.fieldstate.$error).forEach(function (error) {
-        out.push(config.invalidClass + '-' + error);
+        out.push(config.invalidClass + '-' + hyphenate(error));
       });
 
       return out;
@@ -755,4 +759,3 @@ var main = {
 return main;
 
 })));
-//# sourceMappingURL=vue-form.js.map

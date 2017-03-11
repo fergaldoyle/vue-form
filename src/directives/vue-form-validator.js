@@ -95,7 +95,6 @@ export default {
 
   update(el, binding, vnode, oldVNode) {
     const changes = compareChanges(vnode, oldVNode);
-    const name = (vnode.data.attrs || {}).name;
     const fieldstate = binding.value;
 
     if (!changes) {
