@@ -22,7 +22,7 @@ mixins: [vueForm.mixin]
 
 ### Usage
 
-Once installed you have access to four components (`vue-form`, `validate`, `form-errors`, `form-error`) for managing form state, validating form fields and displaying validation error messages.
+Once installed you have access to four components (`vue-form`, `validate`, `field`, `field-messages`) for managing form state, validating form fields and displaying validation messages.
 
 Example
 
@@ -34,17 +34,20 @@ Example
       <span>Name *</span>
       <input v-model="model.name" required name="name" />
 
-      <form-error field="name" error="required">Name is a required field</form-error>
+      <field-messages name="name">
+        <div>Success!</div>
+        <div slot="required">Name is a required field</div>
+      </field-messages>
     </validate>
 
     <validate tag="label">
       <span>Email</span>
       <input v-model="model.email" name="email" type="email" required />
 
-      <form-errors field="email">
+      <field-messages name="email">
         <div slot="required">Email is a required field</div>
         <div slot="email">Email is not valid</div>
-      </form-errors>
+      </field-messages>
     </validate>
 
     <button type="submit">Submit</button>
@@ -120,8 +123,8 @@ The output of `formstate` will be:
 }
 ```
 
-### Displaying errors
-Display single errors with `form-error` or multiple errors with `form-errors`.
+### Displaying messages
+Display validation errors or success messages with `field-messages`.
 
 The `show` prop supports simple expressions which specifiy when erros should be displayed based on the current state of the field, e.g: `$dirty`, `$dirty && $touched`, `$dirty || $touched`
 
@@ -271,19 +274,14 @@ When writing custom form field components, e.g. `<my-checkbox v-model="foo"></my
 * `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
 * `custom` Object containing one or many custom validators. `{validatorName: validatorFunction}`
 * `tag` String which specifies what element tag should be rendered by the `validate` component, defaults to `span`
+* `auto-label`: Automatically set `for` and `id` attributes of label and input elements found inside the `validate` component
 
-#### form-error
+#### field-messages
 * `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
-* `field` String which specifies the related field name
-* `error` String which specifies the error key which the error should be shown for
-* `tag` String, defaults to `span`
-* `show`: String, show error dependant on form field state e.g. `$dirty`, `$dirty && $touched`
-
-#### form-errors
-* `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
-* `field` String which specifies the related field name
+* `name` String which specifies the related field name
 * `tag` String, defaults to `div`
-* `show`: String, show error dependant on form field state e.g. `$touched`, `$dirty || $touched`
+* `show`: String, show error dependant on form field state e.g. `$touched`, `$dirty || $touched`, '$touched || $submitted'
+* `auto-label`: Automatically set the `for` attribute of labels found inside the `field-messages` component
 
 ### Config
 Set config options using `vueForm.config`, defaults:
@@ -291,20 +289,43 @@ Set config options using `vueForm.config`, defaults:
 ```js
 {
     formComponent: 'vueForm',
-    errorComponent: 'formError',
-    errorsComponent: 'formErrors',
+    messagesComponent: 'fieldMessages',
     validateComponent: 'validate',
-    errorTag: 'span',
-    errorsTag: 'div',
-    classPrefix: 'vf-',
-    dirtyClass: 'dirty',
-    pristineClass: 'pristine',
-    validClass: 'valid',
-    invalidClass: 'invalid',
-    submittedClass: 'submitted',
-    touchedClass: 'touched',
-    untouchedClass: 'untouched',
-    pendingClass: 'pending',
+    fieldComponent: 'field',
+    messagesTag: 'div',
+    fieldTag: 'div',
+    classes: {
+      form: {
+        dirty: 'vf-form-dirty',
+        pristine: 'vf-form-pristine',
+        valid: 'vf-form-valid',
+        invalid: 'vf-form-invalid',
+        touched: 'vf-form-touched',
+        untouched: 'vf-form-untouched',
+        submitted: 'vf-form-submitted',
+        pending: 'vf-form-pending'
+      },
+      validate: {
+        dirty: 'vf-field-dirty',
+        pristine: 'vf-field-pristine',
+        valid: 'vf-field-valid',
+        invalid: 'vf-field-invalid',
+        touched: 'vf-field-touched',
+        untouched: 'vf-field-untouched',
+        submitted: 'vf-field-submitted',
+        pending: 'vf-field-pending'
+      },
+      input: {
+        dirty: 'vf-dirty',
+        pristine: 'vf-pristine',
+        valid: 'vf-valid',
+        invalid: 'vf-invalid',
+        touched: 'vf-touched',
+        untouched: 'vf-untouched',
+        submitted: 'vf-submitted',
+        pending: 'vf-pending'
+      }
+    },
     Promise: window.Promise
 }
 ```
