@@ -1,6 +1,6 @@
 # vue-form  
 
-[![Build Status](https://travis-ci.org/fergaldoyle/vue-form.svg?branch=0.2.2)](https://travis-ci.org/fergaldoyle/vue-form)
+[![Build Status](https://travis-ci.org/fergaldoyle/vue-form.svg?branch=master)](https://travis-ci.org/fergaldoyle/vue-form)
 
 Form validation for Vue.js 2.0+
 
@@ -132,7 +132,7 @@ The output of `formstate` will be:
 ### Displaying messages
 Display validation errors or success messages with `field-messages`.
 
-The `show` prop supports simple expressions which specifiy when erros should be displayed based on the current state of the field, e.g: `$dirty`, `$dirty && $touched`, `$dirty || $touched`
+The `show` prop supports simple expressions which specifiy when messages should be displayed based on the current state of the field, e.g: `$dirty`, `$dirty && $touched`, `$dirty || $touched`, `$touched || $submitted`
 
 ```html
 <form-error field="fieldName" error="errorKey" show="$dirty">Error message</form-error>
@@ -280,14 +280,18 @@ When writing custom form field components, e.g. `<my-checkbox v-model="foo"></my
 * `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
 * `custom` Object containing one or many custom validators. `{validatorName: validatorFunction}`
 * `tag` String which specifies what element tag should be rendered by the `validate` component, defaults to `span`
-* `auto-label`: Automatically set `for` and `id` attributes of label and input elements found inside the `validate` component
+* `auto-label`: Boolean, defaults to false. Automatically set `for` and `id` attributes of label and input elements found inside the `validate` component
 
 #### field-messages
 * `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
 * `name` String which specifies the related field name
 * `tag` String, defaults to `div`
 * `show`: String, show error dependant on form field state e.g. `$touched`, `$dirty || $touched`, '$touched || $submitted'
-* `auto-label`: Automatically set the `for` attribute of labels found inside the `field-messages` component
+* `auto-label`: Boolean, defaults to false. Automatically set the `for` attribute of labels found inside the `field-messages` component
+
+#### field
+* `tag` String, defaults to `div`
+* `auto-label`: Boolean, defaults to true. Automatically set `for` and `id` attributes of label and input elements found inside the `validate` component
 
 ### Config
 Set config options using `vueForm.config`, defaults:
