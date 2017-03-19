@@ -1,3 +1,4 @@
+import { config } from '../config';
 import { validators } from '../validators';
 import { vModelValue, getName } from '../util';
 
@@ -53,9 +54,9 @@ export default {
     Object.keys(attrs).forEach((attr) => {
       let prop;
       if (attr === 'type') {
-        prop = attrs[attr];
+        prop = attrs[attr].toLowerCase();
       } else {
-        prop = attr;
+        prop = attr.toLowerCase();
       }
       if (validators[prop] && !fieldstate._validators[prop]) {
         fieldstate._validators[prop] = validators[prop];

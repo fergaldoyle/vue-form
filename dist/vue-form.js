@@ -5,80 +5,106 @@
 }(this, (function () { 'use strict';
 
 var config = {
-    formComponent: 'vueForm',
-    errorComponent: 'formError',
-    errorsComponent: 'formErrors',
-    validateComponent: 'validate',
-    errorTag: 'span',
-    errorsTag: 'div',
-    classPrefix: 'vf-',
-    dirtyClass: 'dirty',
-    pristineClass: 'pristine',
-    validClass: 'valid',
-    invalidClass: 'invalid',
-    submittedClass: 'submitted',
-    touchedClass: 'touched',
-    untouchedClass: 'untouched',
-    pendingClass: 'pending',
-    Promise: window.Promise
+  formComponent: 'vueForm',
+  messagesComponent: 'fieldMessages',
+  validateComponent: 'validate',
+  fieldComponent: 'field',
+  messagesTag: 'div',
+  fieldTag: 'div',
+  classes: {
+    form: {
+      dirty: 'vf-form-dirty',
+      pristine: 'vf-form-pristine',
+      valid: 'vf-form-valid',
+      invalid: 'vf-form-invalid',
+      touched: 'vf-form-touched',
+      untouched: 'vf-form-untouched',
+      submitted: 'vf-form-submitted',
+      pending: 'vf-form-pending'
+    },
+    validate: {
+      dirty: 'vf-field-dirty',
+      pristine: 'vf-field-pristine',
+      valid: 'vf-field-valid',
+      invalid: 'vf-field-invalid',
+      touched: 'vf-field-touched',
+      untouched: 'vf-field-untouched',
+      submitted: 'vf-field-submitted',
+      pending: 'vf-field-pending'
+    },
+    input: {
+      dirty: 'vf-dirty',
+      pristine: 'vf-pristine',
+      valid: 'vf-valid',
+      invalid: 'vf-invalid',
+      touched: 'vf-touched',
+      untouched: 'vf-untouched',
+      submitted: 'vf-submitted',
+      pending: 'vf-pending'
+    }
+  },
+  Promise: window.Promise
 };
 
-var errorMixin = {
-  computed: {
-    isShown: function isShown() {
-      var field = this.formstate[this.field];
-
-      if (!this.show || !field) {
-        return true;
-      }
-
-      if (this.show.indexOf('&&') > -1) {
-        // and logic - every
-        var split = this.show.split('&&');
-        return split.every(function (v) {
-          return field[v.trim()];
-        });
-      } else if (this.show.indexOf('||') > -1) {
-        // or logic - some
-        var _split = this.show.split('||');
-        return _split.some(function (v) {
-          return field[v.trim()];
-        });
-      } else {
-        // single
-        return field[this.show];
-      }
+function findLabel(nodes) {
+  if (!nodes) {
+    return;
+  }
+  for (var i = 0; i < nodes.length; i++) {
+    var vnode = nodes[i];
+    if (vnode.tag === 'label') {
+      return nodes[i];
+    } else if (nodes[i].children) {
+      return findLabel(nodes[i].children);
     }
   }
-};
+}
 
-var formErrors = {
-  mixins: [errorMixin],
+var messages = {
   render: function render(h) {
     var _this = this;
 
-    //console.log('errors render');
     var children = [];
-    var field = this.formstate[this.field];
+    var field = this.formstate[this.name];
     if (field && field.$error && this.isShown) {
       Object.keys(field.$error).forEach(function (key) {
+        if (_this.autoLabel) {
+          var label = findLabel(_this.$slots[key]);
+          if (label) {
+            label.data = label.data || {};
+            label.data.attrs = label.data.attrs || {};
+            label.data.attrs.for = field._id;
+          }
+        }
         children.push(_this.$slots[key]);
       });
+      if (!children.length) {
+        if (this.autoLabel) {
+          var label = findLabel(this.$slots.default);
+          if (label) {
+            label.data = label.data || {};
+            label.data.attrs = label.data.attrs || {};
+            label.data.attrs.for = field._id;
+          }
+        }
+        children.push(this.$slots.default);
+      }
     }
     return h(this.tag, children);
   },
 
   props: {
     state: Object,
-    field: String,
+    name: String,
     show: {
       type: String,
       default: ''
     },
     tag: {
       type: String,
-      default: config.errorsTag
-    }
+      default: config.messagesTag
+    },
+    autoLabel: Boolean
   },
   data: function data() {
     return {
@@ -91,42 +117,33 @@ var formErrors = {
     this.$nextTick(function () {
       _this2.formstate = _this2.state || _this2.$parent.formstate || _this2.$parent.state;
     });
-  }
-};
+  },
 
-var formError = {
-  mixins: [errorMixin],
-  render: function render(h) {
-    var field = this.formstate[this.field];
-    if (field && field.$error[this.error] && this.isShown) {
-      return h(this.tag, [this.$slots.default]);
+  computed: {
+    isShown: function isShown() {
+      var field = this.formstate[this.name];
+
+      if (!this.show || !field) {
+        return true;
+      }
+
+      var compare = function compare(v) {
+        return field[v.trim()];
+      };
+
+      if (this.show.indexOf('&&') > -1) {
+        // and logic - every
+        var split = this.show.split('&&');
+        return split.every(compare);
+      } else if (this.show.indexOf('||') > -1) {
+        // or logic - some
+        var _split = this.show.split('||');
+        return _split.some(compare);
+      } else {
+        // single
+        return field[this.show];
+      }
     }
-  },
-
-  props: {
-    state: Object,
-    field: String,
-    error: String,
-    show: {
-      type: String,
-      default: ''
-    },
-    tag: {
-      type: String,
-      default: config.errorTag
-    }
-  },
-  data: function data() {
-    return {
-      formstate: {}
-    };
-  },
-  mounted: function mounted() {
-    var _this = this;
-
-    this.$nextTick(function () {
-      _this.formstate = _this.state || _this.$parent.formstate || _this.$parent.state;
-    });
   }
 };
 
@@ -183,6 +200,7 @@ var vueForm = {
       on: {
         submit: function submit(event) {
           _this.state.$submitted = true;
+          _this.state._cloneState();
           _this.$emit('submit', event);
         }
       },
@@ -214,6 +232,15 @@ var vueForm = {
       $untouched: true,
       $pending: false,
       $error: {},
+      $submittedState: {},
+      _id: '',
+      _cloneState: function _cloneState() {
+        var cloned = JSON.parse(JSON.stringify(state));
+        delete cloned.$submittedState;
+        Object.keys(cloned).forEach(function (key) {
+          _this2.$set(_this2.state.$submittedState, key, cloned[key]);
+        });
+      },
       _addControl: function _addControl(ctrl) {
         controls[ctrl.$name] = ctrl;
         _this2.$set(state, ctrl.$name, ctrl);
@@ -236,6 +263,9 @@ var vueForm = {
       var isPending = false;
       Object.keys(controls).forEach(function (key) {
         var control = controls[key];
+
+        control.$submitted = state.$submitted;
+
         if (control.$dirty) {
           isDirty = true;
         }
@@ -275,30 +305,29 @@ var vueForm = {
   computed: {
     className: function className() {
       var out = [];
+      var c = config.classes.form;
       if (this.state.$dirty) {
-        out.push(config.dirtyClass);
+        out.push(c.dirty);
       } else {
-        out.push(config.pristineClass);
+        out.push(c.pristine);
       }
       if (this.state.$valid) {
-        out.push(config.validClass);
+        out.push(c.valid);
       } else {
-        out.push(config.invalidClass);
+        out.push(c.invalid);
       }
       if (this.state.$touched) {
-        out.push(config.touchedClass);
+        out.push(c.touched);
       } else {
-        out.push(config.untouchedClass);
+        out.push(c.untouched);
       }
       if (this.state.$submitted) {
-        out.push(config.submittedClass);
+        out.push(c.submitted);
       }
       if (this.state.$pending) {
-        out.push(config.pendingClass);
+        out.push(c.pending);
       }
-      return out.map(function (v) {
-        return config.classPrefix + 'form-' + v;
-      }).join(' ');
+      return out.join(' ');
     }
   }
 };
@@ -330,22 +359,28 @@ function vModelValue(data) {
   })[0].value;
 }
 
-function getVModelNode(nodes) {
-  var foundVnodes = [];
+function getVModelAndLabel(nodes) {
+  var foundVnodes = {
+    vModel: [],
+    label: null
+  };
 
   function traverse(nodes) {
     for (var i = 0; i < nodes.length; i++) {
       var node = nodes[i];
+      if (node.tag === 'label' && !foundVnodes.label) {
+        foundVnodes.label = node;
+      }
       if (node.data) {
         if (node.data.directives) {
           var match = node.data.directives.filter(function (v) {
             return v.name === 'model';
           });
           if (match.length) {
-            foundVnodes.push(node);
+            foundVnodes.vModel.push(node);
           }
         } else if (node.data.model) {
-          foundVnodes.push(node);
+          foundVnodes.vModel.push(node);
         }
       }
       if (node.children) {
@@ -370,6 +405,10 @@ function getName(vnode) {
 var hyphenateRE = /([^-])([A-Z])/g;
 function hyphenate(str) {
   return str.replace(hyphenateRE, '$1-$2').replace(hyphenateRE, '$1-$2').toLowerCase();
+}
+
+function randomId() {
+  return Math.random().toString(36).substr(2, 10);
 }
 
 function compareChanges(vnode, oldvnode) {
@@ -426,9 +465,9 @@ var vueFormValidator = {
     Object.keys(attrs).forEach(function (attr) {
       var prop = void 0;
       if (attr === 'type') {
-        prop = attrs[attr];
+        prop = attrs[attr].toLowerCase();
       } else {
-        prop = attr;
+        prop = attr.toLowerCase();
       }
       if (validators[prop] && !fieldstate._validators[prop]) {
         fieldstate._validators[prop] = validators[prop];
@@ -491,36 +530,49 @@ var vueFormValidator = {
   }
 };
 
-// todo: Make getVModelNode recursive
-
 var validate = {
   render: function render(h) {
     var _this = this;
 
-    var foundVnodes = getVModelNode(this.$slots.default);
-    if (foundVnodes.length) {
-      this.name = getName(foundVnodes[0]);
-      foundVnodes.forEach(function (foundVnode) {
-        if (!foundVnode.data.directives) {
-          foundVnode.data.directives = [];
+    var foundVnodes = getVModelAndLabel(this.$slots.default);
+    var vModelnodes = foundVnodes.vModel;
+    var attrs = {
+      for: null
+    };
+    if (vModelnodes.length) {
+      this.name = getName(vModelnodes[0]);
+      if (this.autoLabel) {
+        var id = this.fieldstate._id || vModelnodes[0].data.attrs.id || 'vf' + randomId();
+        this.fieldstate._id = id;
+        vModelnodes[0].data.attrs.id = id;
+        if (foundVnodes.label) {
+          foundVnodes.label.data = foundVnodes.label.data || {};
+          foundVnodes.label.data.attrs = foundVnodes.label.data.attrs = {};
+          foundVnodes.label.data.attrs.for = id;
+        } else if (this.tag === 'label') {
+          attrs.for = id;
         }
-        foundVnode.data.directives.push({ name: 'vue-form-validator', value: _this.fieldstate });
-        foundVnode.data.attrs['vue-form-validator'] = '';
+      }
+      vModelnodes.forEach(function (vnode) {
+        if (!vnode.data.directives) {
+          vnode.data.directives = [];
+        }
+        vnode.data.directives.push({ name: 'vue-form-validator', value: _this.fieldstate });
+        vnode.data.attrs['vue-form-validator'] = '';
       });
     } else {
       console.warn('Element with v-model not found');
     }
-    return h(this.tag, { 'class': this.className.map(function (v) {
-        return config.classPrefix + 'container-' + v;
-      }) }, this.$slots.default);
+    return h(this.tag, { 'class': this.className.join(' '), attrs: attrs }, this.$slots.default);
   },
 
   props: {
     state: Object,
     custom: null,
+    autoLabel: Boolean,
     tag: {
       type: String,
-      default: 'span'
+      default: 'div'
     }
   },
   data: function data() {
@@ -534,26 +586,54 @@ var validate = {
   computed: {
     className: function className() {
       var out = [];
+      var c = config.classes.validate;
       if (this.fieldstate.$dirty) {
-        out.push(config.dirtyClass);
+        out.push(c.dirty);
       } else {
-        out.push(config.pristineClass);
+        out.push(c.pristine);
       }
       if (this.fieldstate.$valid) {
-        out.push(config.validClass);
+        out.push(c.valid);
       } else {
-        out.push(config.invalidClass);
+        out.push(c.invalid);
       }
       if (this.fieldstate.$touched) {
-        out.push(config.touchedClass);
+        out.push(c.touched);
       } else {
-        out.push(config.untouchedClass);
+        out.push(c.untouched);
       }
       if (this.fieldstate.$pending) {
-        out.push(config.pendingClass);
+        out.push(c.pending);
       }
       Object.keys(this.fieldstate.$error).forEach(function (error) {
-        out.push(config.invalidClass + '-' + hyphenate(error));
+        out.push(c.invalid + '-' + hyphenate(error));
+      });
+
+      return out;
+    },
+    inputClassName: function inputClassName() {
+      var out = [];
+      var c = config.classes.input;
+      if (this.fieldstate.$dirty) {
+        out.push(c.dirty);
+      } else {
+        out.push(c.pristine);
+      }
+      if (this.fieldstate.$valid) {
+        out.push(c.valid);
+      } else {
+        out.push(c.invalid);
+      }
+      if (this.fieldstate.$touched) {
+        out.push(c.touched);
+      } else {
+        out.push(c.untouched);
+      }
+      if (this.fieldstate.$pending) {
+        out.push(c.pending);
+      }
+      Object.keys(this.fieldstate.$error).forEach(function (error) {
+        out.push(c.invalid + '-' + hyphenate(error));
       });
 
       return out;
@@ -567,11 +647,11 @@ var validate = {
     var vModelEls = this.$el.querySelectorAll('[vue-form-validator]');
 
     // add classes to the input element
-    this.$watch('className', function (value, oldValue) {
+    this.$watch('inputClassName', function (value, oldValue) {
       if (oldValue) {
         var _loop = function _loop(i) {
           oldValue.forEach(function (v) {
-            return removeClass(vModelEls[i], config.classPrefix + v);
+            return removeClass(vModelEls[i], v);
           });
         };
 
@@ -582,7 +662,7 @@ var validate = {
 
       var _loop2 = function _loop2(_i) {
         value.forEach(function (v) {
-          return addClass(vModelEls[_i], config.classPrefix + v);
+          return addClass(vModelEls[_i], v);
         });
       };
 
@@ -609,7 +689,9 @@ var validate = {
       $touched: false,
       $untouched: true,
       $pending: false,
+      $submitted: false,
       $error: {},
+      _id: '',
       _setValidatorVadility: function _setValidatorVadility(validator, isValid) {
         if (isValid) {
           vm.$delete(this.$error, validator);
@@ -729,12 +811,64 @@ var validate = {
   }
 };
 
+var field = {
+  render: function render(h) {
+    var foundVnodes = getVModelAndLabel(this.$slots.default);
+    var vModelnodes = foundVnodes.vModel;
+    var attrs = {
+      for: null
+    };
+    if (vModelnodes.length) {
+      if (this.autoLabel) {
+        var id = vModelnodes[0].data.attrs.id || 'vf' + randomId();
+        vModelnodes[0].data.attrs.id = id;
+        if (foundVnodes.label) {
+          foundVnodes.label.data = foundVnodes.label.data || {};
+          foundVnodes.label.data.attrs = foundVnodes.label.data.attrs = {};
+          foundVnodes.label.data.attrs.for = id;
+        } else if (this.tag === 'label') {
+          attrs.for = id;
+        }
+      }
+    }
+    return h(this.tag, { attrs: attrs }, this.$slots.default);
+  },
+
+  props: {
+    tag: {
+      type: String,
+      default: config.fieldTag
+    },
+    autoLabel: {
+      type: Boolean,
+      default: true
+    }
+  }
+};
+
+var defineProperty = function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+};
+
+var _components;
+
 var main = {
   install: function install(Vue) {
     Vue.component(config.formComponent, vueForm);
     Vue.component(config.validateComponent, validate);
-    Vue.component(config.errorsComponent, formErrors);
-    Vue.component(config.errorComponent, formError);
+    Vue.component(config.messagesComponent, messages);
+    Vue.component(config.fieldComponent, field);
     Vue.directive('vue-form-validator', vueFormValidator);
   },
 
@@ -744,12 +878,7 @@ var main = {
   },
 
   mixin: {
-    components: {
-      formErrors: formErrors,
-      formError: formError,
-      vueForm: vueForm,
-      validate: validate
-    },
+    components: (_components = {}, defineProperty(_components, config.formComponent, vueForm), defineProperty(_components, config.validateComponent, validate), defineProperty(_components, config.messagesComponent, messages), defineProperty(_components, config.fieldComponent, field), _components),
     directives: {
       vueFormValidator: vueFormValidator
     }

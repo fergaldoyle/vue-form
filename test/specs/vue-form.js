@@ -9,6 +9,7 @@ describe('vue-form', function() {
     vm.model.b = '123456';
     vm.model.c = '12346';
     vm.model.multicheck = ['Jack'];
+    vm.model.sample = 'aaa';
   }
 
   beforeEach(function(done) {
@@ -25,22 +26,20 @@ describe('vue-form', function() {
 
           <validate :state="formstate">
             <input v-model="model.b" name="b" required type="text" minlength="6" />
-            <form-errors field="b" show="$dirty && $touched">
-              <span id="error-message-b" slot="required">required error</span>
-            </form-errors>
-            <form-error field="b" error="required" show="$touched"><span id="error-message-b-2"></span></form-error>
+            <field-messages name="b" show="$dirty && $touched">
+              <span id="message-b-ok">Field is OK</span>
+              <span id="message-b" slot="required">required error</span>
+            </field-messages>
           </validate>
 
           <div v-if="isCEnabled">
             <validate>
               <input v-model="model.c" name="c" :required="isRequired" :minlength="minlength" type="text" />
             </validate>
-            <form-errors field="c">
-              <span id="error-message" slot="required">required error</span>
+            <field-messages name="c">
+              <span id="message" slot="required">required error</span>
               <span id="minlength-message" slot="minlength">minlength error</span>
-            </form-errors>
-            <form-error field="c" error="required"><span id="error-message2"></span></form-error>
-            <form-error field="c" error="minlength"><span id="minlength-message2"></span></form-error>
+            </field-messages>
           </div>
 
           <validate>
@@ -81,6 +80,52 @@ describe('vue-form', function() {
             <input type="checkbox" value="Mike" v-model="model.multicheck" required name="multicheck"/>
           </validate>
 
+          <field-messages name="sampleA" auto-label>
+            <label id="field-messages-auto-label-a" slot="required">Sample is required</label>
+          </field-messages>
+
+          <field-messages name="sampleA" tag="ul" auto-label>
+            <li id="field-messages-auto-label-b" slot="required"><label>Sample is required</label></li>
+          </field-messages>
+
+          <validate auto-label id="auto-label-a">
+            <label>Sample</label>
+            <input name="sampleA" type="text" required v-model="model.sample" />
+          </validate>
+
+          <validate auto-label id="auto-label-b">
+            <label>Sample <input name="sample" type="text" v-model="model.sample" /></label>
+          </validate>
+
+          <validate auto-label id="auto-label-c">
+            <label>Sample</label>
+            <input name="sample" type="text" v-model="model.sample" id="existing" />
+          </validate>
+
+          <validate tag="label" auto-label id="auto-label-d">
+            <span>Sample</span>
+            <input name="sample" type="text" v-model="model.sample" />
+          </validate>
+
+          <field id="field-auto-label-a">
+            <label>Sample</label>
+            <input name="sample" type="text" v-model="model.sample" />
+          </field>
+
+          <field id="field-auto-label-b">
+            <label>Sample <input name="sample" type="text" v-model="model.sample" /></label>
+          </field>
+
+          <field id="field-auto-label-c">
+            <label>Sample</label>
+            <input name="sample" type="text" v-model="model.sample" id="existing" />
+          </field>
+
+          <field tag="label" id="field-auto-label-d">
+            <span>Sample</span>
+            <input name="sample" type="text" v-model="model.sample" />
+          </field>
+
           <button id="submit" type="submit"></button>
 
         </vue-form>
@@ -104,7 +149,8 @@ describe('vue-form', function() {
           pattern: '1234',
           custom: 'custom',
           custom2: 'custom2',
-          multicheck: []
+          multicheck: [],
+          sample: ''
         }
       },
       methods: {
@@ -371,7 +417,7 @@ describe('vue-form', function() {
     expect(vm.formstate.$pristine).toBe(true);
     expect(vm.formstate.$touched).toBe(false);
     expect(vm.formstate.$untouched).toBe(true);
-    expect(Object.keys(vm.formstate.$error).length).toBe(3);
+    expect(Object.keys(vm.formstate.$error).length).toBe(4);
 
     // emulate user interaction
     vm.$el.querySelector('[name=b]').focus();
@@ -441,50 +487,70 @@ describe('vue-form', function() {
     });
   });
 
-  it('should show the correct form errors', (done) => {
+  it('should set tie labels and inputs together with auto-label', (done) => {
+    vm.$nextTick(() => {
+      expect(vm.$el.querySelector('#auto-label-a > label').getAttribute('for')).toBeDefined();
+      expect(vm.$el.querySelector('#auto-label-b > label').getAttribute('for')).toBeDefined();
+      expect(vm.$el.querySelector('#auto-label-c > label').getAttribute('for')).toBeDefined();
+      expect(vm.$el.querySelector('#auto-label-c > label').getAttribute('for')).toBe('existing');
+      expect(vm.$el.querySelector('#auto-label-d').getAttribute('for')).toBeDefined();
+
+      expect(vm.$el.querySelector('#field-auto-label-a > label').getAttribute('for')).toBeDefined();
+      expect(vm.$el.querySelector('#field-auto-label-b > label').getAttribute('for')).toBeDefined();
+      expect(vm.$el.querySelector('#field-auto-label-c > label').getAttribute('for')).toBeDefined();
+      expect(vm.$el.querySelector('#field-auto-label-c > label').getAttribute('for')).toBe('existing');
+      expect(vm.$el.querySelector('#field-auto-label-d').getAttribute('for')).toBeDefined();
+
+      expect(vm.$el.querySelector('#field-messages-auto-label-a').getAttribute('for')).toBeDefined();
+      expect(vm.$el.querySelector('#field-messages-auto-label-b > label').getAttribute('for')).toBeDefined();
+      done();
+
+    });
+  });
+
+  it('should show the correct field messages', (done) => {
     vm.$nextTick(() => {
 
       // field b
-      expect(vm.$el.querySelector('#error-message-b')).toBe(null);
-      expect(vm.$el.querySelector('#error-message-b-2')).toBe(null);
+      expect(vm.$el.querySelector('#message-b')).toBeNull();
+      expect(vm.$el.querySelector('#message-b-ok')).toBeNull();
       vm.model.b = '123';
 
       // field c
-      expect(vm.$el.querySelector('#error-message')).not.toBeNull(null);
-      expect(vm.$el.querySelector('#minlength-message')).toBe(null);
-      expect(vm.$el.querySelector('#error-message2')).not.toBeNull(null);
-      expect(vm.$el.querySelector('#minlength-message2')).toBe(null);
+      expect(vm.$el.querySelector('#message')).not.toBeNull();
+      expect(vm.$el.querySelector('#minlength-message')).toBeNull();
       vm.model.c = '123';
 
       vm.$nextTick(() => {
-        // field b could still be null
-        expect(vm.$el.querySelector('#error-message-b')).toBe(null);
-        expect(vm.$el.querySelector('#error-message-b-2')).toBe(null);
+        // field b sould still be null
+        expect(vm.$el.querySelector('#message-b')).toBeNull();
         vm.$el.querySelector('[name=b]').focus();
         vm.$el.querySelector('[name=b]').blur();
-        vm.model.b = '';
+        vm.model.b = '123456';
 
         // field c
-        expect(vm.$el.querySelector('#error-message')).toBe(null);
-        expect(vm.$el.querySelector('#minlength-message')).not.toBeNull(null);
-        expect(vm.$el.querySelector('#error-message2')).toBe(null);
-        expect(vm.$el.querySelector('#minlength-message2')).not.toBeNull(null);
+        expect(vm.$el.querySelector('#message')).toBeNull();
+        expect(vm.$el.querySelector('#minlength-message')).not.toBeNull();
         vm.model.c = '123456';
 
         vm.$nextTick(() => {
 
           // field b
-          expect(vm.$el.querySelector('#error-message-b')).not.toBeNull(null);
-          expect(vm.$el.querySelector('#error-message-b-2')).not.toBeNull(null);
+          expect(vm.$el.querySelector('#message-b-ok')).not.toBeNull();
+          expect(vm.$el.querySelector('#message-b')).toBeNull();
+          vm.model.b = '';
 
           // field c
-          expect(vm.$el.querySelector('#error-message')).toBe(null);
-          expect(vm.$el.querySelector('#minlength-message')).toBe(null);
-          expect(vm.$el.querySelector('#error-message2')).toBe(null);
-          expect(vm.$el.querySelector('#minlength-message2')).toBe(null);
+          expect(vm.$el.querySelector('#message')).toBeNull();
+          expect(vm.$el.querySelector('#minlength-message')).toBeNull();
 
+          vm.$nextTick(()=>{
+            // field b
+            expect(vm.$el.querySelector('#message-b-ok')).toBeNull();
+            expect(vm.$el.querySelector('#message-b')).not.toBeNull();
+            done();
+          });
 
-          done();
         });
       });
     });

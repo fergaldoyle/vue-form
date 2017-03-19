@@ -8,6 +8,7 @@ export default {
         on: {
           submit: (event) => {
             this.state.$submitted = true;
+            this.state._cloneState();
             this.$emit('submit', event);
           }
         },
@@ -37,6 +38,15 @@ export default {
       $untouched: true,
       $pending: false,
       $error: {},
+      $submittedState: {},
+      _id: '',
+      _cloneState: () => {
+        const cloned = JSON.parse(JSON.stringify(state));
+        delete cloned.$submittedState;
+        Object.keys(cloned).forEach((key) => {
+          this.$set(this.state.$submittedState, key, cloned[key]);
+        });
+      },
       _addControl: (ctrl) => {
         controls[ctrl.$name] = ctrl;
         this.$set(state, ctrl.$name, ctrl);
@@ -59,6 +69,9 @@ export default {
       let isPending = false;
       Object.keys(controls).forEach((key) => {
         const control = controls[key];
+
+        control.$submitted = state.$submitted;
+
         if (control.$dirty) {
           isDirty = true;
         }
@@ -99,28 +112,29 @@ export default {
   computed: {
     className() {
       const out = [];
+      const c = config.classes.form;
       if (this.state.$dirty) {
-        out.push(config.dirtyClass);
+        out.push(c.dirty);
       } else {
-        out.push(config.pristineClass);
+        out.push(c.pristine);
       }
       if (this.state.$valid) {
-        out.push(config.validClass);
+        out.push(c.valid);
       } else {
-        out.push(config.invalidClass);
+        out.push(c.invalid);
       }
       if (this.state.$touched) {
-        out.push(config.touchedClass);
+        out.push(c.touched);
       } else {
-        out.push(config.untouchedClass);
+        out.push(c.untouched);
       }
       if (this.state.$submitted) {
-        out.push(config.submittedClass);
+        out.push(c.submitted);
       }
       if (this.state.$pending) {
-        out.push(config.pendingClass);
+        out.push(c.pending);
       }
-      return out.map(v => config.classPrefix + 'form-' + v).join(' ');
+      return out.join(' ');
     }
   }
 }

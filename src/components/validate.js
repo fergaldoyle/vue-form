@@ -1,32 +1,47 @@
 import { config } from '../config';
-import { getVModelNode, vModelValue, addClass, removeClass, getName, hyphenate } from '../util';
+import { getVModelAndLabel, vModelValue, addClass, removeClass, getName, hyphenate, randomId } from '../util';
 import { validators } from '../validators';
-
-// todo: Make getVModelNode recursive
 
 export default {
   render(h) {
-    let foundVnodes = getVModelNode(this.$slots.default);
-    if (foundVnodes.length) {
-      this.name = getName(foundVnodes[0]);
-      foundVnodes.forEach((foundVnode) => {
-        if (!foundVnode.data.directives) {
-          foundVnode.data.directives = [];
+    let foundVnodes = getVModelAndLabel(this.$slots.default);
+    const vModelnodes = foundVnodes.vModel;
+    const attrs = {
+      for: null
+    };
+    if (vModelnodes.length) {
+      this.name = getName(vModelnodes[0]);
+      if(this.autoLabel) {
+        const id = this.fieldstate._id || vModelnodes[0].data.attrs.id || 'vf' + randomId();
+        this.fieldstate._id = id;
+        vModelnodes[0].data.attrs.id = id;
+        if(foundVnodes.label) {
+          foundVnodes.label.data = foundVnodes.label.data || {};
+          foundVnodes.label.data.attrs = foundVnodes.label.data.attrs = {};
+          foundVnodes.label.data.attrs.for = id;
+        } else if (this.tag === 'label') {
+          attrs.for = id;
         }
-        foundVnode.data.directives.push({ name: 'vue-form-validator', value: this.fieldstate });
-        foundVnode.data.attrs['vue-form-validator'] = '';
+      }
+      vModelnodes.forEach((vnode) => {
+        if (!vnode.data.directives) {
+          vnode.data.directives = [];
+        }
+        vnode.data.directives.push({ name: 'vue-form-validator', value: this.fieldstate });
+        vnode.data.attrs['vue-form-validator'] = '';
       });
     } else {
       console.warn('Element with v-model not found');
     }
-    return h(this.tag, { 'class': this.className.map(v => config.classPrefix + 'container-' + v) }, this.$slots.default);
+    return h(this.tag, { 'class': this.className.join(' '), attrs }, this.$slots.default);
   },
   props: {
     state: Object,
     custom: null,
+    autoLabel: Boolean,
     tag: {
       type: String,
-      default: 'span'
+      default: 'div'
     }
   },
   data() {
@@ -39,26 +54,54 @@ export default {
   computed: {
     className() {
       const out = [];
+      const c = config.classes.validate;
       if (this.fieldstate.$dirty) {
-        out.push(config.dirtyClass);
+        out.push(c.dirty);
       } else {
-        out.push(config.pristineClass)
+        out.push(c.pristine)
       }
       if (this.fieldstate.$valid) {
-        out.push(config.validClass);
+        out.push(c.valid);
       } else {
-        out.push(config.invalidClass)
+        out.push(c.invalid)
       }
       if (this.fieldstate.$touched) {
-        out.push(config.touchedClass);
+        out.push(c.touched);
       } else {
-        out.push(config.untouchedClass)
+        out.push(c.untouched)
       }
       if (this.fieldstate.$pending) {
-        out.push(config.pendingClass);
+        out.push(c.pending);
       }
       Object.keys(this.fieldstate.$error).forEach((error) => {
-        out.push(config.invalidClass + '-' + hyphenate(error));
+        out.push(c.invalid + '-' + hyphenate(error));
+      });
+
+      return out;
+    },
+    inputClassName() {
+      const out = [];
+      const c = config.classes.input;
+      if (this.fieldstate.$dirty) {
+        out.push(c.dirty);
+      } else {
+        out.push(c.pristine)
+      }
+      if (this.fieldstate.$valid) {
+        out.push(c.valid);
+      } else {
+        out.push(c.invalid)
+      }
+      if (this.fieldstate.$touched) {
+        out.push(c.touched);
+      } else {
+        out.push(c.untouched)
+      }
+      if (this.fieldstate.$pending) {
+        out.push(c.pending);
+      }
+      Object.keys(this.fieldstate.$error).forEach((error) => {
+        out.push(c.invalid + '-' + hyphenate(error));
       });
 
       return out;
@@ -72,14 +115,14 @@ export default {
     const vModelEls = this.$el.querySelectorAll('[vue-form-validator]');
 
     // add classes to the input element
-    this.$watch('className', (value, oldValue) => {
+    this.$watch('inputClassName', (value, oldValue) => {
       if (oldValue) {
         for (let i = 0; i < vModelEls.length; i++) {
-          oldValue.forEach(v => removeClass(vModelEls[i], config.classPrefix + v));
+          oldValue.forEach(v => removeClass(vModelEls[i], v));
         }
       }
       for (let i = 0; i < vModelEls.length; i++) {
-        value.forEach(v => addClass(vModelEls[i], config.classPrefix + v));
+        value.forEach(v => addClass(vModelEls[i], v));
       };
     }, {
       deep: true,
@@ -100,7 +143,9 @@ export default {
       $touched: false,
       $untouched: true,
       $pending: false,
+      $submitted: false,
       $error: {},
+      _id: '',
       _setValidatorVadility(validator, isValid) {
         if (isValid) {
           vm.$delete(this.$error, validator);

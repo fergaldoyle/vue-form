@@ -28,20 +28,26 @@ export function vModelValue(data) {
   return data.directives.filter(v => v.name === 'model')[0].value;
 }
 
-export function getVModelNode(nodes) {
-  const foundVnodes = [];
+export function getVModelAndLabel(nodes) {
+  const foundVnodes = {
+    vModel: [],
+    label: null
+  };
 
   function traverse(nodes) {
     for (let i = 0; i < nodes.length; i++) {
       let node = nodes[i];
+      if(node.tag === 'label' && !foundVnodes.label) {
+        foundVnodes.label = node;
+      }
       if (node.data) {
         if (node.data.directives) {
           const match = node.data.directives.filter(v => v.name === 'model');
           if (match.length) {
-            foundVnodes.push(node);
+            foundVnodes.vModel.push(node);
           }
         } else if (node.data.model) {
-          foundVnodes.push(node);
+          foundVnodes.vModel.push(node);
         }
       }
       if (node.children) {
@@ -69,4 +75,9 @@ export function hyphenate (str) {
     .replace(hyphenateRE, '$1-$2')
     .replace(hyphenateRE, '$1-$2')
     .toLowerCase()
+}
+
+
+export function randomId() {
+  return Math.random().toString(36).substr(2, 10);
 }
