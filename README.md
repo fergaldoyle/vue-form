@@ -25,7 +25,7 @@ mixins: [vueForm.mixin]
 Once installed you have access to four components (`vue-form`, `validate`, `field`, `field-messages`) for managing form state, validating form fields and displaying validation messages.
 
 Live examples
-* Configured to work with Bootrap classes: https://jsfiddle.net/fergal_doyle/zfqt4yhq/
+* Configured to work with Bootstrap styles: https://jsfiddle.net/fergal_doyle/zfqt4yhq/
 
 Example
 
