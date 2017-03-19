@@ -94,6 +94,9 @@ The output of `formstate` will be:
   "$error": {
     // fields with errors are copied into this object
   },
+  "$submittedState": {
+    // each form sumbit, state is cloned into this object 
+  },
   "name": {
     "$name": "name",
     "$dirty": false,
