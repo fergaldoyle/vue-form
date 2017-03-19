@@ -24,6 +24,9 @@ mixins: [vueForm.mixin]
 
 Once installed you have access to four components (`vue-form`, `validate`, `field`, `field-messages`) for managing form state, validating form fields and displaying validation messages.
 
+Live examples
+* Configured to work with Bootrap classes: https://jsfiddle.net/fergal_doyle/zfqt4yhq/
+
 Example
 
 ```html
@@ -259,9 +262,9 @@ vf-dirty, vf-pristine, vf-valid, vf-invalid
 vf-invalid-required, vf-invalid-minlength, vf-invalid-max, etc
 ```
 
-Input wrappers (e.g. the tag the `validate` component renders) will also get state classes, but with the `container` prefix, e.g.
+Input wrappers (e.g. the tag the `validate` component renders) will also get state classes, but with the `field` prefix, e.g.
 ```
-vf-container-dirty, vf-container-pristine, vf-container-valid, vf-container-invalid
+vf-field-dirty, vf-field-pristine, vf-field-valid, vf-field-invalid
 ```
 
 ### Custom components
