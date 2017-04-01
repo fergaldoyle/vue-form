@@ -20,26 +20,32 @@ export default {
     const field = this.formstate[this.name];
     if (field && field.$error && this.isShown) {
       Object.keys(field.$error).forEach((key) => {
-        if(this.autoLabel) {
-          const label = findLabel(this.$slots[key]);
-          if(label) {
-            label.data = label.data || {};
-            label.data.attrs = label.data.attrs || {};
-            label.data.attrs.for = field._id;
+        if(this.$slots[key] || this.$scopedSlots[key]) {
+          const out = this.$slots[key] || this.$scopedSlots[key](field);
+          if(this.autoLabel) {
+            const label = findLabel(out);
+            if(label) {
+              label.data = label.data || {};
+              label.data.attrs = label.data.attrs || {};
+              label.data.attrs.for = field._id;
+            }
           }
+          children.push(out);
         }
-        children.push(this.$slots[key]);
       });
       if(!children.length) {
-        if(this.autoLabel) {
-          const label = findLabel(this.$slots.default);
-          if(label) {
-            label.data = label.data || {};
-            label.data.attrs = label.data.attrs || {};
-            label.data.attrs.for = field._id;
+        if(this.$slots.default || this.$scopedSlots.default) {
+          const out = this.$slots.default || this.$scopedSlots.default(field);
+          if(this.autoLabel) {
+            const label = findLabel(out);
+            if(label) {
+              label.data = label.data || {};
+              label.data.attrs = label.data.attrs || {};
+              label.data.attrs.for = field._id;
+            }
           }
+          children.push(out);
         }
-        children.push(this.$slots.default);
       }
     }
     return h(this.tag, children);

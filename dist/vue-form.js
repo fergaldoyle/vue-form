@@ -68,26 +68,32 @@ var messages = {
     var field = this.formstate[this.name];
     if (field && field.$error && this.isShown) {
       Object.keys(field.$error).forEach(function (key) {
-        if (_this.autoLabel) {
-          var label = findLabel(_this.$slots[key]);
-          if (label) {
-            label.data = label.data || {};
-            label.data.attrs = label.data.attrs || {};
-            label.data.attrs.for = field._id;
+        if (_this.$slots[key] || _this.$scopedSlots[key]) {
+          var out = _this.$slots[key] || _this.$scopedSlots[key](field);
+          if (_this.autoLabel) {
+            var label = findLabel(out);
+            if (label) {
+              label.data = label.data || {};
+              label.data.attrs = label.data.attrs || {};
+              label.data.attrs.for = field._id;
+            }
           }
+          children.push(out);
         }
-        children.push(_this.$slots[key]);
       });
       if (!children.length) {
-        if (this.autoLabel) {
-          var label = findLabel(this.$slots.default);
-          if (label) {
-            label.data = label.data || {};
-            label.data.attrs = label.data.attrs || {};
-            label.data.attrs.for = field._id;
+        if (this.$slots.default || this.$scopedSlots.default) {
+          var out = this.$slots.default || this.$scopedSlots.default(field);
+          if (this.autoLabel) {
+            var label = findLabel(out);
+            if (label) {
+              label.data = label.data || {};
+              label.data.attrs = label.data.attrs || {};
+              label.data.attrs.for = field._id;
+            }
           }
+          children.push(out);
         }
-        children.push(this.$slots.default);
       }
     }
     return h(this.tag, children);
