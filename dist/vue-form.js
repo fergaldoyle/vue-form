@@ -4,6 +4,9 @@
 	(global.vueForm = factory());
 }(this, (function () { 'use strict';
 
+var root = function () {
+  return this || (0, eval)('this');
+}();
 var config = {
   formComponent: 'vueForm',
   messagesComponent: 'fieldMessages',
@@ -43,7 +46,7 @@ var config = {
       pending: 'vf-pending'
     }
   },
-  Promise: window.Promise
+  Promise: root.Promise
 };
 
 function findLabel(nodes) {
