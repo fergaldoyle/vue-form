@@ -35,16 +35,16 @@ export const validators = {
     const patternRegExp = new RegExp('^' + pattern + '$');
     return patternRegExp.test(value);
   },
-  min(value, min) {
-    if (isNaN(min)) {
-      return value >= min;
+  min(value, min, vnode) {
+    if (vnode.data.attrs.type.toLowerCase() == 'number') {
+      return +value >= +min;
     }
-    return value * 1 >= min * 1;
+    return value >= min;
   },
   max(value, max, vnode) {
-    if (isNaN(max)) {
-      return max >= value;
+    if (vnode.data.attrs.type.toLowerCase() == 'number') {
+      return +max >= +value;
     }
-    return max * 1 >= value * 1;
+    return max >= value;
   }
 };
