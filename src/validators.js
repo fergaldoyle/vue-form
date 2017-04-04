@@ -36,9 +36,15 @@ export const validators = {
     return patternRegExp.test(value);
   },
   min(value, min) {
+    if (isNaN(min)) {
+      return value >= min;
+    }
     return value * 1 >= min * 1;
   },
-  max(value, max) {
+  max(value, max, vnode) {
+    if (isNaN(max)) {
+      return max >= value;
+    }
     return max * 1 >= value * 1;
   }
 };
