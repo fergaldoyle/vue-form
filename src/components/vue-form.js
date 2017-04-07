@@ -12,9 +12,9 @@ export default {
             this.$emit('submit', event);
           }
         },
+        class: this.className,
         attrs: {
           'novalidate': '',
-          'class': this.className
         }
       }, [this.$slots.default]
     );
@@ -111,30 +111,18 @@ export default {
   },
   computed: {
     className() {
-      const out = [];
       const c = config.classes.form;
-      if (this.state.$dirty) {
-        out.push(c.dirty);
-      } else {
-        out.push(c.pristine);
-      }
-      if (this.state.$valid) {
-        out.push(c.valid);
-      } else {
-        out.push(c.invalid);
-      }
-      if (this.state.$touched) {
-        out.push(c.touched);
-      } else {
-        out.push(c.untouched);
-      }
-      if (this.state.$submitted) {
-        out.push(c.submitted);
-      }
-      if (this.state.$pending) {
-        out.push(c.pending);
-      }
-      return out.join(' ');
+      const s = this.$state;
+      return {
+        [c.dirty]: s.$dirty,
+        [c.pristine]: s.$pristine,
+        [c.valid]: s.$valid,
+        [c.invalid]: s.$invalid,
+        [c.touched]: s.$touched,
+        [c.untouched]: s.$untouched,
+        [c.submitted]: s.$submitted,
+        [c.pending]: s.$pending,
+      };
     }
   }
 }
