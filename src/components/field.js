@@ -10,7 +10,7 @@ export default {
     };
     if (vModelnodes.length) {
       if(this.autoLabel) {
-        const id = vModelnodes[0].data.attrs.id || 'vf' + randomId();
+        const id = (vModelnodes[0].data.attrs && vModelnodes[0].data.attrs.id) || 'vf' + randomId();
         vModelnodes[0].data.attrs.id = id;
         if(foundVnodes.label) {
           foundVnodes.label.data = foundVnodes.label.data || {};
