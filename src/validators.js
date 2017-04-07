@@ -36,13 +36,13 @@ export const validators = {
     return patternRegExp.test(value);
   },
   min(value, min, vnode) {
-    if (vnode.data.attrs.type.toLowerCase() == 'number') {
+    if ((vnode.data.attrs.type || '').toLowerCase() == 'number') {
       return +value >= +min;
     }
     return value >= min;
   },
   max(value, max, vnode) {
-    if (vnode.data.attrs.type.toLowerCase() == 'number') {
+    if ((vnode.data.attrs.type || '').toLowerCase() == 'number') {
       return +max >= +value;
     }
     return max >= value;
