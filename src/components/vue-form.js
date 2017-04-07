@@ -112,7 +112,7 @@ export default {
   computed: {
     className() {
       const c = config.classes.form;
-      const s = this.$state;
+      const s = this.state;
       return {
         [c.dirty]: s.$dirty,
         [c.pristine]: s.$pristine,
