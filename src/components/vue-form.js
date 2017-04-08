@@ -1,5 +1,6 @@
 import { config } from '../config';
 import { validators } from '../validators';
+import { getClasses } from '../util';
 
 export default {
   render(h) {
@@ -113,16 +114,9 @@ export default {
     className() {
       const c = config.classes.form;
       const s = this.state;
-      return {
-        [c.dirty]: s.$dirty,
-        [c.pristine]: s.$pristine,
-        [c.valid]: s.$valid,
-        [c.invalid]: s.$invalid,
-        [c.touched]: s.$touched,
-        [c.untouched]: s.$untouched,
-        [c.submitted]: s.$submitted,
-        [c.pending]: s.$pending,
-      };
+      const classes = getClasses(c, s);
+      classes[c.submitted] = s.$submitted;
+      return classes;
     }
   }
 }

@@ -1,3 +1,15 @@
+export function getClasses(classConfig, state) {
+    return {
+      [classConfig.dirty]: state.$dirty,
+      [classConfig.pristine]: state.$pristine,
+      [classConfig.valid]: state.$valid,
+      [classConfig.invalid]: state.$invalid,
+      [classConfig.touched]: state.$touched,
+      [classConfig.untouched]: state.$untouched,
+      [classConfig.pending]: state.$pending,
+    };
+}
+
 export function addClass(el, className) {
   if (el.classList) {
     el.classList.add(className);

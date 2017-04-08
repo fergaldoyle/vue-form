@@ -1,5 +1,5 @@
 import { config } from '../config';
-import { getVModelAndLabel, vModelValue, addClass, removeClass, getName, hyphenate, randomId } from '../util';
+import { getVModelAndLabel, vModelValue, addClass, removeClass, getName, hyphenate, randomId, getClasses } from '../util';
 import { validators } from '../validators';
 
 export default {
@@ -33,7 +33,7 @@ export default {
     } else {
       console.warn('Element with v-model not found');
     }
-    return h(this.tag, { 'class': this.className.join(' '), attrs }, this.$slots.default);
+    return h(this.tag, { 'class': this.className, attrs }, this.$slots.default);
   },
   props: {
     state: Object,
@@ -51,60 +51,21 @@ export default {
       fieldstate: {}
     };
   },
+  methods: {
+    getClasses(classConfig) {
+      var s = this.fieldstate;
+      return Object.keys(s.$error).reduce((classes, error) => {
+        classes[classConfig.invalid + '-' + hyphenate(error)] = true;
+        return classes;
+      }, getClasses(classConfig, s));
+    }
+  },
   computed: {
     className() {
-      const out = [];
-      const c = config.classes.validate;
-      if (this.fieldstate.$dirty) {
-        out.push(c.dirty);
-      } else {
-        out.push(c.pristine)
-      }
-      if (this.fieldstate.$valid) {
-        out.push(c.valid);
-      } else {
-        out.push(c.invalid)
-      }
-      if (this.fieldstate.$touched) {
-        out.push(c.touched);
-      } else {
-        out.push(c.untouched)
-      }
-      if (this.fieldstate.$pending) {
-        out.push(c.pending);
-      }
-      Object.keys(this.fieldstate.$error).forEach((error) => {
-        out.push(c.invalid + '-' + hyphenate(error));
-      });
-
-      return out;
+      return this.getClasses(config.classes.validate);
     },
     inputClassName() {
-      const out = [];
-      const c = config.classes.input;
-      if (this.fieldstate.$dirty) {
-        out.push(c.dirty);
-      } else {
-        out.push(c.pristine)
-      }
-      if (this.fieldstate.$valid) {
-        out.push(c.valid);
-      } else {
-        out.push(c.invalid)
-      }
-      if (this.fieldstate.$touched) {
-        out.push(c.touched);
-      } else {
-        out.push(c.untouched)
-      }
-      if (this.fieldstate.$pending) {
-        out.push(c.pending);
-      }
-      Object.keys(this.fieldstate.$error).forEach((error) => {
-        out.push(c.invalid + '-' + hyphenate(error));
-      });
-
-      return out;
+      return this.getClasses(config.classes.input);
     }
   },
   mounted() {
@@ -116,14 +77,12 @@ export default {
 
     // add classes to the input element
     this.$watch('inputClassName', (value, oldValue) => {
-      if (oldValue) {
-        for (let i = 0; i < vModelEls.length; i++) {
-          oldValue.forEach(v => removeClass(vModelEls[i], v));
+      for (let i = 0, el; el = vModelEls[i++];) {
+        if (oldValue) {
+          Object.keys(oldValue).filter(k => oldValue[k]).forEach(k => removeClass(el, k));
         }
+        Object.keys(value).filter(k => value[k]).forEach(k => addClass(el, k));
       }
-      for (let i = 0; i < vModelEls.length; i++) {
-        value.forEach(v => addClass(vModelEls[i], v));
-      };
     }, {
       deep: true,
       immediate: true
