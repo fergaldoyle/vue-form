@@ -1,4 +1,3 @@
-const root = (function(){ return this || (0,eval)('this'); }());
 export const config = {
     formComponent: 'vueForm',
     messagesComponent: 'fieldMessages',
@@ -38,5 +37,5 @@ export const config = {
         pending: 'vf-pending'
       }
     },
-    Promise: root.Promise
+    Promise: typeof Promise === 'function' ? Promise : null
 };
