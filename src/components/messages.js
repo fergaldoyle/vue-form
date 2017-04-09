@@ -1,5 +1,3 @@
-import { config } from '../config';
-
 function findLabel (nodes) {
   if(!nodes) {
     return;
@@ -15,6 +13,7 @@ function findLabel (nodes) {
 }
 
 export default {
+  inject: ['config'],
   render(h) {
     const children = [];
     const field = this.formstate[this.name];
@@ -48,7 +47,7 @@ export default {
         }
       }
     }
-    return h(this.tag, children);
+    return h(this.tag || this.config.messagesTag, children);
   },
   props: {
     state: Object,
@@ -58,8 +57,7 @@ export default {
       default: ''
     },
     tag: {
-      type: String,
-      default: config.messagesTag
+      type: String
     },
     autoLabel: Boolean,
   },

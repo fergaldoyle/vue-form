@@ -1,6 +1,7 @@
 import { config } from '../config';
 import { validators } from '../validators';
 import { getClasses } from '../util';
+import extend from 'extend';
 
 export default {
   render(h) {
@@ -21,12 +22,20 @@ export default {
     );
   },
   props: {
-    state: Object
+    state: Object,
+    config: Object
+  },
+  provide () {
+    return { config: this.mergedConfig };
   },
   data() {
-    return {};
+    return {
+      mergedConfig:{}
+    };
   },
   created() {
+    extend(true, this.mergedConfig, config, this.config);
+
     const controls = {};
     const state = this.state;
     const formstate = {
@@ -112,7 +121,7 @@ export default {
   },
   computed: {
     className() {
-      const c = config.classes.form;
+      const c = this.mergedConfig.classes.form;
       const s = this.state;
       const classes = getClasses(c, s);
       classes[c.submitted] = s.$submitted;

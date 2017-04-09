@@ -1,4 +1,3 @@
-import { config } from '../config';
 import { getVModelAndLabel, vModelValue, addClass, removeClass, getName, hyphenate, randomId, getClasses } from '../util';
 import { validators } from '../validators';
 
@@ -44,6 +43,7 @@ export default {
       default: 'div'
     }
   },
+  inject: ['config'],
   data() {
     return {
       name: '',
@@ -62,10 +62,10 @@ export default {
   },
   computed: {
     className() {
-      return this.getClasses(config.classes.validate);
+      return this.getClasses(this.config.classes.validate);
     },
     inputClassName() {
-      return this.getClasses(config.classes.input);
+      return this.getClasses(this.config.classes.input);
     }
   },
   mounted() {
@@ -179,7 +179,7 @@ export default {
         });
 
         if (pending.promises.length) {
-          config.Promise.all(pending.promises).then((results) => {
+          vm.config.Promise.all(pending.promises).then((results) => {
 
             // only concerned with the last promise results, in case
             // async responses return out of order
