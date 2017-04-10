@@ -14,13 +14,6 @@ export function removeClass(el, className) {
   }
 }
 
-export function removeClassWithPrefix(el, prefix) {
-  var classes = el.className.split(" ").filter(function(c) {
-    return c.lastIndexOf(prefix, 0) !== 0;
-  });
-  el.className = (classes.join(" ")).trim();
-}
-
 export function vModelValue(data) {
   if (data.model) {
     return data.model.value;
