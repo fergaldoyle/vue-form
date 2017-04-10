@@ -1,7 +1,8 @@
 import { getVModelAndLabel, randomId } from '../util';
+import { vueFormConfig } from '../providers';
 
 export default {
-  inject: ['config'],
+  inject: {vueFormConfig},
   render(h) {
     let foundVnodes = getVModelAndLabel(this.$slots.default);
     const vModelnodes = foundVnodes.vModel;
@@ -21,7 +22,7 @@ export default {
         }
       }
     }
-    return h(this.tag || this.config.fieldTag, { attrs }, this.$slots.default);
+    return h(this.tag || this.vueFormConfig.fieldTag , { attrs }, this.$slots.default);
   },
   props: {
     tag: {

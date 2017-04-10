@@ -1,4 +1,5 @@
 import { getVModelAndLabel, vModelValue, addClass, removeClass, getName, hyphenate, randomId, getClasses } from '../util';
+import { vueFormConfig, vueFormState } from '../providers';
 import { validators } from '../validators';
 
 export default {
@@ -43,11 +44,10 @@ export default {
       default: 'div'
     }
   },
-  inject: ['config'],
+  inject: {vueFormConfig, vueFormState},
   data() {
     return {
       name: '',
-      formstate: {},
       fieldstate: {}
     };
   },
@@ -62,16 +62,15 @@ export default {
   },
   computed: {
     className() {
-      return this.getClasses(this.config.classes.validate);
+      return this.getClasses(this.vueFormConfig.classes.validate);
     },
     inputClassName() {
-      return this.getClasses(this.config.classes.input);
+      return this.getClasses(this.vueFormConfig.classes.input);
     }
   },
   mounted() {
     this.fieldstate.$name = this.name;
-    this.formstate = this.state || this.$parent.state;
-    this.formstate._addControl(this.fieldstate);
+    this.vueFormState._addControl(this.fieldstate);
 
     const vModelEls = this.$el.querySelectorAll('[vue-form-validator]');
 
@@ -179,7 +178,7 @@ export default {
         });
 
         if (pending.promises.length) {
-          vm.config.Promise.all(pending.promises).then((results) => {
+          vm.vueFormConfig.Promise.all(pending.promises).then((results) => {
 
             // only concerned with the last promise results, in case
             // async responses return out of order
@@ -218,6 +217,6 @@ export default {
 
   },
   destroyed() {
-    this.formstate._removeControl(this.fieldstate);
+    this.vueFormState._removeControl(this.fieldstate);
   }
 };

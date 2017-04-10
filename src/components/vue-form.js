@@ -1,6 +1,7 @@
 import { config } from '../config';
 import { validators } from '../validators';
 import { getClasses } from '../util';
+import { vueFormConfig, vueFormState } from '../providers';
 import extend from 'extend';
 
 export default {
@@ -26,7 +27,10 @@ export default {
     config: Object
   },
   provide () {
-    return { config: this.mergedConfig };
+    return {
+      [vueFormConfig]: this.mergedConfig,
+      [vueFormState]: this.state
+    };
   },
   data() {
     return {
