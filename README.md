@@ -275,6 +275,7 @@ When writing custom form field components, e.g. `<my-checkbox v-model="foo"></my
 
 #### vue-form
 * `state` Object on which form state is set
+* `tag` String, defaults to `form`
 
 #### validate
 * `state` Optional way of passing in the form state. If omitted form state will be found in the $parent

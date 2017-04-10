@@ -5,7 +5,7 @@ import { getClasses } from '../util';
 export default {
   render(h) {
     return h(
-      'form', {
+      this.tag, {
         on: {
           submit: (event) => {
             this.state.$submitted = true;
@@ -21,7 +21,11 @@ export default {
     );
   },
   props: {
-    state: Object
+    state: Object,
+    tag: {
+      type: String,
+      default: 'form'
+    }
   },
   data() {
     return {};
