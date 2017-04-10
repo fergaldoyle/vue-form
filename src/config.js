@@ -1,4 +1,7 @@
+import { validators } from './validators';
+
 export const config = {
+  validators,
   formComponent: 'vueForm',
   messagesComponent: 'fieldMessages',
   validateComponent: 'validate',

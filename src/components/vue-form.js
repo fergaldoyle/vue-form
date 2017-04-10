@@ -1,5 +1,4 @@
 import { config } from '../config';
-import { validators } from '../validators';
 import { getClasses } from '../util';
 import { vueFormConfig, vueFormState } from '../providers';
 import extend from 'extend';

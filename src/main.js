@@ -5,11 +5,10 @@ import field from './components/field';
 import vueFormValidator from './directives/vue-form-validator';
 import extend from 'extend';
 import { config } from './config';
-import { validators } from './validators';
 import { vueFormConfig } from './providers';
 
 function VueFormBase (options) {
-  const c = extend({}, config, options);
+  const c = extend(true, {}, config, options);
   this.provide = {
     [vueFormConfig]: c
   }

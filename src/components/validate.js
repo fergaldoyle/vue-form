@@ -27,7 +27,7 @@ export default {
         if (!vnode.data.directives) {
           vnode.data.directives = [];
         }
-        vnode.data.directives.push({ name: 'vue-form-validator', value: this.fieldstate });
+        vnode.data.directives.push({ name: 'vue-form-validator', value: { fieldstate: this.fieldstate, config: this.vueFormConfig } });
         vnode.data.attrs['vue-form-validator'] = '';
       });
     } else {

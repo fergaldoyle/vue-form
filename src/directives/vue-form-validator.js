@@ -1,8 +1,8 @@
 import { config } from '../config';
-import { validators } from '../validators';
 import { vModelValue, getName } from '../util';
+import { vueFormConfig, vueFormState } from '../providers';
 
-export function compareChanges(vnode, oldvnode) {
+export function compareChanges(vnode, oldvnode, validators) {
 
   let hasChanged = false;
   const attrs = vnode.data.attrs || {};
@@ -41,7 +41,8 @@ export function compareChanges(vnode, oldvnode) {
 export default {
   name: 'vue-form-validator',
   bind(el, binding, vnode) {
-    const fieldstate = binding.value;
+    const { fieldstate } = binding.value;
+    const { validators } = binding.value.config;
     const attrs = (vnode.data.attrs || {});
     const inputName = getName(vnode);
 
@@ -95,8 +96,9 @@ export default {
   },
 
   update(el, binding, vnode, oldVNode) {
-    const changes = compareChanges(vnode, oldVNode);
-    const fieldstate = binding.value;
+    const { validators } = binding.value.config;
+    const changes = compareChanges(vnode, oldVNode, validators);
+    const { fieldstate } = binding.value;
 
     if (!changes) {
       return;
