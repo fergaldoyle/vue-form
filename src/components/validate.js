@@ -62,10 +62,10 @@ export default {
   },
   computed: {
     className() {
-      return this.getClasses(this.vueFormConfig.classes.validate);
+      return this.getClasses(this.vueFormConfig.validateClasses);
     },
     inputClassName() {
-      return this.getClasses(this.vueFormConfig.classes.input);
+      return this.getClasses(this.vueFormConfig.inputClasses);
     }
   },
   mounted() {

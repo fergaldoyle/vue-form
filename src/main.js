@@ -1,32 +1,37 @@
-import { config } from './config';
-import messages from './components/messages';
 import vueForm from './components/vue-form';
-import vueFormValidator from './directives/vue-form-validator';
+import messages from './components/messages';
 import validate from './components/validate';
 import field from './components/field';
+import vueFormValidator from './directives/vue-form-validator';
+import extend from 'extend';
+import { config } from './config';
 import { validators } from './validators';
+import { vueFormConfig } from './providers';
 
-export default {
-  install(Vue) {
-    Vue.component(config.formComponent, vueForm);
-    Vue.component(config.validateComponent, validate);
-    Vue.component(config.messagesComponent, messages);
-    Vue.component(config.fieldComponent, field);
-    Vue.directive('vue-form-validator', vueFormValidator);
-  },
-  config,
-  addValidator(key, fn) {
-    validators[key] = fn;
-  },
-  mixin: {
-    components: {
-      [config.formComponent]: vueForm,
-      [config.validateComponent]: validate,
-      [config.messagesComponent]: messages,
-      [config.fieldComponent]: field
-    },
-    directives: {
-      vueFormValidator
-    }
+function VueFormBase (options) {
+  const c = extend({}, config, options);
+  this.provide = {
+    [vueFormConfig]: c
   }
-};
+  this.components = {
+    [c.formComponent]: vueForm,
+    [c.messagesComponent]: messages,
+    [c.validateComponent]: validate,
+    [c.fieldComponent]: field,
+  };
+  this.directives = { vueFormValidator };
+}
+
+export default class VueForm extends VueFormBase {
+  static install(Vue, options) {
+    Vue.mixin(new this(options));
+  }
+  static get installed() {
+    return !!this.install.done;
+  }
+  static set installed(val) {
+    this.install.done = val;
+  }
+}
+
+VueFormBase.call(VueForm);

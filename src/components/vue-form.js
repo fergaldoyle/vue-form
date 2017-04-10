@@ -26,20 +26,13 @@ export default {
     state: Object,
     config: Object
   },
+  inject: {vueFormConfig},
   provide () {
     return {
-      [vueFormConfig]: this.mergedConfig,
       [vueFormState]: this.state
     };
   },
-  data() {
-    return {
-      mergedConfig:{}
-    };
-  },
   created() {
-    extend(true, this.mergedConfig, config, this.config);
-
     const controls = {};
     const state = this.state;
     const formstate = {
@@ -125,7 +118,7 @@ export default {
   },
   computed: {
     className() {
-      const c = this.mergedConfig.classes.form;
+      const c = this.vueFormConfig.formClasses;
       const s = this.state;
       const classes = getClasses(c, s);
       classes[c.submitted] = s.$submitted;

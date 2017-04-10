@@ -7,7 +7,7 @@ export default {
     entry: 'src/main.js',
     dest: 'dist/vue-form.js',
     format: 'umd',
-    moduleName: 'vueForm',
+    moduleName: 'VueForm',
     sourceMap: argv.w,
     plugins: [
         resolve({ jsnext: true, main: true }),
