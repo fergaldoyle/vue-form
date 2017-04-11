@@ -34,7 +34,7 @@ export default {
           children.push(out);
         }
       });
-      if(!children.length) {
+      if(!children.length && field.$valid) {
         if(this.$slots.default || this.$scopedSlots.default) {
           const out = this.$slots.default || this.$scopedSlots.default(field);
           if(this.autoLabel) {
