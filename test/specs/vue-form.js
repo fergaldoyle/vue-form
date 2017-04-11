@@ -1,7 +1,7 @@
 describe('vue-form', function() {
   let vm;
 
-  Vue.use(vueForm);
+  Vue.use(VueForm);
 
   console.log('Vue version', Vue.version);
 

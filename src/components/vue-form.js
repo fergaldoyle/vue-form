@@ -1,11 +1,12 @@
 import { config } from '../config';
-import { validators } from '../validators';
 import { getClasses } from '../util';
+import { vueFormConfig, vueFormState } from '../providers';
+import extend from 'extend';
 
 export default {
   render(h) {
     return h(
-      'form', {
+      this.tag || this.vueFormConfig.formTag, {
         on: {
           submit: (event) => {
             this.state.$submitted = true;
@@ -21,10 +22,14 @@ export default {
     );
   },
   props: {
-    state: Object
+    state: Object,
+    tag: String
   },
-  data() {
-    return {};
+  inject: {vueFormConfig},
+  provide () {
+    return {
+      [vueFormState]: this.state
+    };
   },
   created() {
     const controls = {};
@@ -112,7 +117,7 @@ export default {
   },
   computed: {
     className() {
-      const c = config.classes.form;
+      const c = this.vueFormConfig.formClasses;
       const s = this.state;
       const classes = getClasses(c, s);
       classes[c.submitted] = s.$submitted;

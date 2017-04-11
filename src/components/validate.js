@@ -1,5 +1,5 @@
-import { config } from '../config';
 import { getVModelAndLabel, vModelValue, addClass, removeClass, getName, hyphenate, randomId, getClasses } from '../util';
+import { vueFormConfig, vueFormState } from '../providers';
 import { validators } from '../validators';
 
 export default {
@@ -27,13 +27,13 @@ export default {
         if (!vnode.data.directives) {
           vnode.data.directives = [];
         }
-        vnode.data.directives.push({ name: 'vue-form-validator', value: this.fieldstate });
+        vnode.data.directives.push({ name: 'vue-form-validator', value: { fieldstate: this.fieldstate, config: this.vueFormConfig } });
         vnode.data.attrs['vue-form-validator'] = '';
       });
     } else {
       console.warn('Element with v-model not found');
     }
-    return h(this.tag, { 'class': this.className, attrs }, this.$slots.default);
+    return h(this.tag || this.vueFormConfig.validateTag, { 'class': this.className, attrs }, this.$slots.default);
   },
   props: {
     state: Object,
@@ -44,10 +44,11 @@ export default {
       default: 'div'
     }
   },
+  inject: {vueFormConfig, vueFormState},
   data() {
     return {
       name: '',
-      formstate: {},
+      formstate: null,
       fieldstate: {}
     };
   },
@@ -62,15 +63,14 @@ export default {
   },
   computed: {
     className() {
-      return this.getClasses(config.classes.validate);
+      return this.getClasses(this.vueFormConfig.validateClasses);
     },
     inputClassName() {
-      return this.getClasses(config.classes.input);
+      return this.getClasses(this.vueFormConfig.inputClasses);
     }
   },
   mounted() {
     this.fieldstate.$name = this.name;
-    this.formstate = this.state || this.$parent.state;
     this.formstate._addControl(this.fieldstate);
 
     const vModelEls = this.$el.querySelectorAll('[vue-form-validator]');
@@ -90,6 +90,7 @@ export default {
 
   },
   created() {
+    this.formstate = this.state || this.vueFormState;
     const vm = this;
     let pendingValidators = [];
     let _val;
@@ -179,7 +180,7 @@ export default {
         });
 
         if (pending.promises.length) {
-          config.Promise.all(pending.promises).then((results) => {
+          vm.vueFormConfig.Promise.all(pending.promises).then((results) => {
 
             // only concerned with the last promise results, in case
             // async responses return out of order

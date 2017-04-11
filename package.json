@@ -17,15 +17,21 @@
     "jasmine-core": "^2.5.2",
     "karma": "^1.5.0",
     "karma-babel-preprocessor": "^6.0.1",
+    "karma-chrome-launcher": "^2.0.0",
     "karma-firefox-launcher": "^0.1.7",
     "karma-jasmine": "^1.0.2",
     "karma-phantomjs-launcher": "^1.0.2",
     "phantomjs": "^2.1.7",
     "rollup": "^0.41.4",
     "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-watch": "^3.2.2",
     "uglify-js": "^2.7.3",
     "vue": "2.2.1",
     "yargs": "^7.0.2"
+  },
+  "dependencies": {
+    "extend": "^3.0.0"
   }
 }

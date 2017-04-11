@@ -1,4 +1,4 @@
-import { config } from '../config';
+import { vueFormConfig, vueFormState } from '../providers';
 
 function findLabel (nodes) {
   if(!nodes) {
@@ -15,6 +15,7 @@ function findLabel (nodes) {
 }
 
 export default {
+  inject: {vueFormConfig, vueFormState},
   render(h) {
     const children = [];
     const field = this.formstate[this.name];
@@ -33,7 +34,7 @@ export default {
           children.push(out);
         }
       });
-      if(!children.length) {
+      if(!children.length && field.$valid) {
         if(this.$slots.default || this.$scopedSlots.default) {
           const out = this.$slots.default || this.$scopedSlots.default(field);
           if(this.autoLabel) {
@@ -48,7 +49,7 @@ export default {
         }
       }
     }
-    return h(this.tag, children);
+    return h(this.tag || this.vueFormConfig.messagesTag, children);
   },
   props: {
     state: Object,
@@ -58,20 +59,17 @@ export default {
       default: ''
     },
     tag: {
-      type: String,
-      default: config.messagesTag
+      type: String
     },
     autoLabel: Boolean,
   },
-  data() {
+  data () {
     return {
-      formstate: {}
+      formstate: null
     };
   },
-  mounted() {
-    this.$nextTick(() => {
-      this.formstate = this.state || this.$parent.formstate || this.$parent.state;
-    });
+  created () {
+    this.formstate = this.state || this.vueFormState;
   },
   computed: {
     isShown() {
