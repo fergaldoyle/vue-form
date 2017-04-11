@@ -1,22 +1,22 @@
-# vue-form  
+# vue-form
 
 [![Build Status](https://travis-ci.org/fergaldoyle/vue-form.svg?branch=master)](https://travis-ci.org/fergaldoyle/vue-form)
 
-Form validation for Vue.js 2.0+
+Form validation for Vue.js 2.2+
 
 ### Install
 
 Available through npm as `vue-form`.
 
 ``` js
-import vueForm from 'vue-form';
+import VueForm from 'vue-form';
 
 // install globally
-Vue.use(vueForm);
+Vue.use(VueForm);
 
 // or use the mixin
 ...
-mixins: [vueForm.mixin]
+mixins: [VueForm]
 ...
 ```
 
@@ -60,7 +60,7 @@ Example
 ```
 
 ```js
-Vue.use(vueForm);
+Vue.use(VueForm);
 
 new Vue({
   el: '#app',
@@ -98,7 +98,7 @@ The output of `formstate` will be:
     // fields with errors are copied into this object
   },
   "$submittedState": {
-    // each form sumbit, state is cloned into this object 
+    // each form sumbit, state is cloned into this object
   },
   "name": {
     "$name": "name",
@@ -143,6 +143,15 @@ The `show` prop supports simple expressions which specifiy when messages should 
 </form-errors>
 ```
 
+Or use scoped templates:
+```html
+<field-messages name="fieldName">
+  <span>Success</span>
+  <template slot="required" scope="state">
+	<span v-if="state.$touched || state.$submitted">Name is a required field</span>
+  </template>
+</field-messages>
+```
 
 ### Validators
 
@@ -179,14 +188,23 @@ You can use static validation attributes or bindings. If it is a binding, the in
 ```
 
 #### Custom validators
-You can register global and local custom validators. 
+You can register global and local custom validators.
 
 Global custom validator
 ```js
-vueForm.addValidator('my-custom-validator', function (value, attrValue, vnode) {
-  // return true to set input as $valid, false to set as $invalid
-  return value === 'custom';
-});
+
+var options = {
+  validators: {
+    'my-custom-validator': function (value, attrValue, vnode) {
+      // return true to set input as $valid, false to set as $invalid
+      return value === 'custom';
+    }
+  }
+}
+
+Vue.use(VueForm, options);
+// or
+// mixins: [new VueForm(options)]
 ```
 
 ```html
@@ -215,7 +233,7 @@ methods: {
 
 #### Async validators:
 
-Async validators are custom validators which return a Promise. `resolve()` `true` or `false` to set field vadility. 
+Async validators are custom validators which return a Promise. `resolve()` `true` or `false` to set field vadility.
 ```js
 // ...
 methods: {
@@ -275,6 +293,7 @@ When writing custom form field components, e.g. `<my-checkbox v-model="foo"></my
 
 #### vue-form
 * `state` Object on which form state is set
+* `tag` String, defaults to `form`
 
 #### validate
 * `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
@@ -294,48 +313,49 @@ When writing custom form field components, e.g. `<my-checkbox v-model="foo"></my
 * `auto-label`: Boolean, defaults to true. Automatically set `for` and `id` attributes of label and input elements found inside the `validate` component
 
 ### Config
-Set config options using `vueForm.config`, defaults:
+Set config options when using `Vue.use(VueForm, options)`, or when using a mixin `mixins: [new VueForm(options)]` defaults:
 
 ```js
 {
+    validators: {},
     formComponent: 'vueForm',
+    formTag: 'form',
     messagesComponent: 'fieldMessages',
-    validateComponent: 'validate',
-    fieldComponent: 'field',
     messagesTag: 'div',
+    validateComponent: 'validate',
+    validateTag: 'div',
+    fieldComponent: 'field',
     fieldTag: 'div',
-    classes: {
-      form: {
-        dirty: 'vf-form-dirty',
-        pristine: 'vf-form-pristine',
-        valid: 'vf-form-valid',
-        invalid: 'vf-form-invalid',
-        touched: 'vf-form-touched',
-        untouched: 'vf-form-untouched',
-        submitted: 'vf-form-submitted',
-        pending: 'vf-form-pending'
-      },
-      validate: {
-        dirty: 'vf-field-dirty',
-        pristine: 'vf-field-pristine',
-        valid: 'vf-field-valid',
-        invalid: 'vf-field-invalid',
-        touched: 'vf-field-touched',
-        untouched: 'vf-field-untouched',
-        submitted: 'vf-field-submitted',
-        pending: 'vf-field-pending'
-      },
-      input: {
-        dirty: 'vf-dirty',
-        pristine: 'vf-pristine',
-        valid: 'vf-valid',
-        invalid: 'vf-invalid',
-        touched: 'vf-touched',
-        untouched: 'vf-untouched',
-        submitted: 'vf-submitted',
-        pending: 'vf-pending'
-      }
+    formClasses: {
+      dirty: 'vf-form-dirty',
+      pristine: 'vf-form-pristine',
+      valid: 'vf-form-valid',
+      invalid: 'vf-form-invalid',
+      touched: 'vf-form-touched',
+      untouched: 'vf-form-untouched',
+      submitted: 'vf-form-submitted',
+      pending: 'vf-form-pending'
     },
-    Promise: window.Promise
+    validateClasses: {
+      dirty: 'vf-field-dirty',
+      pristine: 'vf-field-pristine',
+      valid: 'vf-field-valid',
+      invalid: 'vf-field-invalid',
+      touched: 'vf-field-touched',
+      untouched: 'vf-field-untouched',
+      submitted: 'vf-field-submitted',
+      pending: 'vf-field-pending'
+    },
+    inputClasses: {
+      dirty: 'vf-dirty',
+      pristine: 'vf-pristine',
+      valid: 'vf-valid',
+      invalid: 'vf-invalid',
+      touched: 'vf-touched',
+      untouched: 'vf-untouched',
+      submitted: 'vf-submitted',
+      pending: 'vf-pending'
+    },
+    Promise: typeof Promise === 'function' ? Promise : null
 }
 ```
