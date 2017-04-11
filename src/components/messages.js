@@ -18,7 +18,7 @@ export default {
   inject: {vueFormConfig, vueFormState},
   render(h) {
     const children = [];
-    const field = this.vueFormState[this.name];
+    const field = this.formstate[this.name];
     if (field && field.$error && this.isShown) {
       Object.keys(field.$error).forEach((key) => {
         if(this.$slots[key] || this.$scopedSlots[key]) {
@@ -63,9 +63,17 @@ export default {
     },
     autoLabel: Boolean,
   },
+  data () {
+    return {
+      formstate: null
+    };
+  },
+  created () {
+    this.formstate = this.state || this.vueFormState;
+  },
   computed: {
     isShown() {
-      const field = this.vueFormState[this.name];
+      const field = this.formstate[this.name];
 
       if (!this.show || !field) {
         return true;

@@ -48,6 +48,7 @@ export default {
   data() {
     return {
       name: '',
+      formstate: null,
       fieldstate: {}
     };
   },
@@ -70,7 +71,7 @@ export default {
   },
   mounted() {
     this.fieldstate.$name = this.name;
-    this.vueFormState._addControl(this.fieldstate);
+    this.formstate._addControl(this.fieldstate);
 
     const vModelEls = this.$el.querySelectorAll('[vue-form-validator]');
 
@@ -89,6 +90,7 @@ export default {
 
   },
   created() {
+    this.formstate = this.state || this.vueFormState;
     const vm = this;
     let pendingValidators = [];
     let _val;
@@ -217,6 +219,6 @@ export default {
 
   },
   destroyed() {
-    this.vueFormState._removeControl(this.fieldstate);
+    this.formstate._removeControl(this.fieldstate);
   }
 };
