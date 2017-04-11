@@ -103,12 +103,16 @@
   <script src="../dist/vue-form.js"></script>
   <script>
 
-    vueForm.config.classes.input.invalid = 'form-control-danger';
-    vueForm.config.classes.input.valid = 'form-control-success';
+    var options = {
+      inputClasses: {
+        valid: 'form-control-success',
+        invalid: 'form-control-danger'
+      }
+    }
 
     var vm = new Vue({
       el: '#app',
-      mixins: [vueForm.mixin],
+      mixins: [new VueForm(options)],
       data: {
         formstate: {},
         model: {
