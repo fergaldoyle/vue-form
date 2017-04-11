@@ -8,6 +8,8 @@ export const config = {
   fieldComponent: 'field',
   messagesTag: 'div',
   fieldTag: 'div',
+  validateTag: 'div',
+  formTag: 'form',
   formClasses: {
     dirty: 'vf-form-dirty',
     pristine: 'vf-form-pristine',

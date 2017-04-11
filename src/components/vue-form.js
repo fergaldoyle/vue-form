@@ -6,7 +6,7 @@ import extend from 'extend';
 export default {
   render(h) {
     return h(
-      'form', {
+      this.tag || this.vueFormConfig.formTag, {
         on: {
           submit: (event) => {
             this.state.$submitted = true;
@@ -23,7 +23,7 @@ export default {
   },
   props: {
     state: Object,
-    config: Object
+    tag: String
   },
   inject: {vueFormConfig},
   provide () {

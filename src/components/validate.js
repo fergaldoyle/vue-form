@@ -33,7 +33,7 @@ export default {
     } else {
       console.warn('Element with v-model not found');
     }
-    return h(this.tag, { 'class': this.className, attrs }, this.$slots.default);
+    return h(this.tag || this.vueFormConfig.validateTag, { 'class': this.className, attrs }, this.$slots.default);
   },
   props: {
     state: Object,
