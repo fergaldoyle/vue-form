@@ -1,6 +1,5 @@
 import { config } from '../config';
 import { vModelValue, getName } from '../util';
-import { vueFormConfig, vueFormState } from '../providers';
 
 export function compareChanges(vnode, oldvnode, validators) {
 
