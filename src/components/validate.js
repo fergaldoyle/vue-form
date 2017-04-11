@@ -40,8 +40,7 @@ export default {
     custom: null,
     autoLabel: Boolean,
     tag: {
-      type: String,
-      default: 'div'
+      type: String
     }
   },
   inject: {vueFormConfig, vueFormState},

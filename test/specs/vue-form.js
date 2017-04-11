@@ -1,7 +1,7 @@
 describe('vue-form', function() {
   let vm;
 
-  Vue.use(VueForm);
+  //Vue.use(VueForm);
 
   console.log('Vue version', Vue.version);
 
@@ -16,6 +16,7 @@ describe('vue-form', function() {
     const div = document.createElement('div');
     document.body.appendChild(div);
     vm = new Vue({
+      mixins: [VueForm],
       el: div,
       template: `
         <vue-form :state="formstate" @submit.prevent="onSubmit">
@@ -564,6 +565,7 @@ describe('vue-form', function() {
     document.body.appendChild(div);
 
     new Vue({
+      mixins: [VueForm],
       el: div,
       template: `
         <vue-form :state="formstate">
@@ -612,6 +614,7 @@ describe('vue-form', function() {
     document.body.appendChild(div);
 
     new Vue({
+      mixins: [VueForm],
       el: div,
       components: {
         test: {
@@ -661,6 +664,76 @@ describe('vue-form', function() {
           expect(this.formstate.test.$dirty).toBe(false);
           expect(this.formstate.test2.$dirty).toBe(true);
           expect(this.formstate.test2.$touched).toBe(true);
+          done();
+        });
+      }
+    });
+
+  });
+
+  it('should be configurable', function(done) {
+
+    vm.$destroy();
+
+    const div = document.createElement('div');
+    document.body.appendChild(div);
+
+    var optionsA = {
+      formTag: 'article',
+      validateTag: 'section',
+      messagesTag: 'ul',
+      inputClasses: {
+        invalid: 'form-control-danger',
+        valid: 'form-control-success'
+      },
+      formClasses: {
+        invalid: 'foo',
+        valid: 'bar'
+      },
+      validateClasses: {
+        invalid: 'baz',
+        valid: 'jaz'
+      },
+      validators: {
+        'foo-validator' () { return false },
+        'bar-validator' () { return false }
+      }
+    }
+
+    new Vue({
+      mixins: [new VueForm(optionsA)],
+      el: div,
+      template: `
+        <vue-form :state="formstate" class="test">
+          <validate>
+              <input type="text" name="name" v-model="name" foo-validator bar-validator />
+          </validate>
+
+          <field-messages name="name" class="messages">
+            <li slot="foo-validator" id="foo-message"></li>
+            <li slot="bar-validator" id="bar-message"></li>
+          </field-messages>
+
+        </vue-form>
+      `,
+      data: {
+        name: '',
+        formstate: {}
+      },
+      mounted: function() {
+        this.name = 'abc';
+        const form = this.$el;
+
+        this.$nextTick(() => {
+          expect(form.querySelector('#foo-message')).not.toBeNull();
+          expect(form.querySelector('#bar-message')).not.toBeNull();
+          expect(form.tagName).toBe('ARTICLE');
+          expect(form.querySelector('section')).not.toBeNull();
+          expect(form.querySelector('.messages').tagName).toBe('UL');
+          expect(form.querySelector('.form-control-danger')).not.toBeNull();
+          expect(form.querySelector('.form-control-danger')).not.toBeNull();
+          expect(form.className.indexOf('foo')).not.toBe(-1);
+          expect(form.querySelector('section.baz')).not.toBeNull();
           done();
         });
       }
