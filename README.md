@@ -13,10 +13,14 @@ import VueForm from 'vue-form';
 
 // install globally
 Vue.use(VueForm);
+Vue.use(VueForm, options);
 
 // or use the mixin
 ...
 mixins: [VueForm]
+...
+...
+mixins: [new VueForm()]
 ...
 ```
 
