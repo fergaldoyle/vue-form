@@ -149,10 +149,10 @@ Or use scoped templates:
 <field-messages name="fieldName">
   <span>Success</span>
   <template slot="required" scope="state">
-	  <span v-if="state.$touched || state.$submitted">Name is a required field</span>
+    <span v-if="state.$touched || state.$submitted">Name is a required field</span>
   </template>
   <template slot="errorKeyB" scope="state">
-	  <span v-if="state.$touched || state.$dirty">Error message B</span>
+    <span v-if="state.$touched || state.$dirty">Error message B</span>
   </template>
 </field-messages>
 ```
