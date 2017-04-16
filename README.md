@@ -137,13 +137,11 @@ Display validation errors or success messages with `field-messages`.
 
 The `show` prop supports simple expressions which specifiy when messages should be displayed based on the current state of the field, e.g: `$dirty`, `$dirty && $touched`, `$dirty || $touched`, `$touched || $submitted`
 
-```html
-<form-error field="fieldName" error="errorKey" show="$dirty">Error message</form-error>
-
-<form-errors field="fieldName" show="$dirty && $touched">
+```html  
+<field-messages name="name" show="$dirty && $touched">
   <div slot="errorKeyA">Error message A</div>
   <div slot="errorKeyB">Error message B</div>
-</form-errors>
+</field-messages>
 ```
 
 Or use scoped templates:
@@ -151,7 +149,10 @@ Or use scoped templates:
 <field-messages name="fieldName">
   <span>Success</span>
   <template slot="required" scope="state">
-	<span v-if="state.$touched || state.$submitted">Name is a required field</span>
+	  <span v-if="state.$touched || state.$submitted">Name is a required field</span>
+  </template>
+  <template slot="errorKeyB" scope="state">
+	  <span v-if="state.$touched || state.$dirty">Error message B</span>
   </template>
 </field-messages>
 ```
