@@ -19,7 +19,7 @@ Vue.use(VueForm, options);
 ...
 mixins: [VueForm]
 ...
-mixins: [new VueForm()]
+mixins: [new VueForm(options)]
 ...
 ```
 
@@ -137,7 +137,7 @@ Display validation errors or success messages with `field-messages`.
 
 The `show` prop supports simple expressions which specifiy when messages should be displayed based on the current state of the field, e.g: `$dirty`, `$dirty && $touched`, `$dirty || $touched`, `$touched || $submitted`
 
-```html  
+```html
 <field-messages name="name" show="$dirty && $touched">
   <div slot="errorKeyA">Error message A</div>
   <div slot="errorKeyB">Error message B</div>
@@ -237,7 +237,7 @@ methods: {
 
 #### Async validators:
 
-Async validators are custom validators which return a Promise. `resolve()` `true` or `false` to set field vadility.
+Async validators are custom validators which return a Promise. `resolve()` `true` or `false` to set field validity.
 ```js
 // ...
 methods: {

@@ -112,7 +112,7 @@ export default {
           vm.$set(this.$error, validator, true);
         }
       },
-      _setVadility(isValid) {
+      _setValidity(isValid) {
         this.$valid = isValid;
         this.$invalid = !isValid;
       },
@@ -199,11 +199,11 @@ export default {
                 this._setValidatorVadility(name, false);
               }
             });
-            this._setVadility(isValid);
+            this._setValidity(isValid);
             this.$pending = false;
           });
         } else {
-          this._setVadility(isValid);
+          this._setValidity(isValid);
           this.$pending = false;
         }
       }

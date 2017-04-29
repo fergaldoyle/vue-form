@@ -701,7 +701,7 @@ var validate = {
           vm.$set(this.$error, validator, true);
         }
       },
-      _setVadility: function _setVadility(isValid) {
+      _setValidity: function _setValidity(isValid) {
         this.$valid = isValid;
         this.$invalid = !isValid;
       },
@@ -791,11 +791,11 @@ var validate = {
                 _this2._setValidatorVadility(name, false);
               }
             });
-            _this2._setVadility(isValid);
+            _this2._setValidity(isValid);
             _this2.$pending = false;
           });
         } else {
-          this._setVadility(isValid);
+          this._setValidity(isValid);
           this.$pending = false;
         }
       }
@@ -869,14 +869,16 @@ function compareChanges(vnode, oldvnode, validators) {
 
   // if is a component
   if (vnode.componentOptions && vnode.componentOptions.propsData) {
-    var _attrs = vnode.componentOptions.propsData;
-    var _oldAttrs = oldvnode.componentOptions.propsData;
-    Object.keys(validators).forEach(function (validator) {
-      if (_attrs[validator] !== _oldAttrs[validator]) {
-        out[validator] = true;
-        hasChanged = true;
-      }
-    });
+    (function () {
+      var attrs = vnode.componentOptions.propsData;
+      var oldAttrs = oldvnode.componentOptions.propsData;
+      Object.keys(validators).forEach(function (validator) {
+        if (attrs[validator] !== oldAttrs[validator]) {
+          out[validator] = true;
+          hasChanged = true;
+        }
+      });
+    })();
   }
 
   if (hasChanged) {
