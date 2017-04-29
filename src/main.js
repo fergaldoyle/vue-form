@@ -34,3 +34,5 @@ export default class VueForm extends VueFormBase {
 }
 
 VueFormBase.call(VueForm);
+// temp fix for vue 2.3.0
+VueForm.options = new VueForm();

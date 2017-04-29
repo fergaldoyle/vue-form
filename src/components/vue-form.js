@@ -61,6 +61,18 @@ export default {
         delete controls[ctrl.$name];
         this.$delete(this.state, ctrl.$name);
         this.$delete(this.state.$error, ctrl.$name);
+      },
+      _reset: () => {
+        state.$submitted = false;
+        state.$pending = false;
+        state.$submittedState = {};
+        Object.keys(controls).forEach((key) => {
+          const control = controls[key];
+          control._setPristine();
+          control._setUntouched();
+          control.$submitted = false;
+          control.$pending = false;
+        });
       }
     }
 
@@ -122,6 +134,11 @@ export default {
       const classes = getClasses(c, s);
       classes[c.submitted] = s.$submitted;
       return classes;
+    }
+  },
+  methods: {
+    reset () {
+      this.state._reset();
     }
   }
 }

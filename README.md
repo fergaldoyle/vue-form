@@ -268,6 +268,17 @@ methods: {
 }
 ```
 
+### Reset state
+```
+<vue-form ref="form" :state="formstate">
+
+resetState: function () {
+  this.formstate._reset();
+  // or
+  this.$refs.form.reset();
+}
+```
+
 ### State classes
 As form and input validation states change, state classes are added and removed
 

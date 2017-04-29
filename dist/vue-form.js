@@ -407,6 +407,18 @@ var vueForm = {
         delete controls[ctrl.$name];
         _this2.$delete(_this2.state, ctrl.$name);
         _this2.$delete(_this2.state.$error, ctrl.$name);
+      },
+      _reset: function _reset() {
+        state.$submitted = false;
+        state.$pending = false;
+        state.$submittedState = {};
+        Object.keys(controls).forEach(function (key) {
+          var control = controls[key];
+          control._setPristine();
+          control._setUntouched();
+          control.$submitted = false;
+          control.$pending = false;
+        });
       }
     };
 
@@ -467,6 +479,11 @@ var vueForm = {
       var classes = getClasses(c, s);
       classes[c.submitted] = s.$submitted;
       return classes;
+    }
+  },
+  methods: {
+    reset: function reset() {
+      this.state._reset();
     }
   }
 };
@@ -1007,6 +1024,8 @@ var VueForm = function (_VueFormBase) {
 }(VueFormBase);
 
 VueFormBase.call(VueForm);
+// temp fix for vue 2.3.0
+VueForm.options = new VueForm();
 
 return VueForm;
 
