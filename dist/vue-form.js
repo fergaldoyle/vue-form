@@ -260,9 +260,8 @@ function randomId() {
   return Math.random().toString(36).substr(2, 10);
 }
 
-var s = typeof Symbol === 'function';
-var vueFormConfig = s ? Symbol() : 'VueFormProviderConfig' + randomId;
-var vueFormState = s ? Symbol() : 'VueFormProviderState' + randomId;
+var vueFormConfig = 'VueFormProviderConfig' + randomId();
+var vueFormState = 'VueFormProviderState' + randomId();
 
 var hasOwn = Object.prototype.hasOwnProperty;
 var toStr = Object.prototype.toString;
