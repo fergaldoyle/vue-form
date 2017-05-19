@@ -357,6 +357,10 @@ var vueForm = {
           _this.state.$submitted = true;
           _this.state._cloneState();
           _this.$emit('submit', event);
+        },
+        reset: function reset(event) {
+          _this.state._reset();
+          _this.$emit('reset', event);
         }
       },
       class: this.className,
@@ -885,16 +889,14 @@ function compareChanges(vnode, oldvnode, validators) {
 
   // if is a component
   if (vnode.componentOptions && vnode.componentOptions.propsData) {
-    (function () {
-      var attrs = vnode.componentOptions.propsData;
-      var oldAttrs = oldvnode.componentOptions.propsData;
-      Object.keys(validators).forEach(function (validator) {
-        if (attrs[validator] !== oldAttrs[validator]) {
-          out[validator] = true;
-          hasChanged = true;
-        }
-      });
-    })();
+    var _attrs = vnode.componentOptions.propsData;
+    var _oldAttrs = oldvnode.componentOptions.propsData;
+    Object.keys(validators).forEach(function (validator) {
+      if (_attrs[validator] !== _oldAttrs[validator]) {
+        out[validator] = true;
+        hasChanged = true;
+      }
+    });
   }
 
   if (hasChanged) {

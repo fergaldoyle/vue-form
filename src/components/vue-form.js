@@ -12,6 +12,10 @@ export default {
             this.state.$submitted = true;
             this.state._cloneState();
             this.$emit('submit', event);
+          },
+          reset: (event) => {
+            this.state._reset();
+            this.$emit('reset', event);
           }
         },
         class: this.className,
