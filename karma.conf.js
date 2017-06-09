@@ -16,8 +16,10 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
 		files: [
       'https://www.promisejs.org/polyfills/promise-6.1.0.js',
+
       //'https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.js',
-	    'node_modules/vue/dist/vue.js',
+      //'https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.1/vue.js',
+	    'node_modules/vue/dist/vue.js', // 2.3.4
 		  'dist/vue-form.js',
 		  'test/specs/*.js'
 		],
