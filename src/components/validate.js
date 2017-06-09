@@ -31,7 +31,7 @@ export default {
         vnode.data.attrs['vue-form-validator'] = '';
       });
     } else {
-      console.warn('Element with v-model not found');
+      //console.warn('Element with v-model not found');
     }
     return h(this.tag || this.vueFormConfig.validateTag, { 'class': this.className, attrs }, this.$slots.default);
   },
