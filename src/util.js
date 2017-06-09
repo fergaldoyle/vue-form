@@ -39,6 +39,10 @@ export function getVModelAndLabel(nodes) {
     label: null
   };
 
+  if(!nodes) {
+    return foundVnodes;
+  }
+
   function traverse(nodes) {
     for (let i = 0; i < nodes.length; i++) {
       let node = nodes[i];
