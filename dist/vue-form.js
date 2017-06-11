@@ -214,6 +214,10 @@ function getVModelAndLabel(nodes) {
     label: null
   };
 
+  if (!nodes) {
+    return foundVnodes;
+  }
+
   function traverse(nodes) {
     for (var i = 0; i < nodes.length; i++) {
       var node = nodes[i];
@@ -625,7 +629,7 @@ var validate = {
         vnode.data.attrs['vue-form-validator'] = '';
       });
     } else {
-      console.warn('Element with v-model not found');
+      //console.warn('Element with v-model not found');
     }
     return h(this.tag || this.vueFormConfig.validateTag, { 'class': this.className, attrs: attrs }, this.$slots.default);
   },
