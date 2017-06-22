@@ -12,12 +12,12 @@ export default {
     if (vModelnodes.length) {
       this.name = getName(vModelnodes[0]);
       if(this.autoLabel) {
-        const id = this.fieldstate._id || vModelnodes[0].data.attrs.id || 'vf' + randomId();
+        const id = vModelnodes[0].data.attrs.id || this.fieldstate._id;
         this.fieldstate._id = id;
         vModelnodes[0].data.attrs.id = id;
         if(foundVnodes.label) {
           foundVnodes.label.data = foundVnodes.label.data || {};
-          foundVnodes.label.data.attrs = foundVnodes.label.data.attrs = {};
+          foundVnodes.label.data.attrs = foundVnodes.label.data.attrs || {};
           foundVnodes.label.data.attrs.for = id;
         } else if (this.tag === 'label') {
           attrs.for = id;
@@ -29,6 +29,7 @@ export default {
         }
         vnode.data.directives.push({ name: 'vue-form-validator', value: { fieldstate: this.fieldstate, config: this.vueFormConfig } });
         vnode.data.attrs['vue-form-validator'] = '';
+        vnode.data.attrs['debounce'] = this.debounce;
       });
     } else {
       //console.warn('Element with v-model not found');
@@ -41,7 +42,8 @@ export default {
     autoLabel: Boolean,
     tag: {
       type: String
-    }
+    },
+    debounce: Number
   },
   inject: {vueFormConfig, vueFormState},
   data() {
@@ -104,7 +106,7 @@ export default {
       $pending: false,
       $submitted: false,
       $error: {},
-      _id: '',
+      _id: 'vf' + randomId(),
       _setValidatorVadility(validator, isValid) {
         if (isValid) {
           vm.$delete(this.$error, validator);

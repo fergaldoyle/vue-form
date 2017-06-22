@@ -264,6 +264,23 @@ function randomId() {
   return Math.random().toString(36).substr(2, 10);
 }
 
+// https://davidwalsh.name/javascript-debounce-function
+function debounce(func, wait, immediate) {
+  var timeout;
+  return function () {
+    var context = this,
+        args = arguments;
+    var later = function later() {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
+  };
+}
+
 var vueFormConfig = 'VueFormProviderConfig' + randomId();
 var vueFormState = 'VueFormProviderState' + randomId();
 
@@ -610,12 +627,12 @@ var validate = {
     if (vModelnodes.length) {
       this.name = getName(vModelnodes[0]);
       if (this.autoLabel) {
-        var id = this.fieldstate._id || vModelnodes[0].data.attrs.id || 'vf' + randomId();
+        var id = vModelnodes[0].data.attrs.id || this.fieldstate._id;
         this.fieldstate._id = id;
         vModelnodes[0].data.attrs.id = id;
         if (foundVnodes.label) {
           foundVnodes.label.data = foundVnodes.label.data || {};
-          foundVnodes.label.data.attrs = foundVnodes.label.data.attrs = {};
+          foundVnodes.label.data.attrs = foundVnodes.label.data.attrs || {};
           foundVnodes.label.data.attrs.for = id;
         } else if (this.tag === 'label') {
           attrs.for = id;
@@ -627,6 +644,7 @@ var validate = {
         }
         vnode.data.directives.push({ name: 'vue-form-validator', value: { fieldstate: _this.fieldstate, config: _this.vueFormConfig } });
         vnode.data.attrs['vue-form-validator'] = '';
+        vnode.data.attrs['debounce'] = _this.debounce;
       });
     } else {
       //console.warn('Element with v-model not found');
@@ -640,7 +658,8 @@ var validate = {
     autoLabel: Boolean,
     tag: {
       type: String
-    }
+    },
+    debounce: Number
   },
   inject: { vueFormConfig: vueFormConfig, vueFormState: vueFormState },
   data: function data() {
@@ -717,7 +736,7 @@ var validate = {
       $pending: false,
       $submitted: false,
       $error: {},
-      _id: '',
+      _id: 'vf' + randomId(),
       _setValidatorVadility: function _setValidatorVadility(validator, isValid) {
         if (isValid) {
           vm.$delete(this.$error, validator);
@@ -872,6 +891,8 @@ var field = {
   }
 };
 
+var debouncedValidators = {};
+
 function compareChanges(vnode, oldvnode, validators) {
 
   var hasChanged = false;
@@ -920,6 +941,15 @@ var vueFormValidator = {
     if (!inputName) {
       console.warn('vue-form: name attribute missing');
       return;
+    }
+
+    if (attrs.debounce) {
+      debouncedValidators[fieldstate._id] = debounce(function (fieldstate, vnode) {
+        if (fieldstate._hasFocused) {
+          fieldstate._setDirty();
+        }
+        fieldstate._validate(vnode);
+      }, attrs.debounce);
     }
 
     // add validators
@@ -971,6 +1001,7 @@ var vueFormValidator = {
     var changes = compareChanges(vnode, oldVNode, validators);
     var fieldstate = binding.value.fieldstate;
 
+    var attrs = vnode.data.attrs || {};
 
     if (!changes) {
       return;
@@ -978,10 +1009,15 @@ var vueFormValidator = {
 
     if (changes.vModel) {
       // re-validate all
-      if (fieldstate._hasFocused) {
-        fieldstate._setDirty();
+      if (attrs.debounce) {
+        fieldstate.$pending = true;
+        debouncedValidators[fieldstate._id](fieldstate, vnode);
+      } else {
+        if (fieldstate._hasFocused) {
+          fieldstate._setDirty();
+        }
+        fieldstate._validate(vnode);
       }
-      fieldstate._validate(vnode);
     } else {
       // attributes have changed
       // to do: loop through them and re-validate changed ones

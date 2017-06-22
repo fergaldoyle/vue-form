@@ -1,5 +1,7 @@
 import { config } from '../config';
-import { vModelValue, getName } from '../util';
+import { vModelValue, getName, debounce } from '../util';
+
+const debouncedValidators = {};
 
 export function compareChanges(vnode, oldvnode, validators) {
 
@@ -50,6 +52,15 @@ export default {
       return;
     }
 
+    if(attrs.debounce) {
+      debouncedValidators[fieldstate._id] = debounce(function(fieldstate, vnode) {
+        if (fieldstate._hasFocused) {
+          fieldstate._setDirty();
+        }
+        fieldstate._validate(vnode);
+      }, attrs.debounce);
+    }
+
     // add validators
     Object.keys(attrs).forEach((attr) => {
       let prop;
@@ -98,6 +109,7 @@ export default {
     const { validators } = binding.value.config;
     const changes = compareChanges(vnode, oldVNode, validators);
     const { fieldstate } = binding.value;
+    const attrs = (vnode.data.attrs || {});
 
     if (!changes) {
       return;
@@ -105,10 +117,15 @@ export default {
 
     if (changes.vModel) {
       // re-validate all
-      if (fieldstate._hasFocused) {
-        fieldstate._setDirty();
+      if(attrs.debounce) {
+        fieldstate.$pending = true;
+        debouncedValidators[fieldstate._id](fieldstate, vnode);
+      } else {
+        if (fieldstate._hasFocused) {
+          fieldstate._setDirty();
+        }
+        fieldstate._validate(vnode);
       }
-      fieldstate._validate(vnode);
     } else {
       // attributes have changed
       // to do: loop through them and re-validate changed ones
