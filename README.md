@@ -316,17 +316,18 @@ When writing custom form field components, e.g. `<my-checkbox v-model="foo"></my
 * `custom` Object containing one or many custom validators. `{validatorName: validatorFunction}`
 * `tag` String which specifies what element tag should be rendered by the `validate` component, defaults to `span`
 * `auto-label`: Boolean, defaults to false. Automatically set `for` and `id` attributes of label and input elements found inside the `validate` component
+* `debounce` Number, defaults to none, which specifies the delay (milliseconds) before validation takes place.
 
 #### field-messages
 * `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
 * `name` String which specifies the related field name
 * `tag` String, defaults to `div`
-* `show`: String, show error dependant on form field state e.g. `$touched`, `$dirty || $touched`, '$touched || $submitted'
-* `auto-label`: Boolean, defaults to false. Automatically set the `for` attribute of labels found inside the `field-messages` component
+* `show` String, show error dependant on form field state e.g. `$touched`, `$dirty || $touched`, '$touched || $submitted'
+* `auto-label` Boolean, defaults to false. Automatically set the `for` attribute of labels found inside the `field-messages` component
 
 #### field
 * `tag` String, defaults to `div`
-* `auto-label`: Boolean, defaults to true. Automatically set `for` and `id` attributes of label and input elements found inside the `validate` component
+* `auto-label` Boolean, defaults to true. Automatically set `for` and `id` attributes of label and input elements found inside the `validate` component
 
 ### Config
 Set config options when using `Vue.use(VueForm, options)`, or when using a mixin `mixins: [new VueForm(options)]` defaults:
