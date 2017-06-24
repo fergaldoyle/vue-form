@@ -30,6 +30,7 @@ Once installed you have access to four components (`vue-form`, `validate`, `fiel
 Live examples
 * Configured to work with Bootstrap styles: https://jsfiddle.net/fergal_doyle/zfqt4yhq/
 * Matching passwords and password strength: https://jsfiddle.net/fergal_doyle/9rn5kLkw/
+* Field error messages based on submitted state: https://jsfiddle.net/fergal_doyle/bqys2p5y/
 
 Example
 
