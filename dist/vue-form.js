@@ -993,6 +993,12 @@ var vueFormValidator = {
       vnode.componentInstance.$on('focus', function () {
         fieldstate._setFocused();
       });
+      el.addEventListener('focusout', function () {
+        fieldstate._setTouched();
+      }, false);
+      el.addEventListener('focusin', function () {
+        fieldstate._setFocused();
+      }, false);
     }
   },
   update: function update(el, binding, vnode, oldVNode) {

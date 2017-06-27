@@ -102,6 +102,12 @@ export default {
       vnode.componentInstance.$on('focus', () => {
         fieldstate._setFocused();
       });
+      el.addEventListener('focusout', () => {
+        fieldstate._setTouched();
+      }, false);
+      el.addEventListener('focusin', () => {
+        fieldstate._setFocused();
+      }, false);
     }
   },
 
