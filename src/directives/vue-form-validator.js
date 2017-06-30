@@ -116,6 +116,9 @@ export default {
     const changes = compareChanges(vnode, oldVNode, validators);
     const { fieldstate } = binding.value;
     const attrs = (vnode.data.attrs || {});
+    if(vnode.elm.className.indexOf(fieldstate._className[0]) === -1) {
+      vnode.elm.className = vnode.elm.className + ' ' + fieldstate._className.join(' ');
+    }
 
     if (!changes) {
       return;

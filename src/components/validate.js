@@ -78,12 +78,18 @@ export default {
 
     // add classes to the input element
     this.$watch('inputClassName', (value, oldValue) => {
+      let out;
       for (let i = 0, el; el = vModelEls[i++];) {
         if (oldValue) {
           Object.keys(oldValue).filter(k => oldValue[k]).forEach(k => removeClass(el, k));
         }
-        Object.keys(value).filter(k => value[k]).forEach(k => addClass(el, k));
+        out = [];
+        Object.keys(value).filter(k => value[k]).forEach((k) => {
+          out.push(k);
+          addClass(el, k)
+        });
       }
+      this.fieldstate._className = out;
     }, {
       deep: true,
       immediate: true
@@ -106,6 +112,7 @@ export default {
       $pending: false,
       $submitted: false,
       $error: {},
+      _className: null,
       _id: 'vf' + randomId(),
       _setValidatorVadility(validator, isValid) {
         if (isValid) {

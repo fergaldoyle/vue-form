@@ -438,8 +438,9 @@ var vueForm = {
         state.$submittedState = {};
         Object.keys(controls).forEach(function (key) {
           var control = controls[key];
-          control._setPristine();
+          control._hasFocused = false;
           control._setUntouched();
+          control._setPristine();
           control.$submitted = false;
           control.$pending = false;
         });
@@ -688,6 +689,8 @@ var validate = {
     }
   },
   mounted: function mounted() {
+    var _this2 = this;
+
     this.fieldstate.$name = this.name;
     this.formstate._addControl(this.fieldstate);
 
@@ -695,6 +698,8 @@ var validate = {
 
     // add classes to the input element
     this.$watch('inputClassName', function (value, oldValue) {
+      var out = void 0;
+
       var _loop = function _loop(i, el) {
         if (oldValue) {
           Object.keys(oldValue).filter(function (k) {
@@ -703,23 +708,26 @@ var validate = {
             return removeClass(el, k);
           });
         }
+        out = [];
         Object.keys(value).filter(function (k) {
           return value[k];
         }).forEach(function (k) {
-          return addClass(el, k);
+          out.push(k);
+          addClass(el, k);
         });
       };
 
       for (var i = 0, el; el = vModelEls[i++];) {
         _loop(i, el);
       }
+      _this2.fieldstate._className = out;
     }, {
       deep: true,
       immediate: true
     });
   },
   created: function created() {
-    var _this3 = this;
+    var _this4 = this;
 
     this.formstate = this.state || this.vueFormState;
     var vm = this;
@@ -736,6 +744,7 @@ var validate = {
       $pending: false,
       $submitted: false,
       $error: {},
+      _className: null,
       _id: 'vf' + randomId(),
       _setValidatorVadility: function _setValidatorVadility(validator, isValid) {
         if (isValid) {
@@ -771,7 +780,7 @@ var validate = {
       _hasFocused: false,
       _validators: {},
       _validate: function _validate(vnode) {
-        var _this2 = this;
+        var _this3 = this;
 
         this.$pending = true;
         var isValid = true;
@@ -792,20 +801,20 @@ var validate = {
         Object.keys(this._validators).forEach(function (validator) {
           // when value is empty and not the required validator, the field is valid
           if ((value === '' || value === undefined || value === null) && validator !== 'required') {
-            _this2._setValidatorVadility(validator, true);
+            _this3._setValidatorVadility(validator, true);
             emptyAndRequired = true;
             // return early, required validator will
             // fall through if it is present
             return;
           }
           var attrValue = typeof attrs[validator] !== 'undefined' ? attrs[validator] : propsData[validator];
-          var result = _this2._validators[validator](value, attrValue, vnode);
+          var result = _this3._validators[validator](value, attrValue, vnode);
           if (typeof result === 'boolean') {
             if (result) {
-              _this2._setValidatorVadility(validator, true);
+              _this3._setValidatorVadility(validator, true);
             } else {
               isValid = false;
-              _this2._setValidatorVadility(validator, false);
+              _this3._setValidatorVadility(validator, false);
             }
           } else {
             pending.promises.push(result);
@@ -828,14 +837,14 @@ var validate = {
             results.forEach(function (result, i) {
               var name = pending.names[i];
               if (result) {
-                _this2._setValidatorVadility(name, true);
+                _this3._setValidatorVadility(name, true);
               } else {
                 isValid = false;
-                _this2._setValidatorVadility(name, false);
+                _this3._setValidatorVadility(name, false);
               }
             });
-            _this2._setValidity(isValid);
-            _this2.$pending = false;
+            _this3._setValidity(isValid);
+            _this3.$pending = false;
           });
         } else {
           this._setValidity(isValid);
@@ -847,7 +856,7 @@ var validate = {
     // add custom validators
     if (this.custom) {
       Object.keys(this.custom).forEach(function (prop) {
-        _this3.fieldstate._validators[prop] = _this3.custom[prop];
+        _this4.fieldstate._validators[prop] = _this4.custom[prop];
       });
     }
   },
@@ -1008,6 +1017,9 @@ var vueFormValidator = {
     var fieldstate = binding.value.fieldstate;
 
     var attrs = vnode.data.attrs || {};
+    if (vnode.elm.className.indexOf(fieldstate._className[0]) === -1) {
+      vnode.elm.className = vnode.elm.className + ' ' + fieldstate._className.join(' ');
+    }
 
     if (!changes) {
       return;

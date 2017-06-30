@@ -29,8 +29,8 @@ export default {
     state: Object,
     tag: String
   },
-  inject: {vueFormConfig},
-  provide () {
+  inject: { vueFormConfig },
+  provide() {
     return {
       [vueFormState]: this.state
     };
@@ -72,8 +72,9 @@ export default {
         state.$submittedState = {};
         Object.keys(controls).forEach((key) => {
           const control = controls[key];
-          control._setPristine();
+          control._hasFocused = false;
           control._setUntouched();
+          control._setPristine();
           control.$submitted = false;
           control.$pending = false;
         });
@@ -141,7 +142,7 @@ export default {
     }
   },
   methods: {
-    reset () {
+    reset() {
       this.state._reset();
     }
   }
