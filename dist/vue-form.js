@@ -375,8 +375,7 @@ var vueForm = {
     return h(this.tag || this.vueFormConfig.formTag, {
       on: {
         submit: function submit(event) {
-          _this.state.$submitted = true;
-          _this.state._cloneState();
+          _this.state._submit();
           _this.$emit('submit', event);
         },
         reset: function reset(event) {
@@ -416,6 +415,10 @@ var vueForm = {
       $error: {},
       $submittedState: {},
       _id: '',
+      _submit: function _submit() {
+        _this2.state.$submitted = true;
+        _this2.state._cloneState();
+      },
       _cloneState: function _cloneState() {
         var cloned = JSON.parse(JSON.stringify(state));
         delete cloned.$submittedState;

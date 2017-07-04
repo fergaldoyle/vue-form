@@ -9,8 +9,7 @@ export default {
       this.tag || this.vueFormConfig.formTag, {
         on: {
           submit: (event) => {
-            this.state.$submitted = true;
-            this.state._cloneState();
+            this.state._submit();
             this.$emit('submit', event);
           },
           reset: (event) => {
@@ -50,6 +49,10 @@ export default {
       $error: {},
       $submittedState: {},
       _id: '',
+      _submit: () => {
+        this.state.$submitted = true;
+        this.state._cloneState();
+      },
       _cloneState: () => {
         const cloned = JSON.parse(JSON.stringify(state));
         delete cloned.$submittedState;
