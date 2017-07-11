@@ -20,6 +20,13 @@ export const validators = {
       return true;
     }
 
+    if ((vnode.data.attrs && typeof vnode.data.attrs.bool !== 'undefined') || (vnode.componentOptions && vnode.componentOptions.propsData && typeof vnode.componentOptions.propsData.bool !== 'undefined')) {
+      // bool attribute is present, allow false pass validation
+      if (value === false) {
+        return true;
+      }
+    }
+
     if (Array.isArray(value)) {
       return !!value.length;
     }
