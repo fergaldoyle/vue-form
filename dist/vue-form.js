@@ -1062,7 +1062,9 @@ function VueFormBase(options) {
   var _components;
 
   var c = index(true, {}, config, options);
-  this.provide = defineProperty({}, vueFormConfig, c);
+  this.provide = function () {
+    return defineProperty({}, vueFormConfig, c);
+  };
   this.components = (_components = {}, defineProperty(_components, c.formComponent, vueForm), defineProperty(_components, c.messagesComponent, messages), defineProperty(_components, c.validateComponent, validate), defineProperty(_components, c.fieldComponent, field), _components);
   this.directives = { vueFormValidator: vueFormValidator };
 }

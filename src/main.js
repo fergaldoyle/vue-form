@@ -9,9 +9,9 @@ import { vueFormConfig } from './providers';
 
 function VueFormBase (options) {
   const c = extend(true, {}, config, options);
-  this.provide = {
+  this.provide = () => ({
     [vueFormConfig]: c
-  }
+  })
   this.components = {
     [c.formComponent]: vueForm,
     [c.messagesComponent]: messages,
