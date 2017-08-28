@@ -216,16 +216,13 @@ Vue.use(VueForm, options);
 ```html
 <validate>
   <input v-model="something" name="something" my-custom-validator />
+  <!--
+    slot name inside field-messages would be: <div slot="my-custom-validator">...</div>
+  -->
 </validate>
 ```
 
 Local custom validator
-```html
-<validate :custom="{customValidator: customValidator}">
-  <input v-model="something" name="something" />
-</validate>
-```
-
 ```js
 // ...
 methods: {
@@ -235,6 +232,15 @@ methods: {
 	}
 }
 // ...
+```
+
+```html
+<validate :custom="{customValidator: customValidator}">
+  <input v-model="something" name="something" />
+  <!--
+    slot name inside field-messages would be: <div slot="customValidator">...</div>
+  -->
+</validate>
 ```
 
 #### Async validators:
