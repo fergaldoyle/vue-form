@@ -1,4 +1,4 @@
-import { vueFormConfig, vueFormState } from '../providers';
+import { vueFormConfig, vueFormState, vueFormParentForm } from '../providers';
 
 function findLabel (nodes) {
   if(!nodes) {
@@ -15,7 +15,7 @@ function findLabel (nodes) {
 }
 
 export default {
-  inject: {vueFormConfig, vueFormState},
+  inject: {vueFormConfig, vueFormState, vueFormParentForm},
   render(h) {
     const children = [];
     const field = this.formstate[this.name];
@@ -74,8 +74,9 @@ export default {
   computed: {
     isShown() {
       const field = this.formstate[this.name];
+      const show = this.show || this.vueFormParentForm.showMessages || this.vueFormConfig.showMessages;
 
-      if (!this.show || !field) {
+      if (!show || !field) {
         return true;
       }
 
@@ -83,17 +84,17 @@ export default {
         return field[v.trim()];
       };
 
-      if (this.show.indexOf('&&') > -1) {
+      if (show.indexOf('&&') > -1) {
         // and logic - every
-        const split = this.show.split('&&');
+        const split = show.split('&&');
         return split.every(compare);
-      } else if (this.show.indexOf('||') > -1) {
+      } else if (show.indexOf('||') > -1) {
         // or logic - some
-        const split = this.show.split('||');
+        const split = show.split('||');
         return split.some(compare);
       } else {
         // single
-        return field[this.show];
+        return field[show];
       }
     }
   }

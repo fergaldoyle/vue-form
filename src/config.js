@@ -6,6 +6,7 @@ export const config = {
   formTag: 'form',
   messagesComponent: 'fieldMessages',
   messagesTag: 'div',
+  showMessages: '',
   validateComponent: 'validate',
   validateTag: 'div',
   fieldComponent: 'field',

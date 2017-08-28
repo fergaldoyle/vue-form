@@ -68,6 +68,7 @@ var config = {
   formTag: 'form',
   messagesComponent: 'fieldMessages',
   messagesTag: 'div',
+  showMessages: '',
   validateComponent: 'validate',
   validateTag: 'div',
   fieldComponent: 'field',
@@ -290,6 +291,7 @@ function debounce(func, wait, immediate) {
 
 var vueFormConfig = 'VueFormProviderConfig' + randomId();
 var vueFormState = 'VueFormProviderState' + randomId();
+var vueFormParentForm = 'VueFormProviderParentForm' + randomId();
 
 var hasOwn = Object.prototype.hasOwnProperty;
 var toStr = Object.prototype.toString;
@@ -399,11 +401,14 @@ var vueForm = {
 
   props: {
     state: Object,
-    tag: String
+    tag: String,
+    showMessages: String
   },
   inject: { vueFormConfig: vueFormConfig },
   provide: function provide() {
-    return defineProperty({}, vueFormState, this.state);
+    var _ref;
+
+    return _ref = {}, defineProperty(_ref, vueFormState, this.state), defineProperty(_ref, vueFormParentForm, this), _ref;
   },
   created: function created() {
     var _this2 = this;
@@ -538,7 +543,7 @@ function findLabel(nodes) {
 }
 
 var messages = {
-  inject: { vueFormConfig: vueFormConfig, vueFormState: vueFormState },
+  inject: { vueFormConfig: vueFormConfig, vueFormState: vueFormState, vueFormParentForm: vueFormParentForm },
   render: function render(h) {
     var _this = this;
 
@@ -601,8 +606,9 @@ var messages = {
   computed: {
     isShown: function isShown() {
       var field = this.formstate[this.name];
+      var show = this.show || this.vueFormParentForm.showMessages || this.vueFormConfig.showMessages;
 
-      if (!this.show || !field) {
+      if (!show || !field) {
         return true;
       }
 
@@ -610,17 +616,17 @@ var messages = {
         return field[v.trim()];
       };
 
-      if (this.show.indexOf('&&') > -1) {
+      if (show.indexOf('&&') > -1) {
         // and logic - every
-        var split = this.show.split('&&');
+        var split = show.split('&&');
         return split.every(compare);
-      } else if (this.show.indexOf('||') > -1) {
+      } else if (show.indexOf('||') > -1) {
         // or logic - some
-        var _split = this.show.split('||');
+        var _split = show.split('||');
         return _split.some(compare);
       } else {
         // single
-        return field[this.show];
+        return field[show];
       }
     }
   }
@@ -1101,3 +1107,4 @@ VueForm.options = new VueForm();
 return VueForm;
 
 })));
+//# sourceMappingURL=vue-form.js.map

@@ -311,6 +311,7 @@ When writing custom form field components, e.g. `<my-checkbox v-model="foo"></my
 #### vue-form
 * `state` Object on which form state is set
 * `tag` String, defaults to `form`
+* `show-messages` String, applies to all child `field-messages`, show errors dependant on form field state e.g. `$touched`, `$dirty || $touched`, '$touched || $submitted'
 
 #### validate
 * `state` Optional way of passing in the form state. If omitted form state will be found in the $parent
@@ -340,6 +341,7 @@ Set config options when using `Vue.use(VueForm, options)`, or when using a mixin
     formTag: 'form',
     messagesComponent: 'fieldMessages',
     messagesTag: 'div',
+    showMessages: '',
     validateComponent: 'validate',
     validateTag: 'div',
     fieldComponent: 'field',

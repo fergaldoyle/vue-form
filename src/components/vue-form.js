@@ -1,6 +1,6 @@
 import { config } from '../config';
 import { getClasses } from '../util';
-import { vueFormConfig, vueFormState } from '../providers';
+import { vueFormConfig, vueFormState, vueFormParentForm } from '../providers';
 import extend from 'extend';
 
 export default {
@@ -26,12 +26,14 @@ export default {
   },
   props: {
     state: Object,
-    tag: String
+    tag: String,
+    showMessages: String
   },
   inject: { vueFormConfig },
   provide() {
     return {
-      [vueFormState]: this.state
+      [vueFormState]: this.state,
+      [vueFormParentForm]: this
     };
   },
   created() {
