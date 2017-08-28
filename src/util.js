@@ -7,6 +7,7 @@ export function getClasses(classConfig, state) {
       [classConfig.touched]: state.$touched,
       [classConfig.untouched]: state.$untouched,
       [classConfig.pending]: state.$pending,
+      [classConfig.submitted]: state.$submitted,
     };
 }
 

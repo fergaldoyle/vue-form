@@ -142,7 +142,6 @@ export default {
       const c = this.vueFormConfig.formClasses;
       const s = this.state;
       const classes = getClasses(c, s);
-      classes[c.submitted] = s.$submitted;
       return classes;
     }
   },
