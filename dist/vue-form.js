@@ -7,16 +7,25 @@
 var emailRegExp = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i; // from angular
 var urlRegExp = /^(http\:\/\/|https\:\/\/)(.{4,})$/;
 
+var email = function email(value, attrValue, vnode) {
+  return emailRegExp.test(value);
+};
+email._allowNulls = true;
+
+var number = function number(value, attrValue, vnode) {
+  return !isNaN(value);
+};
+number._allowNulls = true;
+
+var url = function url(value, attrValue, vnode) {
+  return urlRegExp.test(value);
+};
+url._allowNulls = true;
+
 var validators = {
-  email: function email(value, attrValue, vnode) {
-    return emailRegExp.test(value);
-  },
-  number: function number(value) {
-    return !isNaN(value);
-  },
-  url: function url(value) {
-    return urlRegExp.test(value);
-  },
+  email: email,
+  number: number,
+  url: url,
   required: function required(value, attrValue, vnode) {
     if (attrValue === false) {
       return true;
@@ -188,7 +197,7 @@ var possibleConstructorReturn = function (self, call) {
 function getClasses(classConfig, state) {
   var _ref;
 
-  return _ref = {}, defineProperty(_ref, classConfig.dirty, state.$dirty), defineProperty(_ref, classConfig.pristine, state.$pristine), defineProperty(_ref, classConfig.valid, state.$valid), defineProperty(_ref, classConfig.invalid, state.$invalid), defineProperty(_ref, classConfig.touched, state.$touched), defineProperty(_ref, classConfig.untouched, state.$untouched), defineProperty(_ref, classConfig.pending, state.$pending), _ref;
+  return _ref = {}, defineProperty(_ref, classConfig.dirty, state.$dirty), defineProperty(_ref, classConfig.pristine, state.$pristine), defineProperty(_ref, classConfig.valid, state.$valid), defineProperty(_ref, classConfig.invalid, state.$invalid), defineProperty(_ref, classConfig.touched, state.$touched), defineProperty(_ref, classConfig.untouched, state.$untouched), defineProperty(_ref, classConfig.pending, state.$pending), defineProperty(_ref, classConfig.submitted, state.$submitted), _ref;
 }
 
 function addClass(el, className) {
@@ -517,7 +526,6 @@ var vueForm = {
       var c = this.vueFormConfig.formClasses;
       var s = this.state;
       var classes = getClasses(c, s);
-      classes[c.submitted] = s.$submitted;
       return classes;
     }
   },
@@ -815,7 +823,7 @@ var validate = {
         var propsData = vnode.componentOptions && vnode.componentOptions.propsData ? vnode.componentOptions.propsData : {};
 
         Object.keys(this._validators).forEach(function (validator) {
-          // when value is empty and not the required validator, the field is valid
+          // when value is empty and current validator is not the required validator, the field is valid
           if ((value === '' || value === undefined || value === null) && validator !== 'required') {
             _this3._setValidatorVadility(validator, true);
             emptyAndRequired = true;
@@ -823,7 +831,14 @@ var validate = {
             // fall through if it is present
             return;
           }
+
           var attrValue = typeof attrs[validator] !== 'undefined' ? attrs[validator] : propsData[validator];
+
+          // match vue behaviour, ignore if attribute is null or undefined, if it is presents in attrs and doesn't allow nulls (type=email|url|number)
+          if ((attrValue === null || typeof attrValue === 'undefined') && typeof attrs[validator] !== 'undefined' && !_this3._validators[validator]._allowNulls) {
+            return;
+          }
+
           var result = _this3._validators[validator](value, attrValue, vnode);
           if (typeof result === 'boolean') {
             if (result) {
@@ -1107,4 +1122,3 @@ VueForm.options = new VueForm();
 return VueForm;
 
 })));
-//# sourceMappingURL=vue-form.js.map

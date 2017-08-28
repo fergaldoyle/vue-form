@@ -1,16 +1,25 @@
 const emailRegExp = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i; // from angular
 const urlRegExp = /^(http\:\/\/|https\:\/\/)(.{4,})$/;
 
+const email = function (value, attrValue, vnode) {
+  return emailRegExp.test(value);
+}
+email._allowNulls = true;
+
+const number = function (value, attrValue, vnode) {
+  return !isNaN(value);
+}
+number._allowNulls = true;
+
+const url = function (value, attrValue, vnode) {
+  return urlRegExp.test(value);
+}
+url._allowNulls = true;
+
 export const validators = {
-  email(value, attrValue, vnode) {
-    return emailRegExp.test(value);
-  },
-  number(value) {
-    return !isNaN(value);
-  },
-  url(value) {
-    return urlRegExp.test(value);
-  },
+  email,
+  number,
+  url,
   required(value, attrValue, vnode) {
     if (attrValue === false) {
       return true;

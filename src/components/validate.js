@@ -164,7 +164,7 @@ export default {
         const propsData = (vnode.componentOptions && vnode.componentOptions.propsData ? vnode.componentOptions.propsData : {});
 
         Object.keys(this._validators).forEach((validator) => {
-          // when value is empty and not the required validator, the field is valid
+          // when value is empty and current validator is not the required validator, the field is valid
           if ((value === '' || value === undefined || value === null) && validator !== 'required') {
             this._setValidatorVadility(validator, true);
             emptyAndRequired = true;
@@ -172,7 +172,14 @@ export default {
             // fall through if it is present
             return;
           }
+
           const attrValue = typeof attrs[validator] !== 'undefined' ? attrs[validator] : propsData[validator];
+
+          // match vue behaviour, ignore if attribute is null or undefined, if it is presents in attrs and doesn't allow nulls (type=email|url|number)
+          if((attrValue === null || typeof attrValue === 'undefined') && typeof attrs[validator] !== 'undefined' && !this._validators[validator]._allowNulls) {
+            return;
+          }
+
           const result = this._validators[validator](value, attrValue, vnode);
           if (typeof result === 'boolean') {
             if (result) {
