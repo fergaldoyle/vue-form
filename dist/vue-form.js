@@ -238,6 +238,7 @@ function getVModelAndLabel(nodes) {
   function traverse(nodes) {
     for (var i = 0; i < nodes.length; i++) {
       var node = nodes[i];
+
       if (node.tag === 'label' && !foundVnodes.label) {
         foundVnodes.label = node;
       }
@@ -255,6 +256,8 @@ function getVModelAndLabel(nodes) {
       }
       if (node.children) {
         traverse(node.children);
+      } else if (node.componentOptions && node.componentOptions.children) {
+        traverse(node.componentOptions.children);
       }
     }
   }
@@ -1122,3 +1125,4 @@ VueForm.options = new VueForm();
 return VueForm;
 
 })));
+//# sourceMappingURL=vue-form.js.map

@@ -47,6 +47,7 @@ export function getVModelAndLabel(nodes) {
   function traverse(nodes) {
     for (let i = 0; i < nodes.length; i++) {
       let node = nodes[i];
+
       if(node.tag === 'label' && !foundVnodes.label) {
         foundVnodes.label = node;
       }
@@ -62,6 +63,8 @@ export function getVModelAndLabel(nodes) {
       }
       if (node.children) {
         traverse(node.children);
+      } else if (node.componentOptions && node.componentOptions.children) {
+        traverse(node.componentOptions.children);
       }
     }
   }
