@@ -25,7 +25,10 @@ export default {
     );
   },
   props: {
-    state: Object,
+    state: {
+      type: Object,
+      required: true
+    },
     tag: String,
     showMessages: String
   },
@@ -37,6 +40,7 @@ export default {
     };
   },
   created() {
+    if(!this.state) { return }
     const controls = {};
     const state = this.state;
     const formstate = {
@@ -139,9 +143,7 @@ export default {
   },
   computed: {
     className() {
-      const c = this.vueFormConfig.formClasses;
-      const s = this.state;
-      const classes = getClasses(c, s);
+      const classes = getClasses(this.vueFormConfig.formClasses, this.state);
       return classes;
     }
   },

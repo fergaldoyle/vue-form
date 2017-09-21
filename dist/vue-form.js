@@ -412,7 +412,10 @@ var vueForm = {
   },
 
   props: {
-    state: Object,
+    state: {
+      type: Object,
+      required: true
+    },
     tag: String,
     showMessages: String
   },
@@ -425,6 +428,9 @@ var vueForm = {
   created: function created() {
     var _this2 = this;
 
+    if (!this.state) {
+      return;
+    }
     var controls = {};
     var state = this.state;
     var formstate = {
@@ -526,9 +532,7 @@ var vueForm = {
 
   computed: {
     className: function className() {
-      var c = this.vueFormConfig.formClasses;
-      var s = this.state;
-      var classes = getClasses(c, s);
+      var classes = getClasses(this.vueFormConfig.formClasses, this.state);
       return classes;
     }
   },
@@ -1125,4 +1129,3 @@ VueForm.options = new VueForm();
 return VueForm;
 
 })));
-//# sourceMappingURL=vue-form.js.map
