@@ -226,16 +226,22 @@ Local custom validator
 ```js
 // ...
 methods: {
-	customValidator: function (value) {
-		// return true to set input as $valid, false to set as $invalid
-		return value === 'custom';
-	}
+  customValidator: function (value) {
+    // return true to set input as $valid, false to set as $invalid
+    return value === 'custom';
+  }
+},
+// local custom validator can also be a data or computed property
+computed: {
+  isEmailAvailable function () {
+    // return true to set input as $valid, false to set as $invalid
+  }
 }
 // ...
 ```
 
 ```html
-<validate :custom="{customValidator: customValidator}">
+<validate :custom="{customValidator: customValidator, 'email-available': isEmailAvailable}">
   <input v-model="something" name="something" />
   <!--
     slot name inside field-messages would be: <div slot="customValidator">...</div>
