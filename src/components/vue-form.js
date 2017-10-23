@@ -75,6 +75,11 @@ export default {
         this.$delete(this.state, ctrl.$name);
         this.$delete(this.state.$error, ctrl.$name);
       },
+      _validate: () => {
+        Object.keys(controls).forEach((key) => {
+          controls[key]._validate();
+        });
+      },
       _reset: () => {
         state.$submitted = false;
         state.$pending = false;
@@ -150,6 +155,9 @@ export default {
   methods: {
     reset() {
       this.state._reset();
+    },
+    validate() {
+      this.state._validate();
     }
   }
 }

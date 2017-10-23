@@ -109,3 +109,11 @@ export function debounce(func, wait, immediate) {
 		if (callNow) func.apply(context, args);
 	};
 };
+
+export function isShallowObjectDifferent(a, b) {
+  let aValue = '';
+  let bValue = '';
+  Object.keys(a).sort().filter(v => typeof a[v] !== 'function').forEach(v => aValue += a[v]);
+  Object.keys(b).sort().filter(v => typeof a[v] !== 'function').forEach(v => bValue += b[v]);
+  return aValue !== bValue;
+}

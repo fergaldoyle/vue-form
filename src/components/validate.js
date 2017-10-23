@@ -1,4 +1,4 @@
-import { getVModelAndLabel, vModelValue, addClass, removeClass, getName, hyphenate, randomId, getClasses } from '../util';
+import { getVModelAndLabel, vModelValue, addClass, removeClass, getName, hyphenate, randomId, getClasses, isShallowObjectDifferent } from '../util';
 import { vueFormConfig, vueFormState } from '../providers';
 import { validators } from '../validators';
 
@@ -11,11 +11,11 @@ export default {
     };
     if (vModelnodes.length) {
       this.name = getName(vModelnodes[0]);
-      if(this.autoLabel) {
+      if (this.autoLabel) {
         const id = vModelnodes[0].data.attrs.id || this.fieldstate._id;
         this.fieldstate._id = id;
         vModelnodes[0].data.attrs.id = id;
-        if(foundVnodes.label) {
+        if (foundVnodes.label) {
           foundVnodes.label.data = foundVnodes.label.data || {};
           foundVnodes.label.data.attrs = foundVnodes.label.data.attrs || {};
           foundVnodes.label.data.attrs.for = id;
@@ -45,7 +45,7 @@ export default {
     },
     debounce: Number
   },
-  inject: {vueFormConfig, vueFormState},
+  inject: { vueFormConfig, vueFormState },
   data() {
     return {
       name: '',
@@ -101,6 +101,7 @@ export default {
     const vm = this;
     let pendingValidators = [];
     let _val;
+    let prevVnode;
     this.fieldstate = {
       $name: '',
       $dirty: false,
@@ -147,6 +148,11 @@ export default {
       _hasFocused: false,
       _validators: {},
       _validate(vnode) {
+        if(!vnode) {
+          vnode = prevVnode;
+        } else {
+          prevVnode = vnode;
+        }
         this.$pending = true;
         let isValid = true;
         let emptyAndRequired = false;
@@ -174,13 +180,15 @@ export default {
           }
 
           const attrValue = typeof attrs[validator] !== 'undefined' ? attrs[validator] : propsData[validator];
+          const isFunction = typeof this._validators[validator] === 'function';
 
-          // match vue behaviour, ignore if attribute is null or undefined, if it is presents in attrs and doesn't allow nulls (type=email|url|number)
-          if((attrValue === null || typeof attrValue === 'undefined') && typeof attrs[validator] !== 'undefined' && !this._validators[validator]._allowNulls) {
+          // match vue behaviour, ignore if attribute is null or undefined. But for type=email|url|number and custom validators, the value will be null, so allow with _allowNulls
+          if (isFunction && (attrValue === null || typeof attrValue === 'undefined') && !this._validators[validator]._allowNulls) {
             return;
           }
 
-          const result = this._validators[validator](value, attrValue, vnode);
+          const result = isFunction ? this._validators[validator](value, attrValue, vnode) : vm.custom[validator];
+
           if (typeof result === 'boolean') {
             if (result) {
               this._setValidatorVadility(validator, true);
@@ -228,9 +236,23 @@ export default {
     // add custom validators
     if (this.custom) {
       Object.keys(this.custom).forEach((prop) => {
-        this.fieldstate._validators[prop] = this.custom[prop];
+        if (typeof this.custom[prop] === 'function') {
+          this.custom[prop]._allowNulls = true;
+          this.fieldstate._validators[prop] = this.custom[prop];
+        } else {
+          this.fieldstate._validators[prop] = this.custom[prop];
+        }
       });
     }
+
+    this.$watch('custom', (v, oldV) => {
+      if(!oldV) { return }
+      if(isShallowObjectDifferent(v, oldV)){
+        this.fieldstate._validate();
+      }
+    }, {
+      deep: true
+    });
 
   },
   destroyed() {

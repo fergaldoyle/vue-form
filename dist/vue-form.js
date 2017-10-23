@@ -301,6 +301,22 @@ function debounce(func, wait, immediate) {
   };
 }
 
+function isShallowObjectDifferent(a, b) {
+  var aValue = '';
+  var bValue = '';
+  Object.keys(a).sort().filter(function (v) {
+    return typeof a[v] !== 'function';
+  }).forEach(function (v) {
+    return aValue += a[v];
+  });
+  Object.keys(b).sort().filter(function (v) {
+    return typeof a[v] !== 'function';
+  }).forEach(function (v) {
+    return bValue += b[v];
+  });
+  return aValue !== bValue;
+}
+
 var vueFormConfig = 'VueFormProviderConfig' + randomId();
 var vueFormState = 'VueFormProviderState' + randomId();
 var vueFormParentForm = 'VueFormProviderParentForm' + randomId();
@@ -465,6 +481,11 @@ var vueForm = {
         _this2.$delete(_this2.state, ctrl.$name);
         _this2.$delete(_this2.state.$error, ctrl.$name);
       },
+      _validate: function _validate() {
+        Object.keys(controls).forEach(function (key) {
+          controls[key]._validate();
+        });
+      },
       _reset: function _reset() {
         state.$submitted = false;
         state.$pending = false;
@@ -539,6 +560,9 @@ var vueForm = {
   methods: {
     reset: function reset() {
       this.state._reset();
+    },
+    validate: function validate() {
+      this.state._validate();
     }
   }
 };
@@ -764,6 +788,7 @@ var validate = {
     var vm = this;
     var pendingValidators = [];
     var _val = void 0;
+    var prevVnode = void 0;
     this.fieldstate = {
       $name: '',
       $dirty: false,
@@ -813,6 +838,11 @@ var validate = {
       _validate: function _validate(vnode) {
         var _this3 = this;
 
+        if (!vnode) {
+          vnode = prevVnode;
+        } else {
+          prevVnode = vnode;
+        }
         this.$pending = true;
         var isValid = true;
         var emptyAndRequired = false;
@@ -840,13 +870,15 @@ var validate = {
           }
 
           var attrValue = typeof attrs[validator] !== 'undefined' ? attrs[validator] : propsData[validator];
+          var isFunction = typeof _this3._validators[validator] === 'function';
 
-          // match vue behaviour, ignore if attribute is null or undefined, if it is presents in attrs and doesn't allow nulls (type=email|url|number)
-          if ((attrValue === null || typeof attrValue === 'undefined') && typeof attrs[validator] !== 'undefined' && !_this3._validators[validator]._allowNulls) {
+          // match vue behaviour, ignore if attribute is null or undefined. But for type=email|url|number and custom validators, the value will be null, so allow with _allowNulls
+          if (isFunction && (attrValue === null || typeof attrValue === 'undefined') && !_this3._validators[validator]._allowNulls) {
             return;
           }
 
-          var result = _this3._validators[validator](value, attrValue, vnode);
+          var result = isFunction ? _this3._validators[validator](value, attrValue, vnode) : vm.custom[validator];
+
           if (typeof result === 'boolean') {
             if (result) {
               _this3._setValidatorVadility(validator, true);
@@ -894,9 +926,25 @@ var validate = {
     // add custom validators
     if (this.custom) {
       Object.keys(this.custom).forEach(function (prop) {
-        _this4.fieldstate._validators[prop] = _this4.custom[prop];
+        if (typeof _this4.custom[prop] === 'function') {
+          _this4.custom[prop]._allowNulls = true;
+          _this4.fieldstate._validators[prop] = _this4.custom[prop];
+        } else {
+          _this4.fieldstate._validators[prop] = _this4.custom[prop];
+        }
       });
     }
+
+    this.$watch('custom', function (v, oldV) {
+      if (!oldV) {
+        return;
+      }
+      if (isShallowObjectDifferent(v, oldV)) {
+        _this4.fieldstate._validate();
+      }
+    }, {
+      deep: true
+    });
   },
   destroyed: function destroyed() {
     this.formstate._removeControl(this.fieldstate);
