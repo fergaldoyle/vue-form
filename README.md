@@ -10,6 +10,7 @@ Available through npm as `vue-form`.
 
 ``` js
 import VueForm from 'vue-form';
+// or var VueForm = require('vue-form') or window.VueForm if you are linking directly to the dist file
 
 // install globally
 Vue.use(VueForm);
