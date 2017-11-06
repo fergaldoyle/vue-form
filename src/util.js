@@ -51,14 +51,18 @@ export function getVModelAndLabel(nodes) {
       if(node.tag === 'label' && !foundVnodes.label) {
         foundVnodes.label = node;
       }
+
       if (node.data) {
-        if (node.data.directives) {
+        if (node.data.model) {
+          // model check has to come first. If a component has
+          // a directive and v-model, the directive will be in .directives
+          // and v-modelstored in .model
+          foundVnodes.vModel.push(node);
+        } else if (node.data.directives) {
           const match = node.data.directives.filter(v => v.name === 'model');
           if (match.length) {
             foundVnodes.vModel.push(node);
           }
-        } else if (node.data.model) {
-          foundVnodes.vModel.push(node);
         }
       }
       if (node.children) {
