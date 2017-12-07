@@ -18,7 +18,7 @@ export const config = {
     invalid: 'vf-form-invalid',
     touched: 'vf-form-touched',
     untouched: 'vf-form-untouched',
-    focus: 'vf-form-focus',
+    focused: 'vf-form-focused',
     submitted: 'vf-form-submitted',
     pending: 'vf-form-pending'
   },
@@ -29,7 +29,7 @@ export const config = {
     invalid: 'vf-field-invalid',
     touched: 'vf-field-touched',
     untouched: 'vf-field-untouched',
-    focus: 'vf-field-focus',
+    focused: 'vf-field-focused',
     submitted: 'vf-field-submitted',
     pending: 'vf-field-pending'
   },
@@ -40,7 +40,7 @@ export const config = {
     invalid: 'vf-invalid',
     touched: 'vf-touched',
     untouched: 'vf-untouched',
-    focus: 'vf-focus',
+    focused: 'vf-focused',
     submitted: 'vf-submitted',
     pending: 'vf-pending'
   },
