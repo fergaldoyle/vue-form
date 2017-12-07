@@ -8,6 +8,7 @@ describe('vue-form', function() {
   function setValid() {
     vm.model.b = '123456';
     vm.model.c = '12346';
+    vm.model.d = 'ddd';
     vm.model.multicheck = ['Jack'];
     vm.model.sample = 'aaa';
   }
@@ -42,6 +43,14 @@ describe('vue-form', function() {
               <span id="minlength-message" slot="minlength">minlength error</span>
             </field-messages>
           </div>
+
+          <validate :state="formstate">
+            <input v-model="model.d" name="d" required type="text" />
+            <field-messages name="d" show="$dirty && $focus">
+              <span id="message-d-ok">Field is OK</span>
+              <span id="message-d" slot="required">required error</span>
+            </field-messages>
+          </validate>
 
           <validate>
             <input v-model="model.email" name="email" type="email" />
@@ -142,6 +151,7 @@ describe('vue-form', function() {
           a: 'aaa',
           b: '',
           c: null,
+          d: '',
           email: 'joe.doe@foo.com',
           number: 1,
           url: 'https://foo.bar.com',
@@ -410,6 +420,17 @@ describe('vue-form', function() {
     });
   });
 
+  it('should set $focus to false on blur', (done) => {
+    expect(vm.formstate.a.$focus).toBe(false);
+    vm.$el.querySelector('[name=a]').focus();
+    expect(vm.formstate.a.$focus).toBe(true);
+    vm.$el.querySelector('[name=a]').blur();
+    vm.$nextTick(() => {
+      expect(vm.formstate.a.$focus).toBe(false);
+      done();
+    });
+  });
+
   it('should set form properties when child properties change', (done) => {
     // starts off invalid
     expect(vm.formstate.$valid).toBe(false);
@@ -418,23 +439,29 @@ describe('vue-form', function() {
     expect(vm.formstate.$pristine).toBe(true);
     expect(vm.formstate.$touched).toBe(false);
     expect(vm.formstate.$untouched).toBe(true);
-    expect(Object.keys(vm.formstate.$error).length).toBe(4);
-
+    expect(Object.keys(vm.formstate.$error).length).toBe(5);
+    
     // emulate user interaction
     vm.$el.querySelector('[name=b]').focus();
-    vm.$el.querySelector('[name=b]').blur();
-
-    setValid();
-
+    
     vm.$nextTick(() => {
-      expect(vm.formstate.$valid).toBe(true);
-      expect(vm.formstate.$invalid).toBe(false);
-      expect(vm.formstate.$dirty).toBe(true);
-      expect(vm.formstate.$pristine).toBe(false);
-      expect(vm.formstate.$touched).toBe(true);
-      expect(vm.formstate.$untouched).toBe(false);
-      expect(Object.keys(vm.formstate.$error).length).toBe(0);
-      done();
+      expect(vm.formstate.$focus).toBe(true)
+      
+      vm.$el.querySelector('[name=b]').blur();
+      
+      setValid();
+    
+      vm.$nextTick(() => {
+        expect(vm.formstate.$valid).toBe(true);
+        expect(vm.formstate.$invalid).toBe(false);
+        expect(vm.formstate.$dirty).toBe(true);
+        expect(vm.formstate.$pristine).toBe(false);
+        expect(vm.formstate.$touched).toBe(true);
+        expect(vm.formstate.$untouched).toBe(false);
+        expect(vm.formstate.$focus).toBe(false);
+        expect(Object.keys(vm.formstate.$error).length).toBe(0);
+        done();
+      });
     });
   });
 
@@ -444,28 +471,38 @@ describe('vue-form', function() {
     expect(vm.$el.classList.contains('vf-form-pristine')).toBe(true);
     expect(vm.$el.classList.contains('vf-form-invalid')).toBe(true);
     expect(vm.$el.classList.contains('vf-form-untouched')).toBe(true);
+    expect(vm.$el.classList.contains('vf-form-focus')).toBe(false);
 
     const input = vm.$el.querySelector('[name=b]');
 
     expect(input.classList.contains('vf-pristine')).toBe(true);
     expect(input.classList.contains('vf-invalid')).toBe(true);
     expect(input.classList.contains('vf-untouched')).toBe(true);
+    expect(input.classList.contains('vf-focus')).toBe(false);
     expect(input.classList.contains('vf-invalid-required')).toBe(true);
 
     // set valid and interacted
     input.focus();
-    input.blur();
-    setValid();
 
     vm.$nextTick(() => {
-      expect(vm.$el.classList.contains('vf-form-dirty')).toBe(true);
-      expect(vm.$el.classList.contains('vf-form-valid')).toBe(true);
-      expect(vm.$el.classList.contains('vf-form-touched')).toBe(true);
-      expect(input.classList.contains('vf-dirty')).toBe(true);
-      expect(input.classList.contains('vf-valid')).toBe(true);
-      expect(input.classList.contains('vf-touched')).toBe(true);
-      expect(input.classList.contains('vf-invalid-required')).toBe(false);
-      done();
+      expect(vm.$el.classList.contains('vf-form-focus')).toBe(true);
+      expect(input.classList.contains('vf-focus')).toBe(true);
+    
+      input.blur();
+      setValid();
+
+      vm.$nextTick(() => {
+        expect(vm.$el.classList.contains('vf-form-dirty')).toBe(true);
+        expect(vm.$el.classList.contains('vf-form-valid')).toBe(true);
+        expect(vm.$el.classList.contains('vf-form-touched')).toBe(true);
+        expect(vm.$el.classList.contains('vf-form-focus')).toBe(false);
+        expect(input.classList.contains('vf-dirty')).toBe(true);
+        expect(input.classList.contains('vf-valid')).toBe(true);
+        expect(input.classList.contains('vf-touched')).toBe(true);
+        expect(input.classList.contains('vf-focus')).toBe(false);
+        expect(input.classList.contains('vf-invalid-required')).toBe(false);
+        done();
+      });
     });
   });
 
@@ -684,15 +721,18 @@ describe('vue-form', function() {
       messagesTag: 'ul',
       inputClasses: {
         invalid: 'form-control-danger',
-        valid: 'form-control-success'
+        valid: 'form-control-success',
+        focus: 'input-focus-class'
       },
       formClasses: {
         invalid: 'foo',
-        valid: 'bar'
+        valid: 'bar',
+        focus: 'form-focus-class'
       },
       validateClasses: {
         invalid: 'baz',
-        valid: 'jaz'
+        valid: 'jaz',
+        focus: 'validate-focus-class'
       },
       validators: {
         'foo-validator' () { return false },
@@ -731,10 +771,21 @@ describe('vue-form', function() {
           expect(form.querySelector('section')).not.toBeNull();
           expect(form.querySelector('.messages').tagName).toBe('UL');
           expect(form.querySelector('.form-control-danger')).not.toBeNull();
-          expect(form.querySelector('.form-control-danger')).not.toBeNull();
           expect(form.className.indexOf('foo')).not.toBe(-1);
           expect(form.querySelector('section.baz')).not.toBeNull();
-          done();
+          expect(form.classList.contains('form-focus-class')).toBe(false);
+          expect(form.querySelector('section.validate-focus-class')).toBeNull();
+          expect(form.querySelector('.input-focus-class')).toBeNull();
+          
+          form.querySelector('input').focus();
+
+          this.$nextTick(() => {
+            expect(form.classList.contains('form-focus-class')).toBe(true);
+            expect(form.querySelector('section.validate-focus-class')).not.toBeNull();
+            expect(form.querySelector('.input-focus-class')).not.toBeNull();
+
+            done();
+          });
         });
       }
     });
