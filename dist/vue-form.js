@@ -354,17 +354,17 @@ var isPlainObject = function isPlainObject(obj) {
 	// Own properties are enumerated firstly, so to speed up,
 	// if last one is own, then all properties are own.
 	var key;
-	for (key in obj) { /**/ }
+	for (key in obj) {/**/}
 
 	return typeof key === 'undefined' || hasOwn.call(obj, key);
 };
 
-var extend = function extend() {
-	var options, name, src, copy, copyIsArray, clone;
-	var target = arguments[0];
-	var i = 1;
-	var length = arguments.length;
-	var deep = false;
+var index = function extend() {
+	var options, name, src, copy, copyIsArray, clone,
+		target = arguments[0],
+		i = 1,
+		length = arguments.length,
+		deep = false;
 
 	// Handle a deep copy situation
 	if (typeof target === 'boolean') {
@@ -372,8 +372,7 @@ var extend = function extend() {
 		target = arguments[1] || {};
 		// skip the boolean and the target
 		i = 2;
-	}
-	if (target == null || (typeof target !== 'object' && typeof target !== 'function')) {
+	} else if ((typeof target !== 'object' && typeof target !== 'function') || target == null) {
 		target = {};
 	}
 
@@ -1160,7 +1159,7 @@ var vueFormValidator = {
 function VueFormBase(options) {
   var _components;
 
-  var c = extend(true, {}, config, options);
+  var c = index(true, {}, config, options);
   this.provide = function () {
     return defineProperty({}, vueFormConfig, c);
   };
