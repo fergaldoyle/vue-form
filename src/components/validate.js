@@ -110,6 +110,7 @@ export default {
       $invalid: false,
       $touched: false,
       $untouched: true,
+      $focused: false,
       $pending: false,
       $submitted: false,
       $error: {},
@@ -142,7 +143,15 @@ export default {
         this.$touched = false;
         this.$untouched = true;
       },
-      _setFocused() {
+      _setFocused(value) {
+        this.$focused = typeof value === 'boolean' ? value : false; 
+        if (this.$focused) {
+          this._setHasFocused();
+        } else {
+          this._setTouched();
+        }
+      },
+      _setHasFocused() {
         this._hasFocused = true;
       },
       _hasFocused: false,

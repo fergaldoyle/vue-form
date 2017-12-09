@@ -99,6 +99,7 @@ The output of `formstate` will be:
   "$submitted": false,
   "$touched": false,
   "$untouched": true,
+  "$focused": false,
   "$pending": false,
   "$error": {
     // fields with errors are copied into this object
@@ -114,6 +115,7 @@ The output of `formstate` will be:
     "$invalid": true,
     "$touched": false,
     "$untouched": true,
+    "$focused": false,
     "$pending": false,
     "$error": {
       "required": true
@@ -127,6 +129,7 @@ The output of `formstate` will be:
     "$invalid": true,
     "$touched": false,
     "$untouched": true,
+    "$focused": false,
     "$pending": false,
     "$error": {
       "email": true
@@ -299,12 +302,12 @@ As form and input validation states change, state classes are added and removed
 
 Possible form classes:
 ```
-vf-form-dirty, vf-form-pristine, vf-form-valid, vf-form-invalid, vf-form-submitted
+vf-form-dirty, vf-form-pristine, vf-form-valid, vf-form-invalid, vf-form-submitted, vf-form-focused
 ```
 
 Possible input classes:
 ```
-vf-dirty, vf-pristine, vf-valid, vf-invalid
+vf-dirty, vf-pristine, vf-valid, vf-invalid, vf-focused
 
 // also for every validation error, a class will be added, e.g.
 vf-invalid-required, vf-invalid-minlength, vf-invalid-max, etc
@@ -312,7 +315,7 @@ vf-invalid-required, vf-invalid-minlength, vf-invalid-max, etc
 
 Input wrappers (e.g. the tag the `validate` component renders) will also get state classes, but with the `field` prefix, e.g.
 ```
-vf-field-dirty, vf-field-pristine, vf-field-valid, vf-field-invalid
+vf-field-dirty, vf-field-pristine, vf-field-valid, vf-field-invalid, vf-field-focused
 ```
 
 ### Custom components
@@ -366,6 +369,7 @@ Set config options when using `Vue.use(VueForm, options)`, or when using a mixin
       invalid: 'vf-form-invalid',
       touched: 'vf-form-touched',
       untouched: 'vf-form-untouched',
+      focused: 'vf-form-focused',
       submitted: 'vf-form-submitted',
       pending: 'vf-form-pending'
     },
@@ -376,6 +380,7 @@ Set config options when using `Vue.use(VueForm, options)`, or when using a mixin
       invalid: 'vf-field-invalid',
       touched: 'vf-field-touched',
       untouched: 'vf-field-untouched',
+      focused: 'vf-field-focused',
       submitted: 'vf-field-submitted',
       pending: 'vf-field-pending'
     },
@@ -386,6 +391,7 @@ Set config options when using `Vue.use(VueForm, options)`, or when using a mixin
       invalid: 'vf-invalid',
       touched: 'vf-touched',
       untouched: 'vf-untouched',
+      focused: 'vf-focused',
       submitted: 'vf-submitted',
       pending: 'vf-pending'
     },

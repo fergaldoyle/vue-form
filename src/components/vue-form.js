@@ -51,6 +51,7 @@ export default {
       $submitted: false,
       $touched: false,
       $untouched: true,
+      $focused: false,
       $pending: false,
       $error: {},
       $submittedState: {},
@@ -103,6 +104,7 @@ export default {
       let isDirty = false;
       let isValid = true;
       let isTouched = false;
+      let isFocused = false;
       let isPending = false;
       Object.keys(controls).forEach((key) => {
         const control = controls[key];
@@ -114,6 +116,9 @@ export default {
         }
         if (control.$touched) {
           isTouched = true;
+        }
+        if (control.$focused) {
+          isFocused = true;
         }
         if (control.$pending) {
           isPending = true;
@@ -131,6 +136,7 @@ export default {
       state.$pristine = !isDirty;
       state.$touched = isTouched;
       state.$untouched = !isTouched;
+      state.$focused = isFocused;
       state.$valid = isValid;
       state.$invalid = !isValid;
       state.$pending = isPending;

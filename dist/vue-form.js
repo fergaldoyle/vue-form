@@ -89,6 +89,7 @@ var config = {
     invalid: 'vf-form-invalid',
     touched: 'vf-form-touched',
     untouched: 'vf-form-untouched',
+    focused: 'vf-form-focused',
     submitted: 'vf-form-submitted',
     pending: 'vf-form-pending'
   },
@@ -99,6 +100,7 @@ var config = {
     invalid: 'vf-field-invalid',
     touched: 'vf-field-touched',
     untouched: 'vf-field-untouched',
+    focused: 'vf-field-focused',
     submitted: 'vf-field-submitted',
     pending: 'vf-field-pending'
   },
@@ -109,6 +111,7 @@ var config = {
     invalid: 'vf-invalid',
     touched: 'vf-touched',
     untouched: 'vf-untouched',
+    focused: 'vf-focused',
     submitted: 'vf-submitted',
     pending: 'vf-pending'
   },
@@ -197,7 +200,7 @@ var possibleConstructorReturn = function (self, call) {
 function getClasses(classConfig, state) {
   var _ref;
 
-  return _ref = {}, defineProperty(_ref, classConfig.dirty, state.$dirty), defineProperty(_ref, classConfig.pristine, state.$pristine), defineProperty(_ref, classConfig.valid, state.$valid), defineProperty(_ref, classConfig.invalid, state.$invalid), defineProperty(_ref, classConfig.touched, state.$touched), defineProperty(_ref, classConfig.untouched, state.$untouched), defineProperty(_ref, classConfig.pending, state.$pending), defineProperty(_ref, classConfig.submitted, state.$submitted), _ref;
+  return _ref = {}, defineProperty(_ref, classConfig.dirty, state.$dirty), defineProperty(_ref, classConfig.pristine, state.$pristine), defineProperty(_ref, classConfig.valid, state.$valid), defineProperty(_ref, classConfig.invalid, state.$invalid), defineProperty(_ref, classConfig.touched, state.$touched), defineProperty(_ref, classConfig.untouched, state.$untouched), defineProperty(_ref, classConfig.focused, state.$focused), defineProperty(_ref, classConfig.pending, state.$pending), defineProperty(_ref, classConfig.submitted, state.$submitted), _ref;
 }
 
 function addClass(el, className) {
@@ -351,17 +354,17 @@ var isPlainObject = function isPlainObject(obj) {
 	// Own properties are enumerated firstly, so to speed up,
 	// if last one is own, then all properties are own.
 	var key;
-	for (key in obj) {/**/}
+	for (key in obj) { /**/ }
 
 	return typeof key === 'undefined' || hasOwn.call(obj, key);
 };
 
-var index = function extend() {
-	var options, name, src, copy, copyIsArray, clone,
-		target = arguments[0],
-		i = 1,
-		length = arguments.length,
-		deep = false;
+var extend = function extend() {
+	var options, name, src, copy, copyIsArray, clone;
+	var target = arguments[0];
+	var i = 1;
+	var length = arguments.length;
+	var deep = false;
 
 	// Handle a deep copy situation
 	if (typeof target === 'boolean') {
@@ -369,7 +372,8 @@ var index = function extend() {
 		target = arguments[1] || {};
 		// skip the boolean and the target
 		i = 2;
-	} else if ((typeof target !== 'object' && typeof target !== 'function') || target == null) {
+	}
+	if (target == null || (typeof target !== 'object' && typeof target !== 'function')) {
 		target = {};
 	}
 
@@ -461,6 +465,7 @@ var vueForm = {
       $submitted: false,
       $touched: false,
       $untouched: true,
+      $focused: false,
       $pending: false,
       $error: {},
       $submittedState: {},
@@ -513,6 +518,7 @@ var vueForm = {
       var isDirty = false;
       var isValid = true;
       var isTouched = false;
+      var isFocused = false;
       var isPending = false;
       Object.keys(controls).forEach(function (key) {
         var control = controls[key];
@@ -524,6 +530,9 @@ var vueForm = {
         }
         if (control.$touched) {
           isTouched = true;
+        }
+        if (control.$focused) {
+          isFocused = true;
         }
         if (control.$pending) {
           isPending = true;
@@ -541,6 +550,7 @@ var vueForm = {
       state.$pristine = !isDirty;
       state.$touched = isTouched;
       state.$untouched = !isTouched;
+      state.$focused = isFocused;
       state.$valid = isValid;
       state.$invalid = !isValid;
       state.$pending = isPending;
@@ -801,6 +811,7 @@ var validate = {
       $invalid: false,
       $touched: false,
       $untouched: true,
+      $focused: false,
       $pending: false,
       $submitted: false,
       $error: {},
@@ -833,7 +844,15 @@ var validate = {
         this.$touched = false;
         this.$untouched = true;
       },
-      _setFocused: function _setFocused() {
+      _setFocused: function _setFocused(value) {
+        this.$focused = typeof value === 'boolean' ? value : false;
+        if (this.$focused) {
+          this._setHasFocused();
+        } else {
+          this._setTouched();
+        }
+      },
+      _setHasFocused: function _setHasFocused() {
         this._hasFocused = true;
       },
 
@@ -1078,25 +1097,25 @@ var vueFormValidator = {
 
     // native listeners
     el.addEventListener('blur', function () {
-      fieldstate._setTouched();
+      fieldstate._setFocused(false);
     }, false);
     el.addEventListener('focus', function () {
-      fieldstate._setFocused();
+      fieldstate._setFocused(true);
     }, false);
 
     // component listeners
     if (vnode.componentInstance) {
       vnode.componentInstance.$on('blur', function () {
-        fieldstate._setTouched();
+        fieldstate._setFocused(false);
       });
       vnode.componentInstance.$on('focus', function () {
-        fieldstate._setFocused();
+        fieldstate._setFocused(true);
       });
       el.addEventListener('focusout', function () {
-        fieldstate._setTouched();
+        fieldstate._setFocused(false);
       }, false);
       el.addEventListener('focusin', function () {
-        fieldstate._setFocused();
+        fieldstate._setFocused(true);
       }, false);
     }
   },
@@ -1141,7 +1160,7 @@ var vueFormValidator = {
 function VueFormBase(options) {
   var _components;
 
-  var c = index(true, {}, config, options);
+  var c = extend(true, {}, config, options);
   this.provide = function () {
     return defineProperty({}, vueFormConfig, c);
   };

@@ -88,25 +88,25 @@ export default {
 
     // native listeners
     el.addEventListener('blur', () => {
-      fieldstate._setTouched();
+      fieldstate._setFocused(false);
     }, false);
     el.addEventListener('focus', () => {
-      fieldstate._setFocused();
+      fieldstate._setFocused(true);
     }, false);
 
     // component listeners
     if (vnode.componentInstance) {
       vnode.componentInstance.$on('blur', () => {
-        fieldstate._setTouched();
+        fieldstate._setFocused(false);
       });
       vnode.componentInstance.$on('focus', () => {
-        fieldstate._setFocused();
+        fieldstate._setFocused(true);
       });
       el.addEventListener('focusout', () => {
-        fieldstate._setTouched();
+        fieldstate._setFocused(false);
       }, false);
       el.addEventListener('focusin', () => {
-        fieldstate._setFocused();
+        fieldstate._setFocused(true);
       }, false);
     }
   },
