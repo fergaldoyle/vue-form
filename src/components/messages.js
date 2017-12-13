@@ -1,4 +1,5 @@
 import { vueFormConfig, vueFormState, vueFormParentForm } from '../providers';
+import scopeEval from 'scope-eval';
 
 function findLabel (nodes) {
   if(!nodes) {
@@ -80,22 +81,7 @@ export default {
         return true;
       }
 
-      const compare = (v) => {
-        return field[v.trim()];
-      };
-
-      if (show.indexOf('&&') > -1) {
-        // and logic - every
-        const split = show.split('&&');
-        return split.every(compare);
-      } else if (show.indexOf('||') > -1) {
-        // or logic - some
-        const split = show.split('||');
-        return split.some(compare);
-      } else {
-        // single
-        return field[show];
-      }
+      return scopeEval(show,field);
     }
   }
 };

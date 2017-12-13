@@ -27,7 +27,7 @@
         <label>Name</label>
         <input type="text" name="name" class="form-control" required v-model.lazy="model.name">
 
-        <field-messages name="name" show="$touched || $submitted" class="form-control-feedback">
+        <field-messages name="name" show="$focused && ($dirty || $submitted)" class="form-control-feedback">
           <div>Success!</div>
           <div slot="required">Name is a required field</div>
         </field-messages>

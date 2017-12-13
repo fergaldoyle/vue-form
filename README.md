@@ -141,7 +141,7 @@ The output of `formstate` will be:
 ### Displaying messages
 Display validation errors or success messages with `field-messages`.
 
-The `show` prop supports simple expressions which specifiy when messages should be displayed based on the current state of the field, e.g: `$dirty`, `$dirty && $touched`, `$dirty || $touched`, `$touched || $submitted`
+The `show` prop supports simple expressions which specifiy when messages should be displayed based on the current state of the field, e.g: `$dirty`, `$dirty && $touched`, `$dirty || $touched`, `$touched || $submitted`, `$focused && ($dirty || $submitted)`
 
 ```html
 <field-messages name="name" show="$dirty && $touched">
