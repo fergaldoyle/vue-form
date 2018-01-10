@@ -1,5 +1,5 @@
 import { getVModelAndLabel, vModelValue, addClass, removeClass, getName, hyphenate, randomId, getClasses, isShallowObjectDifferent } from '../util';
-import { vueFormConfig, vueFormState } from '../providers';
+import { vueFormConfig, vueFormState, vueFormParentForm } from '../providers';
 import { validators } from '../validators';
 
 export default {
@@ -45,7 +45,7 @@ export default {
     },
     debounce: Number
   },
-  inject: { vueFormConfig, vueFormState },
+  inject: { vueFormConfig, vueFormState, vueFormParentForm },
   data() {
     return {
       name: '',
@@ -144,7 +144,7 @@ export default {
         this.$untouched = true;
       },
       _setFocused(value) {
-        this.$focused = typeof value === 'boolean' ? value : false; 
+        this.$focused = typeof value === 'boolean' ? value : false;
         if (this.$focused) {
           this._setHasFocused();
         } else {
@@ -208,6 +208,7 @@ export default {
           } else {
             pending.promises.push(result);
             pending.names.push(validator);
+            vm.vueFormParentForm.promises.push(result);
           }
         });
 

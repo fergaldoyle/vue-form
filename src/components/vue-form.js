@@ -9,8 +9,17 @@ export default {
       this.tag || this.vueFormConfig.formTag, {
         on: {
           submit: (event) => {
-            this.state._submit();
-            this.$emit('submit', event);
+            if(this.state.$pending) {
+              event.preventDefault();
+              this.vueFormConfig.Promise.all(this.promises).then(() => {
+                this.state._submit();
+                this.$emit('submit', event);
+                this.promises = [];
+              });
+            } else {
+              this.state._submit();
+              this.$emit('submit', event);
+            }
           },
           reset: (event) => {
             this.state._reset();
@@ -39,6 +48,9 @@ export default {
       [vueFormParentForm]: this
     };
   },
+  data:() => ({
+    promises: []
+  }),
   created() {
     if(!this.state) { return }
     const controls = {};
