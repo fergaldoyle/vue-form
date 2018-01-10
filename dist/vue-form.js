@@ -420,8 +420,17 @@ var vueForm = {
     return h(this.tag || this.vueFormConfig.formTag, {
       on: {
         submit: function submit(event) {
-          _this.state._submit();
-          _this.$emit('submit', event);
+          if (_this.state.$pending) {
+            event.preventDefault();
+            _this.vueFormConfig.Promise.all(_this.promises).then(function () {
+              _this.state._submit();
+              _this.$emit('submit', event);
+              _this.promises = [];
+            });
+          } else {
+            _this.state._submit();
+            _this.$emit('submit', event);
+          }
         },
         reset: function reset(event) {
           _this.state._reset();
@@ -448,6 +457,12 @@ var vueForm = {
     var _ref;
 
     return _ref = {}, defineProperty(_ref, vueFormState, this.state), defineProperty(_ref, vueFormParentForm, this), _ref;
+  },
+
+  data: function data() {
+    return {
+      promises: []
+    };
   },
   created: function created() {
     var _this2 = this;
@@ -751,7 +766,7 @@ var validate = {
     },
     debounce: Number
   },
-  inject: { vueFormConfig: vueFormConfig, vueFormState: vueFormState },
+  inject: { vueFormConfig: vueFormConfig, vueFormState: vueFormState, vueFormParentForm: vueFormParentForm },
   data: function data() {
     return {
       name: '',
@@ -932,6 +947,7 @@ var validate = {
           } else {
             pending.promises.push(result);
             pending.names.push(validator);
+            vm.vueFormParentForm.promises.push(result);
           }
         });
 
