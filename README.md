@@ -302,12 +302,12 @@ As form and input validation states change, state classes are added and removed
 
 Possible form classes:
 ```
-vf-form-dirty, vf-form-pristine, vf-form-valid, vf-form-invalid, vf-form-submitted, vf-form-focused
+vf-form-dirty, vf-form-pristine, vf-form-valid, vf-form-invalid, vf-form-submitted, vf-form-focused- vf-form-pending
 ```
 
 Possible input classes:
 ```
-vf-dirty, vf-pristine, vf-valid, vf-invalid, vf-focused
+vf-dirty, vf-pristine, vf-valid, vf-invalid, vf-focused, vf-pending
 
 // also for every validation error, a class will be added, e.g.
 vf-invalid-required, vf-invalid-minlength, vf-invalid-max, etc
@@ -315,7 +315,7 @@ vf-invalid-required, vf-invalid-minlength, vf-invalid-max, etc
 
 Input wrappers (e.g. the tag the `validate` component renders) will also get state classes, but with the `field` prefix, e.g.
 ```
-vf-field-dirty, vf-field-pristine, vf-field-valid, vf-field-invalid, vf-field-focused
+vf-field-dirty, vf-field-pristine, vf-field-valid, vf-field-invalid, vf-field-focused, vf-field-pending
 ```
 
 ### Custom components
