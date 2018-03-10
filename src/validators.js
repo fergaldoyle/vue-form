@@ -69,7 +69,7 @@ export const validators = {
 
 function getTypeAttribute(vnode) {
   if (vnode.data && vnode.data.attrs && vnode.data.attrs.type) {
-    return vnode.data.attrs;
+    return vnode.data.attrs.type;
   }
 
   if (vnode.componentOptions && vnode.componentOptions.propsData && vnode.componentOptions.propsData.type) {
