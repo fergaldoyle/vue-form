@@ -52,15 +52,35 @@ export const validators = {
     return patternRegExp.test(value);
   },
   min(value, min, vnode) {
-    if ((vnode.data.attrs.type || '').toLowerCase() == 'number') {
-      return +value >= +min;
+    if (getTypeAttribute(vnode).toLowerCase() == 'number') {
+      // if value is not a number, return true since this case is handled by the number validator
+      return !isNaN(value) ? (+value >= +min) : true;
     }
     return value >= min;
   },
   max(value, max, vnode) {
-    if ((vnode.data.attrs.type || '').toLowerCase() == 'number') {
-      return +max >= +value;
+    if (getTypeAttribute(vnode).toLowerCase() == 'number') {
+      // if value is not a number, return true since this case is handled by the number validator
+      return !isNaN(value) ? (+max >= +value) : true;
     }
     return max >= value;
   }
 };
+
+function getTypeAttribute(vnode) {
+  if (vnode.data && vnode.data.attrs && vnode.data.attrs.type) {
+    return vnode.data.attrs;
+  }
+
+  if (vnode.componentOptions && vnode.componentOptions.propsData && vnode.componentOptions.propsData.type) {
+    return vnode.componentOptions.propsData.type;
+  }
+
+  for (const elemAttr of vnode.elm.attributes) {
+    if (elemAttr.name.toLowerCase() === 'type') {
+      return elemAttr.value;
+    }
+  }
+
+  return '';
+}
