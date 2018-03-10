@@ -60,14 +60,14 @@ var validators = {
   min: function min(value, _min, vnode) {
     if (getTypeAttribute(vnode).toLowerCase() == 'number') {
       // if value is not a number, return true since this case is handled by the number validator
-      return !isNaN(value) ? +value >= +_min : true;
+      return isNaN(value) || +value >= +_min;
     }
     return value >= _min;
   },
   max: function max(value, _max, vnode) {
     if (getTypeAttribute(vnode).toLowerCase() == 'number') {
       // if value is not a number, return true since this case is handled by the number validator
-      return !isNaN(value) ? +_max >= +value : true;
+      return isNaN(value) || +_max >= +value;
     }
     return _max >= value;
   }

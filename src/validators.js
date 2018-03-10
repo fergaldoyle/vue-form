@@ -54,14 +54,14 @@ export const validators = {
   min(value, min, vnode) {
     if (getTypeAttribute(vnode).toLowerCase() == 'number') {
       // if value is not a number, return true since this case is handled by the number validator
-      return !isNaN(value) ? (+value >= +min) : true;
+      return isNaN(value) || (+value >= +min);
     }
     return value >= min;
   },
   max(value, max, vnode) {
     if (getTypeAttribute(vnode).toLowerCase() == 'number') {
       // if value is not a number, return true since this case is handled by the number validator
-      return !isNaN(value) ? (+max >= +value) : true;
+      return isNaN(value) || (+max >= +value);
     }
     return max >= value;
   }
