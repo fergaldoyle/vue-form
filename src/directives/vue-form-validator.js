@@ -66,8 +66,8 @@ export default {
     // add validators
     addValidators(attrs, validators, fieldstate._validators);
 
-    // if is a component, a validator attribute by be
-    // a prop this component uses
+    // if is a component, a validator attribute by be a prop this component uses
+    // or an attribute of the component's root element
     if (vnode.componentOptions && vnode.componentOptions.propsData) {
       addValidators(vnode.componentOptions.propsData, validators, fieldstate._validators);
 
