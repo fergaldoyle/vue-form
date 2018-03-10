@@ -953,7 +953,10 @@ var validate = {
             return;
           }
 
-          var attrValue = attrs[validator] || propsData[validator] || elemAttrs[validator];
+          var attrValue = attrs[validator];
+          if (typeof attrs[validator] === 'undefined') {
+            attrValue = typeof propsData[validator] !== 'undefined' ? propsData[validator] : elemAttrs[validator];
+          }
           var isFunction = typeof _this3._validators[validator] === 'function';
 
           // match vue behaviour, ignore if attribute is null or undefined. But for type=email|url|number and custom validators, the value will be null, so allow with _allowNulls
