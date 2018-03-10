@@ -72,7 +72,8 @@ export default {
       addValidators(vnode.componentOptions.propsData, validators, fieldstate._validators);
 
       const elemAttrs = {};
-      for (const elemAttr of el.attributes) {
+      for (let i = 0; i < el.attributes.length; i++) {
+        const elemAttr = el.attributes[i];
         elemAttrs[elemAttr.name] = elemAttr.value;
       }
       addValidators(elemAttrs, validators, fieldstate._validators);
@@ -143,12 +144,12 @@ export default {
 }
 
 function addValidators(attrs, validators, fieldValidators) {
-  for (const attr of Object.keys(attrs)) {
+  Object.keys(attrs).forEach((attr) => {
     const prop = (attr === 'type') ? attrs[attr].toLowerCase() : attr.toLowerCase();
 
     if (validators[prop] && !fieldValidators[prop]) {
       fieldValidators[prop] = validators[prop];
       console.log(prop);
     }
-  }
+  });
 }

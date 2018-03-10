@@ -178,7 +178,8 @@ export default {
         const attrs = (vnode.data.attrs || {});
         const propsData = (vnode.componentOptions && vnode.componentOptions.propsData ? vnode.componentOptions.propsData : {});
         const elemAttrs = {};
-        for (const elemAttr of vnode.elm.attributes) {
+        for (let i = 0; i < vnode.elm.attributes.length; i++) {
+          const elemAttr = vnode.elm.attributes[i];
           elemAttrs[elemAttr.name] = elemAttr.value;
         }
 

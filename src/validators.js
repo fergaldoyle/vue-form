@@ -76,7 +76,8 @@ function getTypeAttribute(vnode) {
     return vnode.componentOptions.propsData.type;
   }
 
-  for (const elemAttr of vnode.elm.attributes) {
+  for (let i = 0; i < vnode.elm.attributes.length; i++) {
+    const elemAttr = vnode.elm.attributes[i];
     if (elemAttr.name.toLowerCase() === 'type') {
       return elemAttr.value;
     }

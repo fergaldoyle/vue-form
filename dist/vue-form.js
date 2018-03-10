@@ -82,30 +82,10 @@ function getTypeAttribute(vnode) {
     return vnode.componentOptions.propsData.type;
   }
 
-  var _iteratorNormalCompletion = true;
-  var _didIteratorError = false;
-  var _iteratorError = undefined;
-
-  try {
-    for (var _iterator = vnode.elm.attributes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      var elemAttr = _step.value;
-
-      if (elemAttr.name.toLowerCase() === 'type') {
-        return elemAttr.value;
-      }
-    }
-  } catch (err) {
-    _didIteratorError = true;
-    _iteratorError = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion && _iterator.return) {
-        _iterator.return();
-      }
-    } finally {
-      if (_didIteratorError) {
-        throw _iteratorError;
-      }
+  for (var i = 0; i < vnode.elm.attributes.length; i++) {
+    var elemAttr = vnode.elm.attributes[i];
+    if (elemAttr.name.toLowerCase() === 'type') {
+      return elemAttr.value;
     }
   }
 
@@ -958,29 +938,9 @@ var validate = {
         var attrs = vnode.data.attrs || {};
         var propsData = vnode.componentOptions && vnode.componentOptions.propsData ? vnode.componentOptions.propsData : {};
         var elemAttrs = {};
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-          for (var _iterator = vnode.elm.attributes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var elemAttr = _step.value;
-
-            elemAttrs[elemAttr.name] = elemAttr.value;
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-              _iterator.return();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
+        for (var i = 0; i < vnode.elm.attributes.length; i++) {
+          var elemAttr = vnode.elm.attributes[i];
+          elemAttrs[elemAttr.name] = elemAttr.value;
         }
 
         Object.keys(this._validators).forEach(function (validator) {
@@ -1183,31 +1143,10 @@ var vueFormValidator = {
       addValidators(vnode.componentOptions.propsData, validators, fieldstate._validators);
 
       var elemAttrs = {};
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = el.attributes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var elemAttr = _step.value;
-
-          elemAttrs[elemAttr.name] = elemAttr.value;
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
+      for (var i = 0; i < el.attributes.length; i++) {
+        var elemAttr = el.attributes[i];
+        elemAttrs[elemAttr.name] = elemAttr.value;
       }
-
       addValidators(elemAttrs, validators, fieldstate._validators);
     }
 
@@ -1276,35 +1215,14 @@ var vueFormValidator = {
 };
 
 function addValidators(attrs, validators, fieldValidators) {
-  var _iteratorNormalCompletion2 = true;
-  var _didIteratorError2 = false;
-  var _iteratorError2 = undefined;
+  Object.keys(attrs).forEach(function (attr) {
+    var prop = attr === 'type' ? attrs[attr].toLowerCase() : attr.toLowerCase();
 
-  try {
-    for (var _iterator2 = Object.keys(attrs)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-      var attr = _step2.value;
-
-      var prop = attr === 'type' ? attrs[attr].toLowerCase() : attr.toLowerCase();
-
-      if (validators[prop] && !fieldValidators[prop]) {
-        fieldValidators[prop] = validators[prop];
-        console.log(prop);
-      }
+    if (validators[prop] && !fieldValidators[prop]) {
+      fieldValidators[prop] = validators[prop];
+      console.log(prop);
     }
-  } catch (err) {
-    _didIteratorError2 = true;
-    _iteratorError2 = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion2 && _iterator2.return) {
-        _iterator2.return();
-      }
-    } finally {
-      if (_didIteratorError2) {
-        throw _iteratorError2;
-      }
-    }
-  }
+  });
 }
 
 function VueFormBase(options) {
