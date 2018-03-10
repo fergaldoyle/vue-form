@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>vue-form example</title>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <style>
+
+    .required-field > label::after {
+      content: '*';
+      color: red;
+      margin-left: 0.25rem;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="app" class="container py-5">
+
+    <p>Example showing vue-form usage with custom components</p>
+
+    <vue-form :state="formstate" @submit.prevent="onSubmit">
+
+      <validate auto-label class="form-group required-field" :class="fieldClassName(formstate.number)">
+        <label>Number between 3 and 6</label>
+        <custom-number-input name="number" v-model="model.number" max="6"></custom-number-input>
+
+        <field-messages name="number" class="form-control-feedback">
+          <div>Success!</div>
+          <div slot="required">Number is a required field</div>
+          <div slot="number">Number must be a number</div>
+          <div slot="min">Number is too small</div>
+          <div slot="max">Number is too big</div>
+        </field-messages>
+
+      </validate>
+
+      <div class="py-2 text-center">
+        <button class="btn btn-primary" type="submit">Submit</button>
+      </div>
+    </vue-form>
+
+    <pre>{{formstate}}</pre>
+
+  </div>
+
+  <script src="../node_modules/vue/dist/vue.js"></script>
+  <script src="../dist/vue-form.js"></script>
+  <script>
+
+    var options = {
+      inputClasses: {
+        valid: 'form-control-success',
+        invalid: 'form-control-danger'
+      }
+    };
+
+    Vue.component('custom-number-input', {
+      props: {
+        value: {
+          type: [Number, String],
+          required: false,
+          default: null
+        }
+      },
+      computed: {
+        localValue: {
+          get: function() {
+            return this.value; // return prop
+          },
+          set: function(value) {
+            this.$emit(`input`, value); // set prop
+          }
+        }
+      },
+      methods: {
+        update: function() {
+          const input = this.$refs.input;
+
+          // check browser's validity first
+          if (input.validity && input.validity.badInput) {
+            return this.$emit(`input`, `invalid`);
+          }
+          if (input.value === ``) {
+            return this.$emit(`input`, null);
+          }
+
+          return this.$emit(`input`, parseFloat(input.value));
+        }
+      },
+      // possibly more logic here
+      template: '<input ref="input" type="number" class="form-control" required min="3" :value="value === `invalid` ? `` : value" @input="update" />'
+    });
+
+    var vm = new Vue({
+      el: '#app',
+      mixins: [new VueForm(options)],
+      data: {
+        formstate: {},
+        model: {
+          number: '',
+          name: '',
+          email: '',
+          phone: '',
+          department: null,
+          comments: '',
+          notValidated: ''
+        }
+      },
+      methods: {
+        fieldClassName: function (field) {
+          if(!field) {
+            return '';
+          }
+          if(field.$valid) {
+            return 'has-success';
+          }
+          if(field.$invalid) {
+            return 'has-danger';
+          }
+        },
+        onSubmit: function() {
+          console.log(this.formstate.$valid);
+        }
+      }
+    });
+  </script>
+
+</body>
+
+</html>
