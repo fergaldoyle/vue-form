@@ -52,15 +52,36 @@ export const validators = {
     return patternRegExp.test(value);
   },
   min(value, min, vnode) {
-    if ((vnode.data.attrs.type || '').toLowerCase() == 'number') {
-      return +value >= +min;
+    if (getTypeAttribute(vnode).toLowerCase() == 'number') {
+      // if value is not a number, return true since this case is handled by the number validator
+      return isNaN(value) || (+value >= +min);
     }
     return value >= min;
   },
   max(value, max, vnode) {
-    if ((vnode.data.attrs.type || '').toLowerCase() == 'number') {
-      return +max >= +value;
+    if (getTypeAttribute(vnode).toLowerCase() == 'number') {
+      // if value is not a number, return true since this case is handled by the number validator
+      return isNaN(value) || (+max >= +value);
     }
     return max >= value;
   }
 };
+
+function getTypeAttribute(vnode) {
+  if (vnode.data && vnode.data.attrs && vnode.data.attrs.type) {
+    return vnode.data.attrs.type;
+  }
+
+  if (vnode.componentOptions && vnode.componentOptions.propsData && vnode.componentOptions.propsData.type) {
+    return vnode.componentOptions.propsData.type;
+  }
+
+  for (let i = 0; i < vnode.elm.attributes.length; i++) {
+    const elemAttr = vnode.elm.attributes[i];
+    if (elemAttr.name.toLowerCase() === 'type') {
+      return elemAttr.value;
+    }
+  }
+
+  return '';
+}

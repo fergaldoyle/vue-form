@@ -32,6 +32,8 @@ export function compareChanges(vnode, oldvnode, validators) {
         hasChanged = true;
       }
     });
+
+    // TODO: can't detect changes in component's root element's attributes yet
   }
 
   if (hasChanged) {
@@ -62,26 +64,19 @@ export default {
     }
 
     // add validators
-    Object.keys(attrs).forEach((attr) => {
-      let prop;
-      if (attr === 'type') {
-        prop = attrs[attr].toLowerCase();
-      } else {
-        prop = attr.toLowerCase();
-      }
-      if (validators[prop] && !fieldstate._validators[prop]) {
-        fieldstate._validators[prop] = validators[prop];
-      }
-    });
+    addValidators(attrs, validators, fieldstate._validators);
 
-    // if is a component, a validator attribute by be
-    // a prop this component uses
+    // if is a component, a validator attribute by be a prop this component uses
+    // or an attribute of the component's root element
     if (vnode.componentOptions && vnode.componentOptions.propsData) {
-      Object.keys(vnode.componentOptions.propsData).forEach((prop) => {
-        if (validators[prop] && !fieldstate._validators[prop]) {
-          fieldstate._validators[prop] = validators[prop];
-        }
-      });
+      addValidators(vnode.componentOptions.propsData, validators, fieldstate._validators);
+
+      const elemAttrs = {};
+      for (let i = 0; i < el.attributes.length; i++) {
+        const elemAttr = el.attributes[i];
+        elemAttrs[elemAttr.name] = elemAttr.value;
+      }
+      addValidators(elemAttrs, validators, fieldstate._validators);
     }
 
     fieldstate._validate(vnode);
@@ -146,4 +141,14 @@ export default {
     }
 
   }
+}
+
+function addValidators(attrs, validators, fieldValidators) {
+  Object.keys(attrs).forEach((attr) => {
+    const prop = (attr === 'type') ? attrs[attr].toLowerCase() : attr.toLowerCase();
+
+    if (validators[prop] && !fieldValidators[prop]) {
+      fieldValidators[prop] = validators[prop];
+    }
+  });
 }

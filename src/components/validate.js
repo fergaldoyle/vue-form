@@ -177,6 +177,11 @@ export default {
 
         const attrs = (vnode.data.attrs || {});
         const propsData = (vnode.componentOptions && vnode.componentOptions.propsData ? vnode.componentOptions.propsData : {});
+        const elemAttrs = {};
+        for (let i = 0; i < vnode.elm.attributes.length; i++) {
+          const elemAttr = vnode.elm.attributes[i];
+          elemAttrs[elemAttr.name] = elemAttr.value;
+        }
 
         Object.keys(this._validators).forEach((validator) => {
           // when value is empty and current validator is not the required validator, the field is valid
@@ -188,7 +193,10 @@ export default {
             return;
           }
 
-          const attrValue = typeof attrs[validator] !== 'undefined' ? attrs[validator] : propsData[validator];
+          let attrValue = attrs[validator];
+          if (typeof attrs[validator] === 'undefined') {
+            attrValue = (typeof propsData[validator] !== 'undefined') ? propsData[validator] : elemAttrs[validator];
+          }
           const isFunction = typeof this._validators[validator] === 'function';
 
           // match vue behaviour, ignore if attribute is null or undefined. But for type=email|url|number and custom validators, the value will be null, so allow with _allowNulls
