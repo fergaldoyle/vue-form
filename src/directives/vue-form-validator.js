@@ -149,7 +149,6 @@ function addValidators(attrs, validators, fieldValidators) {
 
     if (validators[prop] && !fieldValidators[prop]) {
       fieldValidators[prop] = validators[prop];
-      console.log(prop);
     }
   });
 }
