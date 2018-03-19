@@ -177,9 +177,9 @@ export default {
         pendingValidators.push(pending);
 
         let attrs = vnode.data.attrs || {};
-        const vm = vnode.componentInstance;
-        if(vm && vm._vfWatch_) {
-          attrs = extend({}, attrs, vm[vm._vfWatch_]);
+        const childvm = vnode.componentInstance;
+        if(childvm && childvm._vfWatch_) {
+          attrs = extend({}, attrs, childvm[childvm._vfWatch_]);
         }
 
         const propsData = (vnode.componentOptions && vnode.componentOptions.propsData ? vnode.componentOptions.propsData : {});
