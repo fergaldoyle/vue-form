@@ -1,6 +1,7 @@
 import { getVModelAndLabel, vModelValue, addClass, removeClass, getName, hyphenate, randomId, getClasses, isShallowObjectDifferent } from '../util';
 import { vueFormConfig, vueFormState, vueFormParentForm } from '../providers';
 import { validators } from '../validators';
+import extend from 'extend';
 
 export default {
   render(h) {
@@ -175,7 +176,12 @@ export default {
 
         pendingValidators.push(pending);
 
-        const attrs = (vnode.data.attrs || {});
+        let attrs = vnode.data.attrs || {};
+        const vm = vnode.componentInstance;
+        if(vm && vm._vfWatch_) {
+          attrs = extend({}, attrs, vm[vm._vfWatch_]);
+        }
+
         const propsData = (vnode.componentOptions && vnode.componentOptions.propsData ? vnode.componentOptions.propsData : {});
 
         Object.keys(this._validators).forEach((validator) => {

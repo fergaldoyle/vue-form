@@ -1,7 +1,18 @@
 import { config } from '../config';
 import { vModelValue, getName, debounce } from '../util';
+import extend from 'extend';
 
 const debouncedValidators = {};
+
+function addValidators(attrs, validators, fieldValidators) {
+  Object.keys(attrs).forEach(attr => {
+    const prop = (attr === 'type') ? attrs[attr].toLowerCase() : attr.toLowerCase();
+
+    if (validators[prop] && !fieldValidators[prop]) {
+      fieldValidators[prop] = validators[prop];
+    }
+  });
+}
 
 export function compareChanges(vnode, oldvnode, validators) {
 
@@ -62,26 +73,11 @@ export default {
     }
 
     // add validators
-    Object.keys(attrs).forEach((attr) => {
-      let prop;
-      if (attr === 'type') {
-        prop = attrs[attr].toLowerCase();
-      } else {
-        prop = attr.toLowerCase();
-      }
-      if (validators[prop] && !fieldstate._validators[prop]) {
-        fieldstate._validators[prop] = validators[prop];
-      }
-    });
+    addValidators(attrs, validators, fieldstate._validators);
 
-    // if is a component, a validator attribute by be
-    // a prop this component uses
+    // if is a component, a validator attribute could be a prop this component uses
     if (vnode.componentOptions && vnode.componentOptions.propsData) {
-      Object.keys(vnode.componentOptions.propsData).forEach((prop) => {
-        if (validators[prop] && !fieldstate._validators[prop]) {
-          fieldstate._validators[prop] = validators[prop];
-        }
-      });
+      addValidators(vnode.componentOptions.propsData, validators, fieldstate._validators);
     }
 
     fieldstate._validate(vnode);
@@ -95,11 +91,12 @@ export default {
     }, false);
 
     // component listeners
-    if (vnode.componentInstance) {
-      vnode.componentInstance.$on('blur', () => {
+    const vm = vnode.componentInstance;
+    if (vm) {
+      vm.$on('blur', () => {
         fieldstate._setFocused(false);
       });
-      vnode.componentInstance.$on('focus', () => {
+      vm.$on('focus', () => {
         fieldstate._setFocused(true);
       });
       el.addEventListener('focusout', () => {
@@ -108,6 +105,17 @@ export default {
       el.addEventListener('focusin', () => {
         fieldstate._setFocused(true);
       }, false);
+
+      vm.$once('vf:watch', watch => {
+        vm._vfWatch_ = watch;
+        addValidators(vm[watch], validators, fieldstate._validators);
+        vm.$watch(watch, data => {
+          fieldstate._validate(vm.$vnode);
+        }, {
+          deep: true,
+          immediate: true
+        });
+      });
     }
   },
 
@@ -115,7 +123,13 @@ export default {
     const { validators } = binding.value.config;
     const changes = compareChanges(vnode, oldVNode, validators);
     const { fieldstate } = binding.value;
-    const attrs = (vnode.data.attrs || {});
+
+    let attrs = vnode.data.attrs || {};
+    const vm = vnode.componentInstance;
+    if(vm && vm._vfWatch_) {
+      attrs = extend({}, attrs, vm[vm._vfWatch_]);
+    }
+
     if(vnode.elm.className.indexOf(fieldstate._className[0]) === -1) {
       vnode.elm.className = vnode.elm.className + ' ' + fieldstate._className.join(' ');
     }
