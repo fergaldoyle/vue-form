@@ -35,10 +35,11 @@ export function vModelValue(data) {
   return data.directives.filter(v => v.name === 'model')[0].value;
 }
 
-export function getVModelAndLabel(nodes) {
+export function getVModelAndLabel(nodes, config) {
   const foundVnodes = {
     vModel: [],
-    label: null
+    label: null,
+    messages: null
   };
 
   if(!nodes) {
@@ -48,6 +49,12 @@ export function getVModelAndLabel(nodes) {
   function traverse(nodes) {
     for (let i = 0; i < nodes.length; i++) {
       let node = nodes[i];
+
+      if(node.componentOptions) {
+        if(node.componentOptions.tag === hyphenate(config.messagesComponent)) {
+          foundVnodes.messages = node;
+        }    
+      }
 
       if(node.tag === 'label' && !foundVnodes.label) {
         foundVnodes.label = node;

@@ -19,7 +19,7 @@ export default {
   inject: {vueFormConfig, vueFormState, vueFormParentForm},
   render(h) {
     const children = [];
-    const field = this.formstate[this.name];
+    const field = this.formstate[this.fieldname];
     if (field && field.$error && this.isShown) {
       Object.keys(field.$error).forEach((key) => {
         if(this.$slots[key] || this.$scopedSlots[key]) {
@@ -66,15 +66,17 @@ export default {
   },
   data () {
     return {
-      formstate: null
+      formstate: null,
+      fieldname: ''
     };
   },
   created () {
+    this.fieldname = this.name;
     this.formstate = this.state || this.vueFormState;
   },
   computed: {
     isShown() {
-      const field = this.formstate[this.name];
+      const field = this.formstate[this.fieldname];
       const show = this.show || this.vueFormParentForm.showMessages || this.vueFormConfig.showMessages;
 
       if (!show || !field) {

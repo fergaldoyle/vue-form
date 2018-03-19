@@ -4,7 +4,7 @@ import { vueFormConfig } from '../providers';
 export default {
   inject: {vueFormConfig},
   render(h) {
-    let foundVnodes = getVModelAndLabel(this.$slots.default);
+    let foundVnodes = getVModelAndLabel(this.$slots.default, this.vueFormConfig);
     const vModelnodes = foundVnodes.vModel;
     const attrs = {
       for: null

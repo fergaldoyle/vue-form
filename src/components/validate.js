@@ -5,13 +5,23 @@ import extend from 'extend';
 
 export default {
   render(h) {
-    let foundVnodes = getVModelAndLabel(this.$slots.default);
+    let foundVnodes = getVModelAndLabel(this.$slots.default, this.vueFormConfig);
     const vModelnodes = foundVnodes.vModel;
     const attrs = {
       for: null
     };
     if (vModelnodes.length) {
       this.name = getName(vModelnodes[0]);
+
+      if (foundVnodes.messages) {
+        this.$nextTick(() => {
+          const messagesVm = foundVnodes.messages.componentInstance
+          if (messagesVm) {
+            messagesVm.fieldname = messagesVm.fieldname || this.name;
+          }
+        });
+      }
+
       if (this.autoLabel) {
         const id = vModelnodes[0].data.attrs.id || this.fieldstate._id;
         this.fieldstate._id = id;
