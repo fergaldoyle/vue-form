@@ -106,15 +106,12 @@ export default {
         fieldstate._setFocused(true);
       }, false);
 
-      vm.$once('vf:watch', watch => {
-        vm._vfWatch_ = watch;
-        addValidators(vm[watch], validators, fieldstate._validators);
-        vm.$watch(watch, data => {
-          fieldstate._validate(vm.$vnode);
-        }, {
-          deep: true,
-          immediate: true
-        });
+      vm.$on('vf:validate', data => {
+        if(!vm._vfValidationData_) {
+          addValidators(data, validators, fieldstate._validators);
+        }
+        vm._vfValidationData_ = data;
+        fieldstate._validate(vm.$vnode);
       });
     }
   },
@@ -126,8 +123,8 @@ export default {
 
     let attrs = vnode.data.attrs || {};
     const vm = vnode.componentInstance;
-    if(vm && vm._vfWatch_) {
-      attrs = extend({}, attrs, vm[vm._vfWatch_]);
+    if(vm && vm._vfValidationData_) {
+      attrs = extend({}, attrs, vm[vm._vfValidationData_]);
     }
 
     if(vnode.elm.className.indexOf(fieldstate._className[0]) === -1) {

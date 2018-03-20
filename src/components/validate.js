@@ -188,8 +188,8 @@ export default {
 
         let attrs = vnode.data.attrs || {};
         const childvm = vnode.componentInstance;
-        if(childvm && childvm._vfWatch_) {
-          attrs = extend({}, attrs, childvm[childvm._vfWatch_]);
+        if(childvm && childvm._vfValidationData_) {
+          attrs = extend({}, attrs, childvm._vfValidationData_);
         }
 
         const propsData = (vnode.componentOptions && vnode.componentOptions.propsData ? vnode.componentOptions.propsData : {});
