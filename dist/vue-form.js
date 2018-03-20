@@ -228,10 +228,11 @@ function vModelValue(data) {
   })[0].value;
 }
 
-function getVModelAndLabel(nodes) {
+function getVModelAndLabel(nodes, config) {
   var foundVnodes = {
     vModel: [],
-    label: null
+    label: null,
+    messages: null
   };
 
   if (!nodes) {
@@ -241,6 +242,12 @@ function getVModelAndLabel(nodes) {
   function traverse(nodes) {
     for (var i = 0; i < nodes.length; i++) {
       var node = nodes[i];
+
+      if (node.componentOptions) {
+        if (node.componentOptions.tag === hyphenate(config.messagesComponent)) {
+          foundVnodes.messages = node;
+        }
+      }
 
       if (node.tag === 'label' && !foundVnodes.label) {
         foundVnodes.label = node;
@@ -359,7 +366,7 @@ var isPlainObject = function isPlainObject(obj) {
 	return typeof key === 'undefined' || hasOwn.call(obj, key);
 };
 
-var index = function extend() {
+var extend = function extend() {
 	var options, name, src, copy, copyIsArray, clone;
 	var target = arguments[0];
 	var i = 1;
@@ -651,7 +658,7 @@ var messages = {
     var _this = this;
 
     var children = [];
-    var field = this.formstate[this.name];
+    var field = this.formstate[this.fieldname];
     if (field && field.$error && this.isShown) {
       Object.keys(field.$error).forEach(function (key) {
         if (_this.$slots[key] || _this.$scopedSlots[key]) {
@@ -699,16 +706,18 @@ var messages = {
   },
   data: function data() {
     return {
-      formstate: null
+      formstate: null,
+      fieldname: ''
     };
   },
   created: function created() {
+    this.fieldname = this.name;
     this.formstate = this.state || this.vueFormState;
   },
 
   computed: {
     isShown: function isShown() {
-      var field = this.formstate[this.name];
+      var field = this.formstate[this.fieldname];
       var show = this.show || this.vueFormParentForm.showMessages || this.vueFormConfig.showMessages;
 
       if (!show || !field) {
@@ -724,13 +733,23 @@ var validate = {
   render: function render(h) {
     var _this = this;
 
-    var foundVnodes = getVModelAndLabel(this.$slots.default);
+    var foundVnodes = getVModelAndLabel(this.$slots.default, this.vueFormConfig);
     var vModelnodes = foundVnodes.vModel;
     var attrs = {
       for: null
     };
     if (vModelnodes.length) {
       this.name = getName(vModelnodes[0]);
+
+      if (foundVnodes.messages) {
+        this.$nextTick(function () {
+          var messagesVm = foundVnodes.messages.componentInstance;
+          if (messagesVm) {
+            messagesVm.fieldname = messagesVm.fieldname || _this.name;
+          }
+        });
+      }
+
       if (this.autoLabel) {
         var id = vModelnodes[0].data.attrs.id || this.fieldstate._id;
         this.fieldstate._id = id;
@@ -915,6 +934,11 @@ var validate = {
         pendingValidators.push(pending);
 
         var attrs = vnode.data.attrs || {};
+        var childvm = vnode.componentInstance;
+        if (childvm && childvm._vfValidationData_) {
+          attrs = extend({}, attrs, childvm._vfValidationData_);
+        }
+
         var propsData = vnode.componentOptions && vnode.componentOptions.propsData ? vnode.componentOptions.propsData : {};
 
         Object.keys(this._validators).forEach(function (validator) {
@@ -1013,7 +1037,7 @@ var validate = {
 var field = {
   inject: { vueFormConfig: vueFormConfig },
   render: function render(h) {
-    var foundVnodes = getVModelAndLabel(this.$slots.default);
+    var foundVnodes = getVModelAndLabel(this.$slots.default, this.vueFormConfig);
     var vModelnodes = foundVnodes.vModel;
     var attrs = {
       for: null
@@ -1046,6 +1070,16 @@ var field = {
 };
 
 var debouncedValidators = {};
+
+function addValidators(attrs, validators, fieldValidators) {
+  Object.keys(attrs).forEach(function (attr) {
+    var prop = attr === 'type' ? attrs[attr].toLowerCase() : attr.toLowerCase();
+
+    if (validators[prop] && !fieldValidators[prop]) {
+      fieldValidators[prop] = validators[prop];
+    }
+  });
+}
 
 function compareChanges(vnode, oldvnode, validators) {
 
@@ -1107,26 +1141,11 @@ var vueFormValidator = {
     }
 
     // add validators
-    Object.keys(attrs).forEach(function (attr) {
-      var prop = void 0;
-      if (attr === 'type') {
-        prop = attrs[attr].toLowerCase();
-      } else {
-        prop = attr.toLowerCase();
-      }
-      if (validators[prop] && !fieldstate._validators[prop]) {
-        fieldstate._validators[prop] = validators[prop];
-      }
-    });
+    addValidators(attrs, validators, fieldstate._validators);
 
-    // if is a component, a validator attribute by be
-    // a prop this component uses
+    // if is a component, a validator attribute could be a prop this component uses
     if (vnode.componentOptions && vnode.componentOptions.propsData) {
-      Object.keys(vnode.componentOptions.propsData).forEach(function (prop) {
-        if (validators[prop] && !fieldstate._validators[prop]) {
-          fieldstate._validators[prop] = validators[prop];
-        }
-      });
+      addValidators(vnode.componentOptions.propsData, validators, fieldstate._validators);
     }
 
     fieldstate._validate(vnode);
@@ -1140,11 +1159,12 @@ var vueFormValidator = {
     }, false);
 
     // component listeners
-    if (vnode.componentInstance) {
-      vnode.componentInstance.$on('blur', function () {
+    var vm = vnode.componentInstance;
+    if (vm) {
+      vm.$on('blur', function () {
         fieldstate._setFocused(false);
       });
-      vnode.componentInstance.$on('focus', function () {
+      vm.$on('focus', function () {
         fieldstate._setFocused(true);
       });
       el.addEventListener('focusout', function () {
@@ -1153,6 +1173,14 @@ var vueFormValidator = {
       el.addEventListener('focusin', function () {
         fieldstate._setFocused(true);
       }, false);
+
+      vm.$on('vf:validate', function (data) {
+        if (!vm._vfValidationData_) {
+          addValidators(data, validators, fieldstate._validators);
+        }
+        vm._vfValidationData_ = data;
+        fieldstate._validate(vm.$vnode);
+      });
     }
   },
   update: function update(el, binding, vnode, oldVNode) {
@@ -1161,7 +1189,13 @@ var vueFormValidator = {
     var changes = compareChanges(vnode, oldVNode, validators);
     var fieldstate = binding.value.fieldstate;
 
+
     var attrs = vnode.data.attrs || {};
+    var vm = vnode.componentInstance;
+    if (vm && vm._vfValidationData_) {
+      attrs = extend({}, attrs, vm[vm._vfValidationData_]);
+    }
+
     if (vnode.elm.className.indexOf(fieldstate._className[0]) === -1) {
       vnode.elm.className = vnode.elm.className + ' ' + fieldstate._className.join(' ');
     }
@@ -1196,7 +1230,7 @@ var vueFormValidator = {
 function VueFormBase(options) {
   var _components;
 
-  var c = index(true, {}, config, options);
+  var c = extend(true, {}, config, options);
   this.provide = function () {
     return defineProperty({}, vueFormConfig, c);
   };
