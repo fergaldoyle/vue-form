@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>vue-form component examples</title>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+    crossorigin="anonymous">
+</head>
+
+<body>
+  <div id="app" class="container py-5">
+
+    <p>Example showing vue-form usage with custom components</p>
+
+    <vue-form :state="formstate" v-model="formstate" @submit.prevent="onSubmit" show-messages="$touched || $submitted">
+
+      <validate auto-label class="form-group">
+        <label>Sample component 1</label>
+        <custom-field-one required pattern="\d\d\d-\d\d\d" v-model="model.bbb" name="bbb" class="form-control"></custom-field-one>
+        <small class="form-text text-muted">Component with validation attributes set on the component element</small>
+        <field-messages class="form-control-feedback">
+          <div>Success!</div>
+          <div slot="required">Field is required</div>
+          <div slot="pattern">Pattern does not match, format example: 123-123</div>
+        </field-messages>
+      </validate>
+
+      <validate auto-label class="form-group">
+        <label>Sample component 2</label>
+        <custom-field-two required v-bind="sampleData" v-model="model.ccc" name="ccc" class="form-control"></custom-field-two>
+        <small class="form-text text-muted">Component where validation attributes are props, along with v-bind</small>
+        <field-messages class="form-control-feedback">
+          <div>Success!</div>
+          <div slot="minlength">Field is too short</div>
+          <div slot="maxlength">Field is too long</div>
+          <div slot="required">Field is required</div>
+        </field-messages>
+      </validate>
+
+      <validate auto-label class="form-group">
+        <label>Sample component 2</label>
+        <dynamic-field name="aaa" :field="sampleDynamicField" v-model="model.aaa"></dynamic-field>
+        <small class="form-text text-muted">Component where validation attributes are emitted within the component using the vf:validate event</small>
+        <field-messages class="form-control-feedback">
+          <div>Success!</div>
+          <div slot="max">Number is too large</div>
+          <div slot="min">Number is too small</div>
+          <div slot="required">Field is required</div>
+        </field-messages>
+      </validate>
+
+      <div class="py-2 text-center">
+        <button class="btn btn-primary" type="submit">Submit</button>
+      </div>
+    </vue-form>
+
+    <pre>{{formstate}}</pre>
+
+  </div>
+
+  <script src="../node_modules/vue/dist/vue.js"></script>
+  <script src="../dist/vue-form.js"></script>
+  <script>
+    var customFieldOne = {
+      template: '<input type="text" v-model="input" />',
+      props: {
+        value: null
+      },
+      data: function () {
+        return {
+          input: null
+        }
+      },
+      created: function () {
+        this.$watch('value', function (v) {
+          this.input = v;
+        }, {
+          immediate: true
+        });
+        this.$watch('input', function (v) {
+          this.$emit('input', v);
+        });
+      }
+    };
+
+    var customFieldTwo = {
+      template: '<input type="text" v-model="input" />',
+      props: {
+        value: null,
+        required: Boolean,
+        minlength: Number,
+        maxlength: Number
+      },
+      data: function () {
+        return {
+          input: null
+        }
+      },
+      created: function () {
+        this.$watch('value', function (v) {
+          this.input = v;
+        }, {
+          immediate: true
+        });
+        this.$watch('input', function (v) {
+          this.$emit('input', v);
+        });
+      }
+    };
+
+    var dynamicField = {
+      template: '<div><input v-if="isNumber" class="form-control" type="number" :min="field.min" :max="field.max" v-model="input" /></div>',
+      props: {
+        field: Object,
+        value: null
+      },
+      data: function () {
+        return {
+          input: null
+        };
+      },
+      watch: {
+        input: function (v) {
+          this.$emit('input', v);
+        },
+        value: function (v) {
+          this.input = v
+        }
+      },
+      computed: {
+        isNumber: function () {
+          return this.field.type === 'number';
+        },
+        validationData: function () {
+          return {
+            type: this.field.type,
+            min: this.field.min,
+            max: this.field.max,
+            required: this.field.required
+          }
+        }
+      },
+      created: function () {
+        this.input = this.value;
+      },
+      mounted: function () {
+        // watch a local data property / computed
+        // which holds validation data / attributes
+        this.$watch('validationData', function (v) {
+          this.$emit('vf:validate', v);
+        }, {
+          deep: true,
+          immediate: true
+        });
+      }
+    };
+
+    var vm = new Vue({
+      el: '#app',
+      mixins: [new VueForm()],
+      components: {
+        dynamicField: dynamicField,
+        customFieldOne: customFieldOne,
+        customFieldTwo: customFieldTwo
+      },
+      data: {
+        formstate: {},
+        model: {
+          aaa: null,
+          bbb: null,
+          ccc: null
+        },
+        sampleData: {
+          minlength: 4,
+          maxlength: 8,
+          required: true
+        },
+        sampleDynamicField: {
+          type: 'number',
+          min: 4,
+          max: 8,
+          required: true
+        }
+      },
+      methods: {
+        onSubmit: function () {
+          console.log(this.formstate.$valid);
+        }
+      }
+    });
+  </script>
+
+</body>
+
+</html>
