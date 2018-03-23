@@ -17,7 +17,7 @@
 
       <validate auto-label class="form-group">
         <label>Sample component 1</label>
-        <custom-field-one required pattern="\d\d\d-\d\d\d" v-model="model.bbb" name="bbb" class="form-control"></custom-field-one>
+        <custom-field-one required pattern="\d\d\d-\d\d\d" v-model="model.aaa" name="aaa" class="form-control"></custom-field-one>
         <small class="form-text text-muted">Component with validation attributes set on the component element</small>
         <field-messages class="form-control-feedback">
           <div>Success!</div>
@@ -28,19 +28,19 @@
 
       <validate auto-label class="form-group">
         <label>Sample component 2</label>
-        <custom-field-two required v-bind="sampleData" v-model="model.ccc" name="ccc" class="form-control"></custom-field-two>
+        <custom-field-two required v-bind="sampleData" v-model="model.bbb" name="bbb" class="form-control"></custom-field-two>
         <small class="form-text text-muted">Component where validation attributes are props, along with v-bind</small>
-        <field-messages class="form-control-feedback">
+        <field-messages class="form-control-feedback" v-if="formstate.bbb">
           <div>Success!</div>
-          <div slot="minlength">Field is too short</div>
-          <div slot="maxlength">Field is too long</div>
+          <div slot="minlength">Minimum allowed characters for this field is {{formstate.bbb.$attrs.minlength}}</div>
+          <div slot="maxlength">Maximum allowed characters for this field is {{formstate.bbb.$attrs.maxlength}}</div>
           <div slot="required">Field is required</div>
         </field-messages>
       </validate>
 
       <validate auto-label class="form-group">
-        <label>Sample component 2</label>
-        <dynamic-field name="aaa" :field="sampleDynamicField" v-model="model.aaa"></dynamic-field>
+        <label>Sample component 3</label>
+        <dynamic-field name="ccc" :field="sampleDynamicField" v-model="model.ccc"></dynamic-field>
         <small class="form-text text-muted">Component where validation attributes are emitted within the component using the vf:validate event</small>
         <field-messages class="form-control-feedback">
           <div>Success!</div>

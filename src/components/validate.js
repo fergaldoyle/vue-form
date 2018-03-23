@@ -125,6 +125,7 @@ export default {
       $pending: false,
       $submitted: false,
       $error: {},
+      $attrs: {},
       _className: null,
       _id: 'vf' + randomId(),
       _setValidatorVadility(validator, isValid) {
@@ -210,6 +211,10 @@ export default {
           // match vue behaviour, ignore if attribute is null or undefined. But for type=email|url|number and custom validators, the value will be null, so allow with _allowNulls
           if (isFunction && (attrValue === null || typeof attrValue === 'undefined') && !this._validators[validator]._allowNulls) {
             return;
+          }
+
+          if(attrValue) {
+            this.$attrs[validator] = attrValue;
           }
 
           const result = isFunction ? this._validators[validator](value, attrValue, vnode) : vm.custom[validator];
