@@ -110,7 +110,7 @@
     };
 
     var dynamicField = {
-      template: '<div><input v-if="isNumber" class="form-control" type="number" :min="field.min" :max="field.max" v-model="input" /></div>',
+      template: '<div><input ref="input" v-if="isNumber" class="form-control" type="number" :min="field.min" :max="field.max" v-model="input" /></div>',
       props: {
         field: Object,
         value: null
@@ -145,6 +145,18 @@
         this.input = this.value;
       },
       mounted: function () {
+        var vm = this;
+
+        this.$refs.input.addEventListener('focus', function() {
+          vm.$emit('focus');
+        }, false);
+        this.$refs.input.addEventListener('blur', function() {
+          vm.$emit('blur');
+        }, false);
+
+        // or listen for bubbled focusin / focusout events
+        //this.$emit('vf:addFocusListener');
+
         // watch a local data property / computed
         // which holds validation data / attributes
         this.$watch('validationData', function (v) {

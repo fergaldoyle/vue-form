@@ -1172,12 +1172,15 @@ var vueFormValidator = {
       vm.$on('focus', function () {
         fieldstate._setFocused(true);
       });
-      el.addEventListener('focusout', function () {
-        fieldstate._setFocused(false);
-      }, false);
-      el.addEventListener('focusin', function () {
-        fieldstate._setFocused(true);
-      }, false);
+
+      vm.$once('vf:addFocusListeners', function () {
+        el.addEventListener('focusout', function () {
+          fieldstate._setFocused(false);
+        }, false);
+        el.addEventListener('focusin', function () {
+          fieldstate._setFocused(true);
+        }, false);
+      });
 
       vm.$on('vf:validate', function (data) {
         if (!vm._vfValidationData_) {

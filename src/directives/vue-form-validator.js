@@ -99,12 +99,15 @@ export default {
       vm.$on('focus', () => {
         fieldstate._setFocused(true);
       });
-      el.addEventListener('focusout', () => {
-        fieldstate._setFocused(false);
-      }, false);
-      el.addEventListener('focusin', () => {
-        fieldstate._setFocused(true);
-      }, false);
+
+      vm.$once('vf:addFocusListeners', () => {
+        el.addEventListener('focusout', () => {
+          fieldstate._setFocused(false);
+        }, false);
+        el.addEventListener('focusin', () => {
+          fieldstate._setFocused(true);
+        }, false);
+      });
 
       vm.$on('vf:validate', data => {
         if(!vm._vfValidationData_) {
