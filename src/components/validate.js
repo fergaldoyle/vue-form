@@ -106,6 +106,12 @@ export default {
       immediate: true
     });
 
+    this.$watch('name', (value, oldValue) => {
+      this.formstate._removeControl(this.fieldstate);
+      this.fieldstate.$name = value;
+      this.formstate._addControl(this.fieldstate);
+    });
+
   },
   created() {
     this.formstate = this.state || this.vueFormState;
