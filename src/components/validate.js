@@ -134,7 +134,7 @@ export default {
       $attrs: {},
       _className: null,
       _id: 'vf' + randomId(),
-      _setValidatorVadility(validator, isValid) {
+      _setValidatorValidity(validator, isValid) {
         if (isValid) {
           vm.$delete(this.$error, validator);
         } else {
@@ -204,7 +204,7 @@ export default {
         Object.keys(this._validators).forEach((validator) => {
           // when value is empty and current validator is not the required validator, the field is valid
           if ((value === '' || value === undefined || value === null) && validator !== 'required') {
-            this._setValidatorVadility(validator, true);
+            this._setValidatorValidity(validator, true);
             emptyAndRequired = true;
             // return early, required validator will
             // fall through if it is present
@@ -227,10 +227,10 @@ export default {
 
           if (typeof result === 'boolean') {
             if (result) {
-              this._setValidatorVadility(validator, true);
+              this._setValidatorValidity(validator, true);
             } else {
               isValid = false;
-              this._setValidatorVadility(validator, false);
+              this._setValidatorValidity(validator, false);
             }
           } else {
             pending.promises.push(result);
@@ -254,10 +254,10 @@ export default {
             results.forEach((result, i) => {
               const name = pending.names[i];
               if (result) {
-                this._setValidatorVadility(name, true);
+                this._setValidatorValidity(name, true);
               } else {
                 isValid = false;
-                this._setValidatorVadility(name, false);
+                this._setValidatorValidity(name, false);
               }
             });
             this._setValidity(isValid);
