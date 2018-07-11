@@ -2,6 +2,7 @@
   "name": "vue-form",
   "version": "4.9.0",
   "description": "Form validation for Vue.js",
+  "repository": "github:fergaldoyle/vue-form",
   "main": "dist/vue-form.js",
   "scripts": {
     "dev": "rollup -w -c",
