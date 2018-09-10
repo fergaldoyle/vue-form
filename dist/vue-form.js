@@ -424,6 +424,12 @@ var vueForm = {
   render: function render(h) {
     var _this = this;
 
+    var attrs = {};
+
+    if (typeof window !== 'undefined') {
+      attrs.novalidate = '';
+    }
+
     return h(this.tag || this.vueFormConfig.formTag, {
       on: {
         submit: function submit(event) {
@@ -445,9 +451,7 @@ var vueForm = {
         }
       },
       class: this.className,
-      attrs: {
-        'novalidate': ''
-      }
+      attrs: attrs
     }, [this.$slots.default]);
   },
 
