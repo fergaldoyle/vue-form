@@ -5,6 +5,12 @@ import extend from 'extend';
 
 export default {
   render(h) {
+    const attrs = {};
+
+    if (typeof window !== 'undefined') {
+      attrs.novalidate = '';
+    }
+
     return h(
       this.tag || this.vueFormConfig.formTag, {
         on: {
@@ -27,9 +33,7 @@ export default {
           }
         },
         class: this.className,
-        attrs: {
-          'novalidate': '',
-        }
+        attrs
       }, [this.$slots.default]
     );
   },
