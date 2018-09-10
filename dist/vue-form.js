@@ -852,6 +852,12 @@ var validate = {
       deep: true,
       immediate: true
     });
+
+    this.$watch('name', function (value, oldValue) {
+      _this2.formstate._removeControl(_this2.fieldstate);
+      _this2.fieldstate.$name = value;
+      _this2.formstate._addControl(_this2.fieldstate);
+    });
   },
   created: function created() {
     var _this4 = this;
@@ -876,7 +882,7 @@ var validate = {
       $attrs: {},
       _className: null,
       _id: 'vf' + randomId(),
-      _setValidatorVadility: function _setValidatorVadility(validator, isValid) {
+      _setValidatorValidity: function _setValidatorValidity(validator, isValid) {
         if (isValid) {
           vm.$delete(this.$error, validator);
         } else {
@@ -949,7 +955,7 @@ var validate = {
         Object.keys(this._validators).forEach(function (validator) {
           // when value is empty and current validator is not the required validator, the field is valid
           if ((value === '' || value === undefined || value === null) && validator !== 'required') {
-            _this3._setValidatorVadility(validator, true);
+            _this3._setValidatorValidity(validator, true);
             emptyAndRequired = true;
             // return early, required validator will
             // fall through if it is present
@@ -972,10 +978,10 @@ var validate = {
 
           if (typeof result === 'boolean') {
             if (result) {
-              _this3._setValidatorVadility(validator, true);
+              _this3._setValidatorValidity(validator, true);
             } else {
               isValid = false;
-              _this3._setValidatorVadility(validator, false);
+              _this3._setValidatorValidity(validator, false);
             }
           } else {
             pending.promises.push(result);
@@ -999,10 +1005,10 @@ var validate = {
             results.forEach(function (result, i) {
               var name = pending.names[i];
               if (result) {
-                _this3._setValidatorVadility(name, true);
+                _this3._setValidatorValidity(name, true);
               } else {
                 isValid = false;
-                _this3._setValidatorVadility(name, false);
+                _this3._setValidatorValidity(name, false);
               }
             });
             _this3._setValidity(isValid);
