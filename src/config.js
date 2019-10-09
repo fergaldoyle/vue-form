@@ -2,14 +2,14 @@ import { validators } from './validators';
 
 export const config = {
   validators,
-  formComponent: 'vueForm',
+  formComponent: 'VueForm',
   formTag: 'form',
-  messagesComponent: 'fieldMessages',
+  messagesComponent: 'FieldMessages',
   messagesTag: 'div',
   showMessages: '',
-  validateComponent: 'validate',
+  validateComponent: 'Validate',
   validateTag: 'div',
-  fieldComponent: 'field',
+  fieldComponent: 'Field',
   fieldTag: 'div',
   formClasses: {
     dirty: 'vf-form-dirty',
