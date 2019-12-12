@@ -283,7 +283,7 @@ export default {
     }
 
     this.$watch('custom', (v, oldV) => {
-      if(!oldV) { return }
+      if(!oldV || !v) { return }
       if(isShallowObjectDifferent(v, oldV)){
         this.fieldstate._validate();
       }

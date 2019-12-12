@@ -1065,7 +1065,7 @@ var validate = {
     }
 
     this.$watch('custom', function (v, oldV) {
-      if (!oldV) {
+      if (!oldV || !v) {
         return;
       }
       if (isShallowObjectDifferent(v, oldV)) {
