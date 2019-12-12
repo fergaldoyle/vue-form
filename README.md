@@ -237,7 +237,7 @@ methods: {
 },
 // local custom validator can also be a data or computed property
 computed: {
-  isEmailAvailable function () {
+  isEmailAvailable: function () {
     // return true to set input as $valid, false to set as $invalid
   }
 }
