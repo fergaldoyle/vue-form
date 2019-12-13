@@ -1,6 +1,6 @@
 {
   "name": "vue-form",
-  "version": "4.10.1",
+  "version": "4.10.3",
   "description": "Form validation for Vue.js",
   "repository": "github:fergaldoyle/vue-form",
   "main": "dist/vue-form.js",
