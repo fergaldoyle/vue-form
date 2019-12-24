@@ -123,9 +123,7 @@ export function debounce(func, wait, immediate) {
 };
 
 export function isShallowObjectDifferent(a, b) {
-  let aValue = '';
-  let bValue = '';
-  Object.keys(a).sort().filter(v => typeof a[v] !== 'function').forEach(v => aValue += a[v]);
-  Object.keys(b).sort().filter(v => typeof a[v] !== 'function').forEach(v => bValue += b[v]);
+  let aValue = Object.keys(a).sort().map(k => typeof a[k] !== 'function' ? a[k] : k).reduce((result, v) => `${result}-${v}`);
+  let bValue = Object.keys(b).sort().map(k => typeof b[k] !== 'function' ? b[k] : k).reduce((result, v) => `${result}-${v}`);
   return aValue !== bValue;
 }
